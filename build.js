@@ -12,7 +12,6 @@
  * Running this build script will also run unit tests to ensure they pass before deploying any code.
  */
 
-const fs = require("fs");
 const path = require("path");
 const shell = require("shelljs");
 const package = require("./package.json");

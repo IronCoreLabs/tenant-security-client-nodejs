@@ -1,6 +1,6 @@
 {
     "name": "@ironcorelabs/tenant-security-nodejs",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "description": "NodeJS client library for the IronCore Labs Tenant Security Proxy.",
     "homepage": "https://docs.ironcorelabs.com",
     "main": "index.js",
@@ -15,7 +15,7 @@
         "build": "./build.js",
         "test": "yarn run lint && yarn run unit",
         "unit": "jest",
-        "lint": "tslint -p \"tsconfig.json\" -e \"**/tests/**\" \"src/**/*.ts\""
+        "lint": "eslint . --ext .ts"
     },
     "dependencies": {
         "futurejs": "2.1.1",
@@ -25,12 +25,14 @@
         "@types/jest": "^25.2.1",
         "@types/node": "^13.13.5",
         "@types/node-fetch": "^2.5.7",
+        "@typescript-eslint/eslint-plugin": "^2.31.0",
+        "@typescript-eslint/parser": "^2.31.0",
+        "eslint": "^6.8.0",
         "jest": "^26.0.1",
         "jest-extended": "^0.11.5",
         "shelljs": "^0.8.4",
         "ts-jest": "^25.5.0",
         "ts-node": "^8.10.1",
-        "tslint": "^6.1.2",
         "typescript": "^3.8.3",
         "typestrict": "^1.0.2"
     },
