@@ -1,5 +1,3 @@
-const hello = () => {
-    return 1 + 1;
-};
-
-export default hello;
+export {TenantSecurityKmsClient} from "./kms/TenantSecurityKmsClient";
+export {default} from "./RequestMetadata";
+export {ErrorCodes, TenantSecurityClientException} from "./TenantSecurityClientException";
