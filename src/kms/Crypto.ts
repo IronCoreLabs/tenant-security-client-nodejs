@@ -30,19 +30,19 @@ const CURRENT_DOCUMENT_HEADER_VERSION = Buffer.from([3]);
 //IRON in ascii. Used to better denote whether this is an IronCore encrypted document
 const DOCUMENT_MAGIC = Buffer.from([73, 82, 79, 78]);
 //Header byte length. CMK documents currently don't have any header data, so this is fixed to 0 for now.
-const HEADER_LENGTH = Buffer.from([0, 0]);
+const HEADER_PROTOBUF_CONTENT = Buffer.from([0, 0]);
 // the size of the fixed length portion of the header
-const DOCUMENT_HEADER_META_LENGTH = CURRENT_DOCUMENT_HEADER_VERSION.length + DOCUMENT_MAGIC.length + HEADER_LENGTH.length;
+const DOCUMENT_HEADER_META_LENGTH = CURRENT_DOCUMENT_HEADER_VERSION.length + DOCUMENT_MAGIC.length + HEADER_PROTOBUF_CONTENT.length;
 
 /**
  * Check that the given bytes contain the expected CMK header bytes
  */
-const containsIroncoreMagic = (bytes: Buffer): boolean => bytes.length >= 5 && bytes.slice(1, 4) === DOCUMENT_MAGIC;
+const containsIroncoreMagic = (bytes: Buffer): boolean => bytes.length >= 5 && bytes.slice(1, 5).equals(DOCUMENT_MAGIC);
 
 /**
  * Return the header bytes for all IronCore encrypted documents
  */
-const generateHeader = (): Buffer => Buffer.concat([CURRENT_DOCUMENT_HEADER_VERSION, DOCUMENT_MAGIC, HEADER_LENGTH]);
+const generateHeader = (): Buffer => Buffer.concat([CURRENT_DOCUMENT_HEADER_VERSION, DOCUMENT_MAGIC, HEADER_PROTOBUF_CONTENT]);
 
 /**
  * Multiply the header size bytes at the 5th and 6th indices to get the header size. If those bytes don't exist this will throw.

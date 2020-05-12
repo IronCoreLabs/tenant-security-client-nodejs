@@ -1,4 +1,5 @@
 import Future from "futurejs";
+import fetch, {Response} from "node-fetch";
 import {Base64String} from "../../tenant-security-nodejs";
 import RequestMetadata from "../RequestMetadata";
 import {ErrorCodes, TenantSecurityClientException} from "../TenantSecurityClientException";
@@ -58,13 +59,13 @@ const makeJsonRequest = <T>(tspDomain: string, apiKey: string, route: string, po
         .flatMap((response) => (response.ok ? Future.tryP(() => response.json()) : parseErrorFromFailedResponse(response)));
 
 /**
- *
+ * Generate and wrap a new key via the tenants KMS.
  */
 export const wrapKey = (tspDomain: string, apiKey: string, metadata: RequestMetadata): Future<TenantSecurityClientException, WrapKeyResponse> =>
     makeJsonRequest(tspDomain, apiKey, WRAP_ENDPOINT, JSON.stringify(metadata.toJsonStructure()));
 
 /**
- *
+ * Generate and wrap a collection of new KMS keys.
  */
 export const batchWrapKeys = (
     tspDomain: string,
@@ -83,7 +84,7 @@ export const batchWrapKeys = (
     );
 
 /**
- *
+ * Take an EDEK and send it to the tenants KMS via the TSP to be unwrapped.
  */
 export const unwrapKey = (
     tspDomain: string,
@@ -102,7 +103,7 @@ export const unwrapKey = (
     );
 
 /**
- *
+ * Take a collection of EDEKs and send them to the tenants KMS via the TSP to be unwrapped.
  */
 export const batchUnwrapKey = (
     tspDomain: string,
