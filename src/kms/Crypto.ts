@@ -35,7 +35,7 @@ const HEADER_PROTOBUF_CONTENT = Buffer.from([0, 0]);
 const DOCUMENT_HEADER_META_LENGTH = CURRENT_DOCUMENT_HEADER_VERSION.length + DOCUMENT_MAGIC.length + HEADER_PROTOBUF_CONTENT.length;
 
 /**
- * Check that the given bytes contain the expected CMK header bytes
+ * Check that the given bytes contain the expected CMK magic header
  */
 const containsIroncoreMagic = (bytes: Buffer): boolean => bytes.length >= 5 && bytes.slice(1, 5).equals(DOCUMENT_MAGIC);
 
