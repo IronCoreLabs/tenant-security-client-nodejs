@@ -15,7 +15,9 @@ jobs:
         with:
           version: 10.x
       - name: build and unit test
-        run: yarn build
+        run: |
+          yarn
+          yarn build
       - name: clone the tsp
         uses: actions/checkout@v2-beta
         with:
