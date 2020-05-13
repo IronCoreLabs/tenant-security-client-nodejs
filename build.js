@@ -96,16 +96,17 @@ shell.echo("Running yarn to make sure deps are up to date");
 shell.exec("yarn");
 
 shell.echo("\n\nRunning unit tests...");
-shell.exec("yarn test --coverage");
+shell.exec("yarn test");
 
 shell.echo("\n\nCompiling all source from TypeScript to ES6 JS and removing unit test files");
-shell.exec("./node_modules/typescript/bin/tsc --target ES6 --sourceMap false --module CommonJS --outDir ./dist");
+shell.exec("./node_modules/typescript/bin/tsc --target ES6 --sourceMap false --module CommonJS --outDir ./dist/src");
 shell.exec("find dist -type d -name tests -prune -exec rm -rf {} \\;");
 
 //Copy in various files that we need to deploy as part of our NPM package
 shell.cp("./package.json", "./dist");
 shell.cp("./tenant-security-nodejs.d.ts", "./dist");
 shell.cp("./README.md", "./dist");
+shell.cp("./LICENSE", "./dist");
 
 publishModule();
 tagRepo(package.version);
