@@ -1,7 +1,7 @@
 export type Base64String = string;
 
 /**
- * Data to encrypt via the customers KMS. A document is a collection of 1-N fields that get encrypted
+ * Data to encrypt via the customer's KMS. A document is a collection of 1-N fields that get encrypted
  * with the same KMS key (but use a different IV). Fields are provided by given a field name/ID to
  * the bytes of that field to encrypt.
  */

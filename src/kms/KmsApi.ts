@@ -59,7 +59,7 @@ const makeJsonRequest = <T>(tspDomain: string, apiKey: string, route: string, po
         .flatMap((response) => (response.ok ? Future.tryP(() => response.json()) : parseErrorFromFailedResponse(response)));
 
 /**
- * Generate and wrap a new key via the tenants KMS.
+ * Generate and wrap a new key via the tenant's KMS.
  */
 export const wrapKey = (tspDomain: string, apiKey: string, metadata: RequestMetadata): Future<TenantSecurityClientException, WrapKeyResponse> =>
     makeJsonRequest(tspDomain, apiKey, WRAP_ENDPOINT, JSON.stringify(metadata.toJsonStructure()));

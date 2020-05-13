@@ -50,7 +50,7 @@ const generateHeader = (): Buffer => Buffer.concat([CURRENT_DOCUMENT_HEADER_VERS
 const getHeaderSize = (bytes: Buffer): number => bytes[5] * 256 + bytes[6];
 
 /**
- * Deconstruct the provided encrypted document into it's component parts. Strips off the header and then slices off the IV on the
+ * Deconstruct the provided encrypted document into its component parts. Strips off the header and then slices off the IV on the
  * front and the GCM auth tag on the back.
  */
 const parseEncryptedDocumentParts = (encryptedBytesWithHeader: Buffer): Future<TenantSecurityClientException, EncryptedDocumentParts> => {
@@ -135,7 +135,7 @@ export const encryptBatchDocuments = (
 };
 
 /**
- * Encrypt the provided batch of previously encrypted documents using the provded unwrapped keys. We should have at least one key or API
+ * Encrypt the provided batch of previously encrypted documents using the provided unwrapped keys. We should have at least one key or API
  * error per document ID in the provided documents. Returns a map from document ID to either the encrypted result, or an exception.
  */
 export const encryptBatchDocumentsWithExistingKey = (
