@@ -106,6 +106,7 @@ shell.exec("find dist -type d -name tests -prune -exec rm -rf {} \\;");
 shell.cp("./package.json", "./dist");
 shell.cp("./tenant-security-nodejs.d.ts", "./dist");
 shell.cp("./README.md", "./dist");
+shell.cp("./LICENSE", "./dist");
 
 publishModule();
 tagRepo(package.version);
