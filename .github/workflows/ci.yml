@@ -28,21 +28,21 @@ jobs:
       # Work around https://github.com/actions/cache/issues/133#issuecomment-599102035
       - name: Fix perms on .cargo so we can restore the cache.
         run: sudo chown -R $(whoami):$(id -ng) ~/.cargo/
-      - name: Cache cargo
+      - name: cache cargo registry
         uses: actions/cache@v1
         with:
-          path: ~/.cargo/
-          key: ${{ github.job }}-${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}-${{ matrix.rust }}
-      - name: Cache cargo build
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      - name: cache cargo index
         uses: actions/cache@v1
         with:
-          path: target
-          key: ${{ github.job }}-${{ runner.os }}-target-${{ hashFiles('**/Cargo.toml') }}-${{ matrix.rust }}
-      - name: Decrypt TSP integration keys
-        uses: IronCoreLabs/ironhide-actions/decrypt@v1
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+      - name: cache cargo build
+        uses: actions/cache@v1
         with:
-          keys: ${{ secrets.IRONHIDE_KEYS }}
-          input: tenant-security-proxy/.env.integration.iron
+          path: tenant-security-proxy/target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
       - name: integration test
         run: |
           cd tenant-security-proxy
