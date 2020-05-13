@@ -96,7 +96,7 @@ shell.echo("Running yarn to make sure deps are up to date");
 shell.exec("yarn");
 
 shell.echo("\n\nRunning unit tests...");
-//shell.exec("yarn test --coverage");
+shell.exec("yarn test");
 
 shell.echo("\n\nCompiling all source from TypeScript to ES6 JS and removing unit test files");
 shell.exec("./node_modules/typescript/bin/tsc --target ES6 --sourceMap false --module CommonJS --outDir ./dist/src");

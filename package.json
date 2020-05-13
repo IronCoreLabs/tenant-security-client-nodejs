@@ -15,7 +15,7 @@
         "build": "./build.js",
         "test": "yarn run lint && yarn run unit",
         "unit": "jest -t UNIT",
-        "integration": "jest -t INTEGRATION",
+        "integration": "jest -t \"INTEGRATION|UNIT\"",
         "local": "jest -t LOCAL",
         "lint": "eslint . --ext .ts"
     },

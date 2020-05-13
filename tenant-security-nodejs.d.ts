@@ -2,8 +2,8 @@ export type Base64String = string;
 
 /**
  * Data to encrypt via the customer's KMS. A document is a collection of 1-N fields that get encrypted
- * with the same KMS key (but use a different IV). Fields are provided by given a field name/ID to
- * the bytes of that field to encrypt.
+ * with the same KMS key (but use a different IV). Fields contain a name/ID to the bytes of that field
+ * to encrypt.
  */
 type Document = Record<string, Buffer>;
 
@@ -34,7 +34,7 @@ export type EncryptedDocumentWithEdekCollection = Record<string, EncryptedDocume
 //Result type of batch operations
 export interface BatchResult<T> {
     successes: Record<string, T>;
-    failures: Record<string, Error>;
+    failures: Record<string, TenantSecurityClientException>;
     hasSuccesses: boolean;
     hasFailures: boolean;
 }

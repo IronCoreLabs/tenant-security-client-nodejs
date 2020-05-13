@@ -13,6 +13,10 @@ import {TenantSecurityClientException} from "../TenantSecurityClientException";
 import * as Crypto from "./Crypto";
 import * as KmsApi from "./KmsApi";
 
+/**
+ * Take a batch result of encrypt/decrypt operations and convert it into the return structure from the SDK, calculating
+ * some convenience fields on the response for successes and failures.
+ */
 const mapBatchOperationToResult = <T>(
     successesAndFailures: Record<string, Crypto.BatchEncryptResult> | Record<string, Crypto.BatchDecryptResult>
 ): BatchResult<T> => {
@@ -39,10 +43,10 @@ export class TenantSecurityKmsClient {
     private tspDomain: string;
     private apiKey: string;
     constructor(tspDomain: string, apiKey: string) {
-        if (typeof tspDomain !== "string" || tspDomain.length === 0) {
+        if (!tspDomain) {
             throw new Error("No value provided for TSP Domain");
         }
-        if (typeof apiKey !== "string" || apiKey.length === 0) {
+        if (!apiKey) {
             throw new Error("No value provided for TSP API Key");
         }
         this.tspDomain = tspDomain;
@@ -50,12 +54,12 @@ export class TenantSecurityKmsClient {
     }
 
     /**
-     *
+     * Determine if the provided bytes are a CMK encrypted document.
      */
     isCiphertext = (bytes: Buffer): boolean => Crypto.isCmkEncryptedDocument(bytes);
 
     /**
-     *
+     * Encrypt the provided document of 1-N fields using the tenants primary KMS.
      */
     encryptDocument = (document: PlaintextDocument, metadata: RequestMetadata): Promise<EncryptedDocumentWithEdek> =>
         KmsApi.wrapKey(this.tspDomain, this.apiKey, metadata)
@@ -68,7 +72,8 @@ export class TenantSecurityKmsClient {
             .toPromise();
 
     /**
-     *
+     * Re-encrypt the provided document of 1-N fields that was previously encrypted with the tenants KMS. Takes the EDEK that was returned on
+     * encrypt, unwraps that via the KMS, and encrypts the document fields with it.
      */
     encryptDocumentWithExistingKey = (document: PlaintextDocumentWithEdek, metadata: RequestMetadata): Promise<EncryptedDocumentWithEdek> =>
         KmsApi.unwrapKey(this.tspDomain, this.apiKey, document.edek, metadata)
@@ -80,7 +85,8 @@ export class TenantSecurityKmsClient {
             .toPromise();
 
     /**
-     *
+     * Encrypt a batch of new documents using the tenants primary KMS. Supports partial failure and returns a list of documents that were successfully
+     * encrypted as well as a list of errors for documents that failed to be encrypted.
      */
     encryptDocumentBatch = (documentList: PlaintextDocumentCollection, metadata: RequestMetadata): Promise<BatchResult<EncryptedDocumentWithEdek>> =>
         KmsApi.batchWrapKeys(this.tspDomain, this.apiKey, Object.keys(documentList), metadata)
@@ -89,7 +95,8 @@ export class TenantSecurityKmsClient {
             .toPromise();
 
     /**
-     *
+     * Re-encrypts a batch of documents that were previously encrypted and re-uses the same key. Supports partial failure and returns a list of documents
+     * that were successfully encrypted as well as a list of errors for documents that failed to be encrypted.
      */
     encryptDocumentBatchWithExistingKey = (
         documentList: PlaintextDocumentWithEdekCollection,
@@ -108,7 +115,8 @@ export class TenantSecurityKmsClient {
     };
 
     /**
-     *
+     * Decrypt the provided encrypted document. Takes the document and EDEK returned on encrypt and unwraps the EDEK via
+     * the tenants KMS and uses the resulting DEK to decrypt the fields of the document.
      */
     decryptDocument = (encryptedDoc: EncryptedDocumentWithEdek, metadata: RequestMetadata): Promise<PlaintextDocumentWithEdek> =>
         KmsApi.unwrapKey(this.tspDomain, this.apiKey, encryptedDoc.edek, metadata)
@@ -121,7 +129,8 @@ export class TenantSecurityKmsClient {
             .toPromise();
 
     /**
-     *
+     * Decrypt a batch of documents using the tenants KMS that was used to encrypt each document. Supports partial failure and will return both
+     * successfully decrypted documents as well as documents that failed to be decrypted.
      */
     decryptDocumentBatch = (documentList: EncryptedDocumentWithEdekCollection, metadata: RequestMetadata): Promise<BatchResult<PlaintextDocumentWithEdek>> => {
         const edeks = Object.entries(documentList).reduce((currentMap, [docId, {edek}]) => {

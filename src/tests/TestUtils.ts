@@ -1,3 +1,4 @@
+import "jest-extended";
 import {PlaintextDocument, PlaintextDocumentCollection, PlaintextDocumentWithEdekCollection, TenantSecurityKmsClient} from "../../tenant-security-nodejs";
 import RequestMetadata from "../RequestMetadata";
 
@@ -62,6 +63,8 @@ export const runSingleExistingDocumentRoundTripForTenant = async (client: Tenant
 
     expect(res.edek).toEqual(edek);
     expect(res.plaintextDocument.field1).toEqual(data.field1);
+    expect(res.plaintextDocument.field2).toEqual(data.field2);
+    expect(res.plaintextDocument.field3).toEqual(data.field3);
 };
 
 export const runBatchDocumentRoundtripForTenant = async (client: TenantSecurityKmsClient, tenant: string) => {

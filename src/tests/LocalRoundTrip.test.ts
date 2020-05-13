@@ -2,7 +2,7 @@ import "jest-extended";
 import {TenantSecurityKmsClient} from "../kms/TenantSecurityKmsClient";
 import * as TestUtils from "./TestUtils";
 
-//Placeholders to be filled in my devs running tests
+//Placeholders to be filled in by devs running tests
 const LOCAL_TENANT_ID = "";
 const LOCAL_API_KEY = "";
 
