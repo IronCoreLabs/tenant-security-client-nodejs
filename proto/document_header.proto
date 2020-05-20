@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package ironcorelabs.proto.cmk;
+option java_package = "com.ironcorelabs.proto.cmk";
+
+message DocumentHeader {
+  bytes encryptedDekData = 1;
+}

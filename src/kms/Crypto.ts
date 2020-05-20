@@ -1,5 +1,9 @@
 import * as crypto from "crypto";
+import * as fs from "fs";
 import Future from "futurejs";
+import {tmpdir} from "os";
+import * as path from "path";
+import {pipeline} from "stream";
 import {
     Base64String,
     EncryptedDocument,
@@ -11,7 +15,10 @@ import {
     PlaintextDocumentWithEdekCollection,
 } from "../../tenant-security-nodejs";
 import {ErrorCodes, TenantSecurityClientException} from "../TenantSecurityClientException";
+import {AES_ALGORITHM, AES_GCM_TAG_LENGTH, IV_BYTE_LENGTH} from "./Constants";
 import {BatchUnwrapKeyResponse, BatchWrapKeyResponse} from "./KmsApi";
+import {StreamingDecryption, StreamingEncryption} from "./StreamingAes";
+import * as Util from "./Util";
 
 interface EncryptedDocumentParts {
     iv: Buffer;
@@ -22,50 +29,16 @@ interface EncryptedDocumentParts {
 export type BatchEncryptResult = TenantSecurityClientException | EncryptedDocumentWithEdek;
 export type BatchDecryptResult = TenantSecurityClientException | PlaintextDocumentWithEdek;
 
-const AES_ALGORITHM = "aes-256-gcm";
-const IV_BYTE_LENGTH = 12;
-const AES_GCM_TAG_LENGTH = 16;
-//Current version of IronCore encrypted documents
-const CURRENT_DOCUMENT_HEADER_VERSION = Buffer.from([3]);
-//IRON in ascii. Used to better denote whether this is an IronCore encrypted document
-const DOCUMENT_MAGIC = Buffer.from([73, 82, 79, 78]);
-//Header byte length. CMK documents currently don't have any header data, so this is fixed to 0 for now.
-const HEADER_PROTOBUF_CONTENT = Buffer.from([0, 0]);
-// the size of the fixed length portion of the header
-const DOCUMENT_HEADER_META_LENGTH = CURRENT_DOCUMENT_HEADER_VERSION.length + DOCUMENT_MAGIC.length + HEADER_PROTOBUF_CONTENT.length;
-
-/**
- * Check that the given bytes contain the expected CMK magic header
- */
-const containsIroncoreMagic = (bytes: Buffer): boolean => bytes.length >= 5 && bytes.slice(1, 5).equals(DOCUMENT_MAGIC);
-
-/**
- * Return the header bytes for all IronCore encrypted documents
- */
-const generateHeader = (): Buffer => Buffer.concat([CURRENT_DOCUMENT_HEADER_VERSION, DOCUMENT_MAGIC, HEADER_PROTOBUF_CONTENT]);
-
-/**
- * Multiply the header size bytes at the 5th and 6th indices to get the header size. If those bytes don't exist this will throw.
- */
-const getHeaderSize = (bytes: Buffer): number => bytes[5] * 256 + bytes[6];
-
 /**
  * Deconstruct the provided encrypted document into its component parts. Strips off the header and then slices off the IV on the
  * front and the GCM auth tag on the back.
  */
-const parseEncryptedDocumentParts = (encryptedBytesWithHeader: Buffer): Future<TenantSecurityClientException, EncryptedDocumentParts> => {
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    if (!isCmkEncryptedDocument(encryptedBytesWithHeader)) {
-        return Future.reject(new TenantSecurityClientException(ErrorCodes.INVALID_ENCRYPTED_DOCUMENT, "Provided bytes are not a CMK encrypted document."));
-    }
-    //Slice off the header of the document which includes the fixed size header plus any metadata we put in the front of the document
-    const encryptedBytes = encryptedBytesWithHeader.slice(getHeaderSize(encryptedBytesWithHeader) + DOCUMENT_HEADER_META_LENGTH);
-    return Future.of({
-        iv: encryptedBytes.slice(0, IV_BYTE_LENGTH),
-        encryptedBytes: encryptedBytes.slice(IV_BYTE_LENGTH, encryptedBytes.length - AES_GCM_TAG_LENGTH),
-        gcmTag: encryptedBytes.slice(encryptedBytes.length - AES_GCM_TAG_LENGTH),
-    });
-};
+const parseEncryptedDocumentParts = (encryptedBytesWithHeader: Buffer): Future<TenantSecurityClientException, EncryptedDocumentParts> =>
+    Util.splitDocumentHeaderAndEncryptedContent(encryptedBytesWithHeader).map(({encryptedDoc}) => ({
+        iv: encryptedDoc.slice(0, IV_BYTE_LENGTH),
+        encryptedBytes: encryptedDoc.slice(IV_BYTE_LENGTH, encryptedDoc.length - AES_GCM_TAG_LENGTH),
+        gcmTag: encryptedDoc.slice(encryptedDoc.length - AES_GCM_TAG_LENGTH),
+    }));
 
 /**
  * Take the provided plaintext bytes, generate a new random IV, and encrypt the data with the provided key.
@@ -74,7 +47,7 @@ const encryptField = (plaintextFieldBytes: Buffer, aesKey: Buffer): Future<Tenan
     Future.tryF(() => {
         const iv = crypto.randomBytes(IV_BYTE_LENGTH);
         const cipher = crypto.createCipheriv(AES_ALGORITHM, aesKey, iv);
-        return Buffer.concat([generateHeader(), iv, cipher.update(plaintextFieldBytes), cipher.final(), cipher.getAuthTag()]);
+        return Buffer.concat([Util.generateHeader(), iv, cipher.update(plaintextFieldBytes), cipher.final(), cipher.getAuthTag()]);
     }).errorMap((e) => new TenantSecurityClientException(ErrorCodes.DOCUMENT_ENCRYPT_FAILED, e.message));
 
 /**
@@ -88,13 +61,6 @@ const decryptField = ({iv, encryptedBytes, gcmTag}: EncryptedDocumentParts, aesK
     }).errorMap((e) => new TenantSecurityClientException(ErrorCodes.DOCUMENT_DECRYPT_FAILED, e.message));
 
 /**
- * Returns true if the provided document is an IronCore CMK encrypted document. Checks that we have the expected header on the front
- * of the document.
- */
-export const isCmkEncryptedDocument = (bytes: Buffer): boolean =>
-    bytes.length > DOCUMENT_HEADER_META_LENGTH && bytes[0] === CURRENT_DOCUMENT_HEADER_VERSION[0] && containsIroncoreMagic(bytes) && getHeaderSize(bytes) === 0;
-
-/**
  * Encrypt the provided document with the provided DEK. Encrypts all fields within the document with the same key but with separate IVs per field.
  */
 export const encryptDocument = (document: PlaintextDocument, dek: Base64String): Future<TenantSecurityClientException, EncryptedDocument> => {
@@ -105,6 +71,27 @@ export const encryptDocument = (document: PlaintextDocument, dek: Base64String):
     }, {} as Record<string, Future<TenantSecurityClientException, Buffer>>);
 
     return Future.all(futuresMap);
+};
+
+/**
+ * Read the provided input stream, encrypt the content using the provided DEK, and write it to the provided output stream.
+ */
+export const encryptStream = (
+    inputStream: NodeJS.ReadableStream,
+    outputStream: NodeJS.WritableStream,
+    dek: Base64String,
+    edek: Base64String
+): Future<TenantSecurityClientException, undefined> => {
+    const encryptionStream = new StreamingEncryption(Buffer.from(dek, "base64"), Buffer.from(edek, "base64"));
+    return new Future<TenantSecurityClientException, undefined>((reject, resolve) => {
+        pipeline(inputStream, encryptionStream.getEncryptionStream(), outputStream, (e) => {
+            if (e) {
+                reject(new TenantSecurityClientException(ErrorCodes.DOCUMENT_ENCRYPT_FAILED, e.message));
+            } else {
+                resolve(undefined);
+            }
+        });
+    });
 };
 
 /**
@@ -164,13 +151,42 @@ export const encryptBatchDocumentsWithExistingKey = (
  * Decrypt all of the provided encrypted document fields using the provided DEK.
  */
 export const decryptDocument = (encryptedDocument: EncryptedDocument, dek: Base64String): Future<TenantSecurityClientException, PlaintextDocument> => {
-    const dekBytes = Buffer.from(dek, "base64");
     const futuresMap = Object.entries(encryptedDocument).reduce((currentMap, [fieldId, fieldBytes]) => {
-        currentMap[fieldId] = parseEncryptedDocumentParts(fieldBytes).flatMap((parts) => decryptField(parts, dekBytes));
+        currentMap[fieldId] = parseEncryptedDocumentParts(fieldBytes).flatMap((parts) => decryptField(parts, Buffer.from(dek, "base64")));
         return currentMap;
     }, {} as Record<string, Future<TenantSecurityClientException, Buffer>>);
 
     return Future.all(futuresMap);
+};
+
+/**
+ * Decrypt the bytes in the provided inputStream and write the result to the provided outfile path if successful.
+ */
+export const decryptStream = (inputStream: NodeJS.ReadableStream, outfile: string, dek: Base64String): Future<TenantSecurityClientException, undefined> => {
+    const decryptionStream = new StreamingDecryption(Buffer.from(dek, "base64"));
+    //Create a temp file in a temp directory within the OS default temp dir
+    const tempDirectoryName = path.join(fs.realpathSync(tmpdir()), crypto.randomBytes(16).toString("hex"));
+    fs.mkdirSync(tempDirectoryName);
+    const tempFileName = path.join(tempDirectoryName, crypto.randomBytes(16).toString("hex"));
+    const tempWritable = fs.createWriteStream(tempFileName);
+    return new Future((reject, resolve) => {
+        pipeline(inputStream, decryptionStream.getDecryptionStream(), tempWritable, (e) => {
+            if (e) {
+                tempWritable.close();
+                fs.unlinkSync(tempFileName);
+                fs.rmdirSync(tempDirectoryName);
+                reject(new TenantSecurityClientException(ErrorCodes.DOCUMENT_DECRYPT_FAILED, e.message));
+            } else {
+                try {
+                    fs.renameSync(tempFileName, outfile);
+                    fs.rmdirSync(tempDirectoryName);
+                    resolve(undefined);
+                } catch (e) {
+                    reject(new TenantSecurityClientException(ErrorCodes.DOCUMENT_DECRYPT_FAILED, e.message));
+                }
+            }
+        });
+    });
 };
 
 /**

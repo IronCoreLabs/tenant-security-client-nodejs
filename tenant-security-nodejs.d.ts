@@ -59,6 +59,7 @@ export class TenantSecurityKmsClient {
     constructor(tspDomain: string, apiKey: string);
     isCiphertext(bytes: Buffer): boolean;
     encryptDocument(document: PlaintextDocument, metadata: RequestMetadata): Promise<EncryptedDocumentWithEdek>;
+    encryptStream(inputStream: NodeJS.ReadableStream, outputStream: NodeJS.WritableStream, metadata: RequestMetadata): Promise<void>;
     encryptDocumentWithExistingKey(document: PlaintextDocumentWithEdek, metadata: RequestMetadata): Promise<EncryptedDocumentWithEdek>;
     encryptDocumentBatch(documentList: PlaintextDocumentCollection, metadata: RequestMetadata): Promise<BatchResult<EncryptedDocumentWithEdek>>;
     encryptDocumentBatchWithExistingKey(
@@ -66,5 +67,6 @@ export class TenantSecurityKmsClient {
         metadata: RequestMetadata
     ): Promise<BatchResult<EncryptedDocumentWithEdek>>;
     decryptDocument(encryptedDoc: EncryptedDocumentWithEdek, metadata: RequestMetadata): Promise<PlaintextDocumentWithEdek>;
+    decryptStream(inputStream: NodeJS.ReadableStream, outfile: string, metadta: RequestMetadata): Promise<void>;
     decryptDocumentBatch(documentList: EncryptedDocumentWithEdekCollection, metadata: RequestMetadata): Promise<BatchResult<PlaintextDocumentWithEdek>>;
 }

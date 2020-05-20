@@ -12,6 +12,7 @@ import RequestMetadata from "../RequestMetadata";
 import {TenantSecurityClientException} from "../TenantSecurityClientException";
 import * as Crypto from "./Crypto";
 import * as KmsApi from "./KmsApi";
+import * as Util from "./Util";
 
 /**
  * Take a batch result of encrypt/decrypt operations and convert it into the return structure from the SDK, calculating
@@ -56,7 +57,7 @@ export class TenantSecurityKmsClient {
     /**
      * Determine if the provided bytes are a CMK encrypted document.
      */
-    isCiphertext = (bytes: Buffer): boolean => Crypto.isCmkEncryptedDocument(bytes);
+    isCiphertext = (bytes: Buffer): boolean => Util.isCmkEncryptedDocument(bytes);
 
     /**
      * Encrypt the provided document of 1-N fields using the tenants primary KMS.
@@ -69,6 +70,14 @@ export class TenantSecurityKmsClient {
                     encryptedDocument,
                 }))
             )
+            .toPromise();
+
+    /**
+     * Read in the provided inputSteam, encrypt the bytes, and write them out to the provided outputStream. Returns the EDEK
+     */
+    encryptStream = (inputStream: NodeJS.ReadableStream, outputStream: NodeJS.WritableStream, metadatda: RequestMetadata): Promise<void> =>
+        KmsApi.wrapKey(this.tspDomain, this.apiKey, metadatda)
+            .flatMap((wrapResponse) => Crypto.encryptStream(inputStream, outputStream, wrapResponse.dek, wrapResponse.edek))
             .toPromise();
 
     /**
@@ -126,6 +135,17 @@ export class TenantSecurityKmsClient {
                     edek: encryptedDoc.edek,
                 }))
             )
+            .toPromise();
+
+    /**
+     * Read the provided input stream, decrypt it, and write the results to the provided outfile.
+     */
+    decryptStream = (inputStream: NodeJS.ReadableStream, outfile: string, metadata: RequestMetadata): Promise<void> =>
+        Util.extractDocumentHeaderFromStream(inputStream)
+            .flatMap((docHeader) =>
+                KmsApi.unwrapKey(this.tspDomain, this.apiKey, Buffer.from(docHeader.encryptedDekData as Buffer).toString("base64"), metadata)
+            )
+            .flatMap(({dek}) => Crypto.decryptStream(inputStream, outfile, dek))
             .toPromise();
 
     /**

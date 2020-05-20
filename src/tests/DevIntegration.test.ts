@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import "jest-extended";
 import {EncryptedDocumentWithEdek} from "../../tenant-security-nodejs";
 import {TenantSecurityKmsClient} from "../kms/TenantSecurityKmsClient";
@@ -68,6 +69,60 @@ describe("INTEGRATION dev environment tests", () => {
         it("roundtrips a collection of fields in Azure", async () => {
             await TestUtils.runSingleDocumentRoundTripForTenant(client, AZURE_TENANT_ID);
             await TestUtils.runSingleExistingDocumentRoundTripForTenant(client, AZURE_TENANT_ID);
+        });
+    });
+
+    describe("roundtrip streaming encrypt and decrypt", () => {
+        let inputFilePath = `${__dirname}/test.txt`;
+        let outputFilePath = `${__dirname}/test.txt.enc`;
+        let roundtripFilePath = `${__dirname}/roundtrip.txt`;
+        beforeEach(() => {
+            fs.appendFileSync(inputFilePath, "content to be encrypted");
+            fs.appendFileSync(outputFilePath, "");
+        });
+
+        afterEach(() => {
+            fs.unlinkSync(inputFilePath);
+            fs.unlinkSync(outputFilePath);
+            if (fs.existsSync(roundtripFilePath)) {
+                fs.unlinkSync(roundtripFilePath);
+            }
+        });
+
+        it("roundtrips streaming in and writing out to a file ", async () => {
+            const plaintextStream = fs.createReadStream(inputFilePath);
+            const ciphertextOutputStream = fs.createWriteStream(outputFilePath);
+
+            await client.encryptStream(plaintextStream, ciphertextOutputStream, TestUtils.getMetadata(GCP_TENANT_ID));
+            ciphertextOutputStream.close();
+            plaintextStream.close();
+            const cipherTextInputStream = fs.createReadStream(outputFilePath);
+
+            await client.decryptStream(cipherTextInputStream, roundtripFilePath, TestUtils.getMetadata(GCP_TENANT_ID));
+
+            const roundTripContent = fs.readFileSync(roundtripFilePath, "utf-8");
+            cipherTextInputStream.close();
+            expect(roundTripContent).toEqual("content to be encrypted");
+        });
+
+        it("doesnt write to output file if decryption fails", async () => {
+            const plaintextStream = fs.createReadStream(inputFilePath);
+            const ciphertextOutputStream = fs.createWriteStream(outputFilePath);
+
+            await client.encryptStream(plaintextStream, ciphertextOutputStream, TestUtils.getMetadata(GCP_TENANT_ID));
+            ciphertextOutputStream.close();
+            plaintextStream.close();
+            //Write some garbage at the end of the encrypted file which will mess up the GCM auth tag
+            fs.appendFileSync(outputFilePath, Buffer.from([35, 91, 38, 98, 35]));
+            const cipherTextInputStream = fs.createReadStream(outputFilePath);
+
+            try {
+                await client.decryptStream(cipherTextInputStream, roundtripFilePath, TestUtils.getMetadata(GCP_TENANT_ID));
+                fail("Should fail when encrypted data is invalid");
+            } catch (e) {
+                expect(e.errorCode).toEqual(ErrorCodes.DOCUMENT_DECRYPT_FAILED);
+                expect(fs.existsSync(roundtripFilePath)).toBeFalse();
+            }
         });
     });
 
