@@ -104,12 +104,12 @@ const verifyHeaderAuthTag = (header: ironcorelabs.proto.ISaaSShieldHeader | unde
     if (!header || !header.authTag) {
         return Future.of(undefined);
     }
-    return decryptField(decomposeEncryptedValue(Buffer.from(header.authTag)), dek).flatMap((decryptedTag) => {
+    return decryptField(decomposeEncryptedValue(Buffer.from(header.authTag)), dek).flatMap((decryptedTag) =>
         //Verify that the decrypted tag equals our expected auth tag original bytes
-        return decryptedTag.equals(DOCUMENT_VALIDATION_TAG_BYTES)
+        decryptedTag.equals(DOCUMENT_VALIDATION_TAG_BYTES)
             ? Future.of(undefined)
-            : Future.reject(new TenantSecurityClientException(ErrorCodes.DOCUMENT_DECRYPT_FAILED, "Invalid DEK provided to decrypt this document"));
-    });
+            : Future.reject(new TenantSecurityClientException(ErrorCodes.DOCUMENT_DECRYPT_FAILED, "Invalid DEK provided to decrypt this document"))
+    );
 };
 
 /**
