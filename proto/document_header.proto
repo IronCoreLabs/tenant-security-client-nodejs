@@ -1,8 +1,20 @@
 syntax = "proto3";
 
-package ironcorelabs.proto.cmk;
-option java_package = "com.ironcorelabs.proto.cmk";
+package ironcorelabs.proto;
+option java_package = "com.ironcorelabs.proto";
 
-message DocumentHeader {
-  bytes encryptedDekData = 1;
+message DataControlPlatformHeader {
+  string document_id = 1;
+  int64 segment_id = 2;
+}
+
+message SaaSShieldHeader {
+  bytes auth_tag = 1;
+}
+
+message v3DocumentHeader {
+  oneof header {
+    DataControlPlatformHeader data_control = 1;
+    SaaSShieldHeader sass_shield = 2;
+  }
 }

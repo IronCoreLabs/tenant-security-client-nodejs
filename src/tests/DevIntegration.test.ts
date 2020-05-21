@@ -89,39 +89,75 @@ describe("INTEGRATION dev environment tests", () => {
             }
         });
 
-        it("roundtrips streaming in and writing out to a file ", async () => {
+        it("roundtrips streaming in and writing out to a file", async () => {
             const plaintextStream = fs.createReadStream(inputFilePath);
             const ciphertextOutputStream = fs.createWriteStream(outputFilePath);
 
-            await client.encryptStream(plaintextStream, ciphertextOutputStream, TestUtils.getMetadata(GCP_TENANT_ID));
-            ciphertextOutputStream.close();
-            plaintextStream.close();
-            const cipherTextInputStream = fs.createReadStream(outputFilePath);
+            const streamEncryptRes = await client.encryptStream(plaintextStream, ciphertextOutputStream, TestUtils.getMetadata(GCP_TENANT_ID));
 
-            await client.decryptStream(cipherTextInputStream, roundtripFilePath, TestUtils.getMetadata(GCP_TENANT_ID));
+            const cipherTextInputStream = fs.createReadStream(outputFilePath);
+            const roundtripFileStream = fs.createWriteStream(roundtripFilePath);
+
+            await client.decryptStream(streamEncryptRes.edek, cipherTextInputStream, roundtripFileStream, TestUtils.getMetadata(GCP_TENANT_ID));
 
             const roundTripContent = fs.readFileSync(roundtripFilePath, "utf-8");
-            cipherTextInputStream.close();
+
             expect(roundTripContent).toEqual("content to be encrypted");
         });
 
-        it("doesnt write to output file if decryption fails", async () => {
+        it("roundtrips encrypting a file without streaming and then decrypting that file with streaming", async () => {
+            //Encrypt a doc using the normal encrypt and write it to the output file
+            const encryptRes = await client.encryptDocument({foo: Buffer.from("encrypted without streaming", "utf-8")}, TestUtils.getMetadata(GCP_TENANT_ID));
+            fs.writeFileSync(outputFilePath, encryptRes.encryptedDocument.foo);
+
+            const cipherTextInputStream = fs.createReadStream(outputFilePath);
+            const roundtripFileStream = fs.createWriteStream(roundtripFilePath);
+
+            await client.decryptStream(encryptRes.edek, cipherTextInputStream, roundtripFileStream, TestUtils.getMetadata(GCP_TENANT_ID));
+
+            const roundTripContent = fs.readFileSync(roundtripFilePath, "utf-8");
+
+            expect(roundTripContent).toEqual("encrypted without streaming");
+        });
+
+        it("doesnt write to output file if wrong DEK is used", async () => {
+            const otherEncrypt = await client.encryptDocument({foo: Buffer.from("bar", "utf-8")}, TestUtils.getMetadata(GCP_TENANT_ID));
+            const otherEdek = otherEncrypt.edek;
+
             const plaintextStream = fs.createReadStream(inputFilePath);
             const ciphertextOutputStream = fs.createWriteStream(outputFilePath);
 
+            //Encrypt, but throw away the resulting EDEK since we want to try our own
             await client.encryptStream(plaintextStream, ciphertextOutputStream, TestUtils.getMetadata(GCP_TENANT_ID));
-            ciphertextOutputStream.close();
-            plaintextStream.close();
+
+            const cipherTextInputStream = fs.createReadStream(outputFilePath);
+            const roundtripFileStream = fs.createWriteStream(roundtripFilePath);
+
+            try {
+                await client.decryptStream(otherEdek, cipherTextInputStream, roundtripFileStream, TestUtils.getMetadata(GCP_TENANT_ID));
+                fail("Should fail when provided EDEK is invalid");
+            } catch (e) {
+                expect(e.errorCode).toEqual(ErrorCodes.DOCUMENT_DECRYPT_FAILED);
+                //When using the wrong EDEK, we shouldn't write any file content
+                expect(fs.readFileSync(roundtripFilePath, "utf-8")).toEqual("");
+            }
+        });
+
+        it("attempts to write to output file if DEK is correct but original file is corrupt", async () => {
+            const plaintextStream = fs.createReadStream(inputFilePath);
+            const ciphertextOutputStream = fs.createWriteStream(outputFilePath);
+            const streamEncryptRes = await client.encryptStream(plaintextStream, ciphertextOutputStream, TestUtils.getMetadata(GCP_TENANT_ID));
             //Write some garbage at the end of the encrypted file which will mess up the GCM auth tag
             fs.appendFileSync(outputFilePath, Buffer.from([35, 91, 38, 98, 35]));
             const cipherTextInputStream = fs.createReadStream(outputFilePath);
-
+            const roundtripFileStream = fs.createWriteStream(roundtripFilePath);
             try {
-                await client.decryptStream(cipherTextInputStream, roundtripFilePath, TestUtils.getMetadata(GCP_TENANT_ID));
+                await client.decryptStream(streamEncryptRes.edek, cipherTextInputStream, roundtripFileStream, TestUtils.getMetadata(GCP_TENANT_ID));
                 fail("Should fail when encrypted data is invalid");
             } catch (e) {
                 expect(e.errorCode).toEqual(ErrorCodes.DOCUMENT_DECRYPT_FAILED);
-                expect(fs.existsSync(roundtripFilePath)).toBeFalse();
+                //Some amount of bytes should have been written
+                expect(fs.readFileSync(roundtripFilePath, "utf-8")).not.toEqual("");
             }
         });
     });

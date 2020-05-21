@@ -15,6 +15,10 @@ export interface EncryptedDocumentWithEdek {
     edek: Base64String;
 }
 
+export interface StreamingResponse {
+    edek: Base64String;
+}
+
 //Input type for single decrypt operation
 export type EncryptedDocument = Document;
 //Result of single decrypt operation
@@ -59,7 +63,7 @@ export class TenantSecurityKmsClient {
     constructor(tspDomain: string, apiKey: string);
     isCiphertext(bytes: Buffer): boolean;
     encryptDocument(document: PlaintextDocument, metadata: RequestMetadata): Promise<EncryptedDocumentWithEdek>;
-    encryptStream(inputStream: NodeJS.ReadableStream, outputStream: NodeJS.WritableStream, metadata: RequestMetadata): Promise<void>;
+    encryptStream(inputStream: NodeJS.ReadableStream, outputStream: NodeJS.WritableStream, metadata: RequestMetadata): Promise<StreamingResponse>;
     encryptDocumentWithExistingKey(document: PlaintextDocumentWithEdek, metadata: RequestMetadata): Promise<EncryptedDocumentWithEdek>;
     encryptDocumentBatch(documentList: PlaintextDocumentCollection, metadata: RequestMetadata): Promise<BatchResult<EncryptedDocumentWithEdek>>;
     encryptDocumentBatchWithExistingKey(
@@ -67,6 +71,11 @@ export class TenantSecurityKmsClient {
         metadata: RequestMetadata
     ): Promise<BatchResult<EncryptedDocumentWithEdek>>;
     decryptDocument(encryptedDoc: EncryptedDocumentWithEdek, metadata: RequestMetadata): Promise<PlaintextDocumentWithEdek>;
-    decryptStream(inputStream: NodeJS.ReadableStream, outfile: string, metadta: RequestMetadata): Promise<void>;
+    decryptStream(
+        edek: Base64String,
+        inputStream: NodeJS.ReadableStream,
+        outputStream: NodeJS.WritableStream,
+        metadta: RequestMetadata
+    ): Promise<StreamingResponse>;
     decryptDocumentBatch(documentList: EncryptedDocumentWithEdekCollection, metadata: RequestMetadata): Promise<BatchResult<PlaintextDocumentWithEdek>>;
 }

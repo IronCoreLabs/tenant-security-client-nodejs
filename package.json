@@ -18,6 +18,7 @@
         "integration": "jest -t \"INTEGRATION|UNIT\"",
         "local": "jest -t LOCAL",
         "lint": "eslint . --ext .ts",
+        "testsingle": "jest",
         "protobuild": "pbjs -t static-module -w commonjs -o proto/ts/DocumentHeader.js proto/document_header.proto && pbts -o proto/ts/DocumentHeader.d.ts proto/ts/DocumentHeader.js"
     },
     "dependencies": {

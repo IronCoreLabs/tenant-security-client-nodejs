@@ -1,7 +1,6 @@
 import * as crypto from "crypto";
 import {Transform, TransformCallback} from "stream";
 import {AES_ALGORITHM, AES_GCM_TAG_LENGTH, IV_BYTE_LENGTH} from "./Constants";
-import {generateHeader} from "./Util";
 
 const AES_BLOCK_SIZE = 16;
 
@@ -13,8 +12,8 @@ export class StreamingEncryption {
     hasPushedOnIV = false;
     documentHeader: Buffer;
 
-    constructor(aesKey: Buffer, edek: Buffer) {
-        this.documentHeader = generateHeader(edek);
+    constructor(aesKey: Buffer, documentHeader: Buffer) {
+        this.documentHeader = documentHeader;
         this.iv = crypto.randomBytes(IV_BYTE_LENGTH);
         this.cipher = crypto.createCipheriv(AES_ALGORITHM, aesKey, this.iv);
     }
