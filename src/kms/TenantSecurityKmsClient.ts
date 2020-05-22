@@ -76,8 +76,8 @@ export class TenantSecurityKmsClient {
     /**
      * Read in the provided inputSteam, encrypt the bytes, and write them out to the provided outputStream. Returns the EDEK
      */
-    encryptStream = (inputStream: NodeJS.ReadableStream, outputStream: NodeJS.WritableStream, metadatda: RequestMetadata): Promise<StreamingResponse> =>
-        KmsApi.wrapKey(this.tspDomain, this.apiKey, metadatda)
+    encryptStream = (inputStream: NodeJS.ReadableStream, outputStream: NodeJS.WritableStream, metadata: RequestMetadata): Promise<StreamingResponse> =>
+        KmsApi.wrapKey(this.tspDomain, this.apiKey, metadata)
             .flatMap((wrapResponse) => Crypto.encryptStream(inputStream, outputStream, wrapResponse.dek).map(() => ({edek: wrapResponse.edek})))
             .toPromise();
 
