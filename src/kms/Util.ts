@@ -21,11 +21,11 @@ const verifyAndCreateDocHeaderPb = (pbBytes: Buffer): Future<TenantSecurityClien
     const invalidDoc = Future.reject(
         new TenantSecurityClientException(ErrorCodes.INVALID_ENCRYPTED_DOCUMENT, "Provided bytes are not a CMK encrypted document.")
     );
-    if (typeof v3DocumentHeader.verify({sassShield: pbBytes}) === "string") {
+    if (typeof v3DocumentHeader.verify({saasShield: pbBytes}) === "string") {
         return invalidDoc;
     }
     const header = v3DocumentHeader.decode(pbBytes);
-    return header.sassShield === null || header.sassShield === undefined ? invalidDoc : Future.of(header.sassShield);
+    return header.saasShield === null || header.saasShield === undefined ? invalidDoc : Future.of(header.saasShield);
 };
 
 /**

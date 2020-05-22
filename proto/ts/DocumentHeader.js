@@ -454,7 +454,7 @@ $root.ironcorelabs = (function() {
              * @memberof ironcorelabs.proto
              * @interface Iv3DocumentHeader
              * @property {ironcorelabs.proto.IDataControlPlatformHeader|null} [dataControl] v3DocumentHeader dataControl
-             * @property {ironcorelabs.proto.ISaaSShieldHeader|null} [sassShield] v3DocumentHeader sassShield
+             * @property {ironcorelabs.proto.ISaaSShieldHeader|null} [saasShield] v3DocumentHeader saasShield
              */
 
             /**
@@ -481,24 +481,24 @@ $root.ironcorelabs = (function() {
             v3DocumentHeader.prototype.dataControl = null;
 
             /**
-             * v3DocumentHeader sassShield.
-             * @member {ironcorelabs.proto.ISaaSShieldHeader|null|undefined} sassShield
+             * v3DocumentHeader saasShield.
+             * @member {ironcorelabs.proto.ISaaSShieldHeader|null|undefined} saasShield
              * @memberof ironcorelabs.proto.v3DocumentHeader
              * @instance
              */
-            v3DocumentHeader.prototype.sassShield = null;
+            v3DocumentHeader.prototype.saasShield = null;
 
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
 
             /**
              * v3DocumentHeader header.
-             * @member {"dataControl"|"sassShield"|undefined} header
+             * @member {"dataControl"|"saasShield"|undefined} header
              * @memberof ironcorelabs.proto.v3DocumentHeader
              * @instance
              */
             Object.defineProperty(v3DocumentHeader.prototype, "header", {
-                get: $util.oneOfGetter($oneOfFields = ["dataControl", "sassShield"]),
+                get: $util.oneOfGetter($oneOfFields = ["dataControl", "saasShield"]),
                 set: $util.oneOfSetter($oneOfFields)
             });
 
@@ -528,8 +528,8 @@ $root.ironcorelabs = (function() {
                     writer = $Writer.create();
                 if (message.dataControl != null && Object.hasOwnProperty.call(message, "dataControl"))
                     $root.ironcorelabs.proto.DataControlPlatformHeader.encode(message.dataControl, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
-                if (message.sassShield != null && Object.hasOwnProperty.call(message, "sassShield"))
-                    $root.ironcorelabs.proto.SaaSShieldHeader.encode(message.sassShield, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+                if (message.saasShield != null && Object.hasOwnProperty.call(message, "saasShield"))
+                    $root.ironcorelabs.proto.SaaSShieldHeader.encode(message.saasShield, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
                 return writer;
             };
 
@@ -568,7 +568,7 @@ $root.ironcorelabs = (function() {
                         message.dataControl = $root.ironcorelabs.proto.DataControlPlatformHeader.decode(reader, reader.uint32());
                         break;
                     case 2:
-                        message.sassShield = $root.ironcorelabs.proto.SaaSShieldHeader.decode(reader, reader.uint32());
+                        message.saasShield = $root.ironcorelabs.proto.SaaSShieldHeader.decode(reader, reader.uint32());
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -614,14 +614,14 @@ $root.ironcorelabs = (function() {
                             return "dataControl." + error;
                     }
                 }
-                if (message.sassShield != null && message.hasOwnProperty("sassShield")) {
+                if (message.saasShield != null && message.hasOwnProperty("saasShield")) {
                     if (properties.header === 1)
                         return "header: multiple values";
                     properties.header = 1;
                     {
-                        var error = $root.ironcorelabs.proto.SaaSShieldHeader.verify(message.sassShield);
+                        var error = $root.ironcorelabs.proto.SaaSShieldHeader.verify(message.saasShield);
                         if (error)
-                            return "sassShield." + error;
+                            return "saasShield." + error;
                     }
                 }
                 return null;
@@ -644,10 +644,10 @@ $root.ironcorelabs = (function() {
                         throw TypeError(".ironcorelabs.proto.v3DocumentHeader.dataControl: object expected");
                     message.dataControl = $root.ironcorelabs.proto.DataControlPlatformHeader.fromObject(object.dataControl);
                 }
-                if (object.sassShield != null) {
-                    if (typeof object.sassShield !== "object")
-                        throw TypeError(".ironcorelabs.proto.v3DocumentHeader.sassShield: object expected");
-                    message.sassShield = $root.ironcorelabs.proto.SaaSShieldHeader.fromObject(object.sassShield);
+                if (object.saasShield != null) {
+                    if (typeof object.saasShield !== "object")
+                        throw TypeError(".ironcorelabs.proto.v3DocumentHeader.saasShield: object expected");
+                    message.saasShield = $root.ironcorelabs.proto.SaaSShieldHeader.fromObject(object.saasShield);
                 }
                 return message;
             };
@@ -670,10 +670,10 @@ $root.ironcorelabs = (function() {
                     if (options.oneofs)
                         object.header = "dataControl";
                 }
-                if (message.sassShield != null && message.hasOwnProperty("sassShield")) {
-                    object.sassShield = $root.ironcorelabs.proto.SaaSShieldHeader.toObject(message.sassShield, options);
+                if (message.saasShield != null && message.hasOwnProperty("saasShield")) {
+                    object.saasShield = $root.ironcorelabs.proto.SaaSShieldHeader.toObject(message.saasShield, options);
                     if (options.oneofs)
-                        object.header = "sassShield";
+                        object.header = "saasShield";
                 }
                 return object;
             };

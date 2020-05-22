@@ -69,7 +69,7 @@ const decomposeField = (encryptedBytesWithHeader: Buffer): Future<TenantSecurity
  */
 const generateEncryptedDocumentHeader = (dek: Buffer): Future<TenantSecurityClientException, Buffer> =>
     encryptBytes(DOCUMENT_VALIDATION_TAG_BYTES, dek).map((authTag) => {
-        const pbHeader = Buffer.from(v3DocumentHeader.encode({sassShield: {authTag}}).finish());
+        const pbHeader = Buffer.from(v3DocumentHeader.encode({saasShield: {authTag}}).finish());
         const headerDataView = new DataView(new ArrayBuffer(HEADER_META_LENGTH_LENGTH));
         headerDataView.setUint16(0, pbHeader.length, false);
         return Buffer.concat([CURRENT_DOCUMENT_HEADER_VERSION, DOCUMENT_MAGIC, Buffer.from(headerDataView.buffer), pbHeader]);

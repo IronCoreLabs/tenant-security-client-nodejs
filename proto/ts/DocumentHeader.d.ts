@@ -197,8 +197,8 @@ export namespace ironcorelabs {
             /** v3DocumentHeader dataControl */
             dataControl?: (ironcorelabs.proto.IDataControlPlatformHeader|null);
 
-            /** v3DocumentHeader sassShield */
-            sassShield?: (ironcorelabs.proto.ISaaSShieldHeader|null);
+            /** v3DocumentHeader saasShield */
+            saasShield?: (ironcorelabs.proto.ISaaSShieldHeader|null);
         }
 
         /** Represents a v3DocumentHeader. */
@@ -213,11 +213,11 @@ export namespace ironcorelabs {
             /** v3DocumentHeader dataControl. */
             public dataControl?: (ironcorelabs.proto.IDataControlPlatformHeader|null);
 
-            /** v3DocumentHeader sassShield. */
-            public sassShield?: (ironcorelabs.proto.ISaaSShieldHeader|null);
+            /** v3DocumentHeader saasShield. */
+            public saasShield?: (ironcorelabs.proto.ISaaSShieldHeader|null);
 
             /** v3DocumentHeader header. */
-            public header?: ("dataControl"|"sassShield");
+            public header?: ("dataControl"|"saasShield");
 
             /**
              * Creates a new v3DocumentHeader instance using the specified properties.
