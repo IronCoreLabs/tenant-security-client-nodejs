@@ -9,7 +9,7 @@ const AES_BLOCK_SIZE = 16;
 export class StreamingEncryption {
     cipher: crypto.CipherGCM;
     iv: Buffer;
-    hasPushedOnIV = false;
+    isFirstChunk = false;
     documentHeader: Buffer;
 
     constructor(aesKey: Buffer, documentHeader: Buffer) {
@@ -29,8 +29,8 @@ export class StreamingEncryption {
         return function transform(this: Transform, chunk: Buffer, _: string, callback: TransformCallback) {
             //Check if this is our first transform operation. If so, we need to shove the IV at the front of the resulting
             //buffer in unencrypted form so we can pull it out on decryption.
-            if (!streamClass.hasPushedOnIV) {
-                streamClass.hasPushedOnIV = true;
+            if (!streamClass.isFirstChunk) {
+                streamClass.isFirstChunk = true;
                 //First push on our document header
                 this.push(streamClass.documentHeader);
                 this.push(streamClass.iv);
@@ -50,7 +50,7 @@ export class StreamingEncryption {
         const streamClass = this;
         return function flush(this: Transform, callback: TransformCallback) {
             //This will only happen if the user is somehow streaming in an empty file. A pretty dumb use case I'll grant you, but it's easy enough to support
-            if (!streamClass.hasPushedOnIV) {
+            if (!streamClass.isFirstChunk) {
                 this.push(streamClass.documentHeader);
                 this.push(streamClass.iv);
             }
