@@ -4,7 +4,7 @@ import {AES_ALGORITHM, AES_GCM_TAG_LENGTH, IV_BYTE_LENGTH} from "./Constants";
 
 const AES_BLOCK_SIZE = 16;
 
-//tslint:disable:max-classes-per-file
+/*eslint-disable @typescript-eslint/explicit-module-boundary-types*/
 
 export class StreamingEncryption {
     cipher: crypto.CipherGCM;

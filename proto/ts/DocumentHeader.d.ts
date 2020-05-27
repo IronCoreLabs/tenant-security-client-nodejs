@@ -104,8 +104,8 @@ export namespace ironcorelabs {
         /** Properties of a SaaSShieldHeader. */
         interface ISaaSShieldHeader {
 
-            /** SaaSShieldHeader authTag */
-            authTag?: (Uint8Array|null);
+            /** SaaSShieldHeader tenantId */
+            tenantId?: (string|null);
         }
 
         /** Represents a SaaSShieldHeader. */
@@ -117,8 +117,8 @@ export namespace ironcorelabs {
              */
             constructor(properties?: ironcorelabs.proto.ISaaSShieldHeader);
 
-            /** SaaSShieldHeader authTag. */
-            public authTag: Uint8Array;
+            /** SaaSShieldHeader tenantId. */
+            public tenantId: string;
 
             /**
              * Creates a new SaaSShieldHeader instance using the specified properties.
@@ -194,6 +194,9 @@ export namespace ironcorelabs {
         /** Properties of a v3DocumentHeader. */
         interface Iv3DocumentHeader {
 
+            /** v3DocumentHeader sig */
+            sig?: (Uint8Array|null);
+
             /** v3DocumentHeader dataControl */
             dataControl?: (ironcorelabs.proto.IDataControlPlatformHeader|null);
 
@@ -209,6 +212,9 @@ export namespace ironcorelabs {
              * @param [properties] Properties to set
              */
             constructor(properties?: ironcorelabs.proto.Iv3DocumentHeader);
+
+            /** v3DocumentHeader sig. */
+            public sig: Uint8Array;
 
             /** v3DocumentHeader dataControl. */
             public dataControl?: (ironcorelabs.proto.IDataControlPlatformHeader|null);

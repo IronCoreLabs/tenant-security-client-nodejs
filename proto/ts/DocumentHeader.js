@@ -66,7 +66,7 @@ $root.ironcorelabs = (function() {
              * @memberof ironcorelabs.proto.DataControlPlatformHeader
              * @instance
              */
-            DataControlPlatformHeader.prototype.segmentId = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+            DataControlPlatformHeader.prototype.segmentId = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
             /**
              * Creates a new DataControlPlatformHeader instance using the specified properties.
@@ -95,7 +95,7 @@ $root.ironcorelabs = (function() {
                 if (message.documentId != null && Object.hasOwnProperty.call(message, "documentId"))
                     writer.uint32(/* id 1, wireType 2 =*/10).string(message.documentId);
                 if (message.segmentId != null && Object.hasOwnProperty.call(message, "segmentId"))
-                    writer.uint32(/* id 2, wireType 0 =*/16).int64(message.segmentId);
+                    writer.uint32(/* id 2, wireType 0 =*/16).uint64(message.segmentId);
                 return writer;
             };
 
@@ -134,7 +134,7 @@ $root.ironcorelabs = (function() {
                         message.documentId = reader.string();
                         break;
                     case 2:
-                        message.segmentId = reader.int64();
+                        message.segmentId = reader.uint64();
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -196,13 +196,13 @@ $root.ironcorelabs = (function() {
                     message.documentId = String(object.documentId);
                 if (object.segmentId != null)
                     if ($util.Long)
-                        (message.segmentId = $util.Long.fromValue(object.segmentId)).unsigned = false;
+                        (message.segmentId = $util.Long.fromValue(object.segmentId)).unsigned = true;
                     else if (typeof object.segmentId === "string")
                         message.segmentId = parseInt(object.segmentId, 10);
                     else if (typeof object.segmentId === "number")
                         message.segmentId = object.segmentId;
                     else if (typeof object.segmentId === "object")
-                        message.segmentId = new $util.LongBits(object.segmentId.low >>> 0, object.segmentId.high >>> 0).toNumber();
+                        message.segmentId = new $util.LongBits(object.segmentId.low >>> 0, object.segmentId.high >>> 0).toNumber(true);
                 return message;
             };
 
@@ -222,7 +222,7 @@ $root.ironcorelabs = (function() {
                 if (options.defaults) {
                     object.documentId = "";
                     if ($util.Long) {
-                        var long = new $util.Long(0, 0, false);
+                        var long = new $util.Long(0, 0, true);
                         object.segmentId = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
                     } else
                         object.segmentId = options.longs === String ? "0" : 0;
@@ -233,7 +233,7 @@ $root.ironcorelabs = (function() {
                     if (typeof message.segmentId === "number")
                         object.segmentId = options.longs === String ? String(message.segmentId) : message.segmentId;
                     else
-                        object.segmentId = options.longs === String ? $util.Long.prototype.toString.call(message.segmentId) : options.longs === Number ? new $util.LongBits(message.segmentId.low >>> 0, message.segmentId.high >>> 0).toNumber() : message.segmentId;
+                        object.segmentId = options.longs === String ? $util.Long.prototype.toString.call(message.segmentId) : options.longs === Number ? new $util.LongBits(message.segmentId.low >>> 0, message.segmentId.high >>> 0).toNumber(true) : message.segmentId;
                 return object;
             };
 
@@ -257,7 +257,7 @@ $root.ironcorelabs = (function() {
              * Properties of a SaaSShieldHeader.
              * @memberof ironcorelabs.proto
              * @interface ISaaSShieldHeader
-             * @property {Uint8Array|null} [authTag] SaaSShieldHeader authTag
+             * @property {string|null} [tenantId] SaaSShieldHeader tenantId
              */
 
             /**
@@ -276,12 +276,12 @@ $root.ironcorelabs = (function() {
             }
 
             /**
-             * SaaSShieldHeader authTag.
-             * @member {Uint8Array} authTag
+             * SaaSShieldHeader tenantId.
+             * @member {string} tenantId
              * @memberof ironcorelabs.proto.SaaSShieldHeader
              * @instance
              */
-            SaaSShieldHeader.prototype.authTag = $util.newBuffer([]);
+            SaaSShieldHeader.prototype.tenantId = "";
 
             /**
              * Creates a new SaaSShieldHeader instance using the specified properties.
@@ -307,8 +307,8 @@ $root.ironcorelabs = (function() {
             SaaSShieldHeader.encode = function encode(message, writer) {
                 if (!writer)
                     writer = $Writer.create();
-                if (message.authTag != null && Object.hasOwnProperty.call(message, "authTag"))
-                    writer.uint32(/* id 1, wireType 2 =*/10).bytes(message.authTag);
+                if (message.tenantId != null && Object.hasOwnProperty.call(message, "tenantId"))
+                    writer.uint32(/* id 1, wireType 2 =*/10).string(message.tenantId);
                 return writer;
             };
 
@@ -344,7 +344,7 @@ $root.ironcorelabs = (function() {
                     var tag = reader.uint32();
                     switch (tag >>> 3) {
                     case 1:
-                        message.authTag = reader.bytes();
+                        message.tenantId = reader.string();
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -381,9 +381,9 @@ $root.ironcorelabs = (function() {
             SaaSShieldHeader.verify = function verify(message) {
                 if (typeof message !== "object" || message === null)
                     return "object expected";
-                if (message.authTag != null && message.hasOwnProperty("authTag"))
-                    if (!(message.authTag && typeof message.authTag.length === "number" || $util.isString(message.authTag)))
-                        return "authTag: buffer expected";
+                if (message.tenantId != null && message.hasOwnProperty("tenantId"))
+                    if (!$util.isString(message.tenantId))
+                        return "tenantId: string expected";
                 return null;
             };
 
@@ -399,11 +399,8 @@ $root.ironcorelabs = (function() {
                 if (object instanceof $root.ironcorelabs.proto.SaaSShieldHeader)
                     return object;
                 var message = new $root.ironcorelabs.proto.SaaSShieldHeader();
-                if (object.authTag != null)
-                    if (typeof object.authTag === "string")
-                        $util.base64.decode(object.authTag, message.authTag = $util.newBuffer($util.base64.length(object.authTag)), 0);
-                    else if (object.authTag.length)
-                        message.authTag = object.authTag;
+                if (object.tenantId != null)
+                    message.tenantId = String(object.tenantId);
                 return message;
             };
 
@@ -421,15 +418,9 @@ $root.ironcorelabs = (function() {
                     options = {};
                 var object = {};
                 if (options.defaults)
-                    if (options.bytes === String)
-                        object.authTag = "";
-                    else {
-                        object.authTag = [];
-                        if (options.bytes !== Array)
-                            object.authTag = $util.newBuffer(object.authTag);
-                    }
-                if (message.authTag != null && message.hasOwnProperty("authTag"))
-                    object.authTag = options.bytes === String ? $util.base64.encode(message.authTag, 0, message.authTag.length) : options.bytes === Array ? Array.prototype.slice.call(message.authTag) : message.authTag;
+                    object.tenantId = "";
+                if (message.tenantId != null && message.hasOwnProperty("tenantId"))
+                    object.tenantId = message.tenantId;
                 return object;
             };
 
@@ -453,6 +444,7 @@ $root.ironcorelabs = (function() {
              * Properties of a v3DocumentHeader.
              * @memberof ironcorelabs.proto
              * @interface Iv3DocumentHeader
+             * @property {Uint8Array|null} [sig] v3DocumentHeader sig
              * @property {ironcorelabs.proto.IDataControlPlatformHeader|null} [dataControl] v3DocumentHeader dataControl
              * @property {ironcorelabs.proto.ISaaSShieldHeader|null} [saasShield] v3DocumentHeader saasShield
              */
@@ -471,6 +463,14 @@ $root.ironcorelabs = (function() {
                         if (properties[keys[i]] != null)
                             this[keys[i]] = properties[keys[i]];
             }
+
+            /**
+             * v3DocumentHeader sig.
+             * @member {Uint8Array} sig
+             * @memberof ironcorelabs.proto.v3DocumentHeader
+             * @instance
+             */
+            v3DocumentHeader.prototype.sig = $util.newBuffer([]);
 
             /**
              * v3DocumentHeader dataControl.
@@ -526,10 +526,12 @@ $root.ironcorelabs = (function() {
             v3DocumentHeader.encode = function encode(message, writer) {
                 if (!writer)
                     writer = $Writer.create();
+                if (message.sig != null && Object.hasOwnProperty.call(message, "sig"))
+                    writer.uint32(/* id 1, wireType 2 =*/10).bytes(message.sig);
                 if (message.dataControl != null && Object.hasOwnProperty.call(message, "dataControl"))
-                    $root.ironcorelabs.proto.DataControlPlatformHeader.encode(message.dataControl, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+                    $root.ironcorelabs.proto.DataControlPlatformHeader.encode(message.dataControl, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
                 if (message.saasShield != null && Object.hasOwnProperty.call(message, "saasShield"))
-                    $root.ironcorelabs.proto.SaaSShieldHeader.encode(message.saasShield, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+                    $root.ironcorelabs.proto.SaaSShieldHeader.encode(message.saasShield, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
                 return writer;
             };
 
@@ -565,9 +567,12 @@ $root.ironcorelabs = (function() {
                     var tag = reader.uint32();
                     switch (tag >>> 3) {
                     case 1:
-                        message.dataControl = $root.ironcorelabs.proto.DataControlPlatformHeader.decode(reader, reader.uint32());
+                        message.sig = reader.bytes();
                         break;
                     case 2:
+                        message.dataControl = $root.ironcorelabs.proto.DataControlPlatformHeader.decode(reader, reader.uint32());
+                        break;
+                    case 3:
                         message.saasShield = $root.ironcorelabs.proto.SaaSShieldHeader.decode(reader, reader.uint32());
                         break;
                     default:
@@ -606,6 +611,9 @@ $root.ironcorelabs = (function() {
                 if (typeof message !== "object" || message === null)
                     return "object expected";
                 var properties = {};
+                if (message.sig != null && message.hasOwnProperty("sig"))
+                    if (!(message.sig && typeof message.sig.length === "number" || $util.isString(message.sig)))
+                        return "sig: buffer expected";
                 if (message.dataControl != null && message.hasOwnProperty("dataControl")) {
                     properties.header = 1;
                     {
@@ -639,6 +647,11 @@ $root.ironcorelabs = (function() {
                 if (object instanceof $root.ironcorelabs.proto.v3DocumentHeader)
                     return object;
                 var message = new $root.ironcorelabs.proto.v3DocumentHeader();
+                if (object.sig != null)
+                    if (typeof object.sig === "string")
+                        $util.base64.decode(object.sig, message.sig = $util.newBuffer($util.base64.length(object.sig)), 0);
+                    else if (object.sig.length)
+                        message.sig = object.sig;
                 if (object.dataControl != null) {
                     if (typeof object.dataControl !== "object")
                         throw TypeError(".ironcorelabs.proto.v3DocumentHeader.dataControl: object expected");
@@ -665,6 +678,16 @@ $root.ironcorelabs = (function() {
                 if (!options)
                     options = {};
                 var object = {};
+                if (options.defaults)
+                    if (options.bytes === String)
+                        object.sig = "";
+                    else {
+                        object.sig = [];
+                        if (options.bytes !== Array)
+                            object.sig = $util.newBuffer(object.sig);
+                    }
+                if (message.sig != null && message.hasOwnProperty("sig"))
+                    object.sig = options.bytes === String ? $util.base64.encode(message.sig, 0, message.sig.length) : options.bytes === Array ? Array.prototype.slice.call(message.sig) : message.sig;
                 if (message.dataControl != null && message.hasOwnProperty("dataControl")) {
                     object.dataControl = $root.ironcorelabs.proto.DataControlPlatformHeader.toObject(message.dataControl, options);
                     if (options.oneofs)

@@ -66,7 +66,7 @@ export class TenantSecurityKmsClient {
     encryptDocument = (document: PlaintextDocument, metadata: RequestMetadata): Promise<EncryptedDocumentWithEdek> =>
         KmsApi.wrapKey(this.tspDomain, this.apiKey, metadata)
             .flatMap((wrapResponse) =>
-                Crypto.encryptDocument(document, wrapResponse.dek).map((encryptedDocument) => ({
+                Crypto.encryptDocument(document, wrapResponse.dek, metadata.tenantId).map((encryptedDocument) => ({
                     edek: wrapResponse.edek,
                     encryptedDocument,
                 }))
@@ -78,7 +78,9 @@ export class TenantSecurityKmsClient {
      */
     encryptStream = (inputStream: NodeJS.ReadableStream, outputStream: NodeJS.WritableStream, metadata: RequestMetadata): Promise<StreamingResponse> =>
         KmsApi.wrapKey(this.tspDomain, this.apiKey, metadata)
-            .flatMap((wrapResponse) => Crypto.encryptStream(inputStream, outputStream, wrapResponse.dek).map(() => ({edek: wrapResponse.edek})))
+            .flatMap((wrapResponse) =>
+                Crypto.encryptStream(inputStream, outputStream, wrapResponse.dek, metadata.tenantId).map(() => ({edek: wrapResponse.edek}))
+            )
             .toPromise();
 
     /**
@@ -87,7 +89,7 @@ export class TenantSecurityKmsClient {
      */
     encryptDocumentWithExistingKey = (document: PlaintextDocumentWithEdek, metadata: RequestMetadata): Promise<EncryptedDocumentWithEdek> =>
         KmsApi.unwrapKey(this.tspDomain, this.apiKey, document.edek, metadata)
-            .flatMap((unwrapResponse) => Crypto.encryptDocument(document.plaintextDocument, unwrapResponse.dek))
+            .flatMap((unwrapResponse) => Crypto.encryptDocument(document.plaintextDocument, unwrapResponse.dek, metadata.tenantId))
             .map((encryptedDocument) => ({
                 edek: document.edek,
                 encryptedDocument,
@@ -100,7 +102,7 @@ export class TenantSecurityKmsClient {
      */
     encryptDocumentBatch = (documentList: PlaintextDocumentCollection, metadata: RequestMetadata): Promise<BatchResult<EncryptedDocumentWithEdek>> =>
         KmsApi.batchWrapKeys(this.tspDomain, this.apiKey, Object.keys(documentList), metadata)
-            .flatMap((batchWrapResponse) => Crypto.encryptBatchDocuments(batchWrapResponse, documentList))
+            .flatMap((batchWrapResponse) => Crypto.encryptBatchDocuments(batchWrapResponse, documentList, metadata.tenantId))
             .map<BatchResult<EncryptedDocumentWithEdek>>(mapBatchOperationToResult)
             .toPromise();
 
@@ -119,7 +121,7 @@ export class TenantSecurityKmsClient {
         }, {} as Record<string, Base64String>);
 
         return KmsApi.batchUnwrapKey(this.tspDomain, this.apiKey, edeks, metadata)
-            .flatMap((unwrappedKeys) => Crypto.encryptBatchDocumentsWithExistingKey(unwrappedKeys, documentList))
+            .flatMap((unwrappedKeys) => Crypto.encryptBatchDocumentsWithExistingKey(unwrappedKeys, documentList, metadata.tenantId))
             .map<BatchResult<EncryptedDocumentWithEdek>>(mapBatchOperationToResult)
             .toPromise();
     };

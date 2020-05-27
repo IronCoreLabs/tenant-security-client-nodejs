@@ -14,20 +14,12 @@ import {
     PlaintextDocumentWithEdekCollection,
 } from "../../tenant-security-nodejs";
 import {ErrorCodes, TenantSecurityClientException} from "../TenantSecurityClientException";
-import {
-    AES_ALGORITHM,
-    AES_GCM_TAG_LENGTH,
-    CURRENT_DOCUMENT_HEADER_VERSION,
-    DOCUMENT_MAGIC,
-    DOCUMENT_VALIDATION_TAG_BYTES,
-    HEADER_META_LENGTH_LENGTH,
-    IV_BYTE_LENGTH,
-} from "./Constants";
+import {AES_ALGORITHM, AES_GCM_TAG_LENGTH, CURRENT_DOCUMENT_HEADER_VERSION, DOCUMENT_MAGIC, HEADER_META_LENGTH_LENGTH, IV_BYTE_LENGTH} from "./Constants";
 import {BatchUnwrapKeyResponse, BatchWrapKeyResponse} from "./KmsApi";
 import {StreamingDecryption, StreamingEncryption} from "./StreamingAes";
 import * as Util from "./Util";
 const pPipeline = promisify(pipeline);
-const v3DocumentHeader = ironcorelabs.proto.v3DocumentHeader;
+const {v3DocumentHeader, SaaSShieldHeader} = ironcorelabs.proto;
 
 interface EncryptedDocumentParts {
     iv: Buffer;
@@ -41,11 +33,11 @@ export type BatchDecryptResult = TenantSecurityClientException | PlaintextDocume
 /**
  * Encrypt the provided bytes with the provided key using AES-256-GCM.
  */
-const encryptBytes = (bytes: Buffer, key: Buffer): Future<TenantSecurityClientException, Buffer> =>
+const encryptBytes = (bytes: Buffer, key: Buffer, iv?: Buffer): Future<TenantSecurityClientException, Buffer> =>
     Future.tryF(() => {
-        const iv = crypto.randomBytes(IV_BYTE_LENGTH);
-        const cipher = crypto.createCipheriv(AES_ALGORITHM, key, iv);
-        return Buffer.concat([iv, cipher.update(bytes), cipher.final(), cipher.getAuthTag()]);
+        const ivBytes = iv && iv.length === IV_BYTE_LENGTH ? iv : crypto.randomBytes(IV_BYTE_LENGTH);
+        const cipher = crypto.createCipheriv(AES_ALGORITHM, key, ivBytes);
+        return Buffer.concat([ivBytes, cipher.update(bytes), cipher.final(), cipher.getAuthTag()]);
     }).errorMap((e) => new TenantSecurityClientException(ErrorCodes.DOCUMENT_ENCRYPT_FAILED, e.message));
 
 /**
@@ -67,19 +59,26 @@ const decomposeField = (encryptedBytesWithHeader: Buffer): Future<TenantSecurity
 /**
  *
  */
-const generateEncryptedDocumentHeader = (dek: Buffer): Future<TenantSecurityClientException, Buffer> =>
-    encryptBytes(DOCUMENT_VALIDATION_TAG_BYTES, dek).map((authTag) => {
-        const pbHeader = Buffer.from(v3DocumentHeader.encode({saasShield: {authTag}}).finish());
+const generateEncryptedDocumentHeader = (dek: Buffer, headerData: ironcorelabs.proto.ISaaSShieldHeader): Future<TenantSecurityClientException, Buffer> => {
+    return encryptBytes(Buffer.from(SaaSShieldHeader.encode(headerData).finish()), dek).map((authTag) => {
+        //Compose the auth tag using the random IV generated during encrypt with the GCM auth tag
+        const {iv, gcmTag} = decomposeEncryptedValue(authTag);
+        const pbHeader = Buffer.from(v3DocumentHeader.encode({sig: Buffer.concat([iv, gcmTag]), saasShield: headerData}).finish());
         const headerDataView = new DataView(new ArrayBuffer(HEADER_META_LENGTH_LENGTH));
         headerDataView.setUint16(0, pbHeader.length, false);
         return Buffer.concat([CURRENT_DOCUMENT_HEADER_VERSION, DOCUMENT_MAGIC, Buffer.from(headerDataView.buffer), pbHeader]);
     });
+};
 
 /**
  * Take the provided plaintext bytes, generate a new random IV, and encrypt the data with the provided key.
  */
-const encryptField = (plaintextFieldBytes: Buffer, dek: Buffer): Future<TenantSecurityClientException, Buffer> =>
-    Future.gather2(generateEncryptedDocumentHeader(dek), encryptBytes(plaintextFieldBytes, dek)).map(([docHeader, encryptedDoc]) =>
+const encryptField = (
+    plaintextFieldBytes: Buffer,
+    dek: Buffer,
+    headerData: ironcorelabs.proto.ISaaSShieldHeader
+): Future<TenantSecurityClientException, Buffer> =>
+    Future.gather2(generateEncryptedDocumentHeader(dek, headerData), encryptBytes(plaintextFieldBytes, dek)).map(([docHeader, encryptedDoc]) =>
         Buffer.concat([docHeader, encryptedDoc])
     );
 
@@ -94,31 +93,33 @@ const decryptField = ({iv, encryptedBytes, gcmTag}: EncryptedDocumentParts, dek:
     }).errorMap((e) => new TenantSecurityClientException(ErrorCodes.DOCUMENT_DECRYPT_FAILED, e.message));
 
 /**
- * Check to see if we have a header and an auth tag and if so, use the provided DEK to decrypt the auth tag and check that it equals the fixed bytes
- * that we encrypt for the auth tag. This method only fails if the header is present and the provided DEK was not the one that was used to originally
- * encrypt the document.
+ * Check if the provided header content can be verified against the provided signature using the provided DEK. Takes the existing IV from
+ * the front of the signature and uses it plus the DEK to encrypt the probotuf encoded header. Then verifies that the resulting GCM auth
+ * tag matches. If the provided header is empty, verification will succeed.
  */
-const verifyHeaderAuthTag = (header: ironcorelabs.proto.ISaaSShieldHeader | undefined, dek: Buffer): Future<TenantSecurityClientException, void> => {
+const verifyHeaderSignature = (header: ironcorelabs.proto.Iv3DocumentHeader | undefined, dek: Buffer): Future<TenantSecurityClientException, void> => {
     //If we have no header or authTag, that means this document was encrypted before the header was added, which would only happen if the
     //document was encrypted with the Java SDK. In that case, we'll just ignore the verification and try to decrypt, which might still work.
-    if (!header || !header.authTag) {
+    if (!header || !header.saasShield || !header.sig) {
         return Future.of(undefined);
     }
-    return decryptField(decomposeEncryptedValue(Buffer.from(header.authTag)), dek).flatMap((decryptedTag) =>
-        //Verify that the decrypted tag equals our expected auth tag original bytes
-        decryptedTag.equals(DOCUMENT_VALIDATION_TAG_BYTES)
+    const headerPb = Buffer.from(SaaSShieldHeader.encode(header.saasShield).finish());
+    const {iv, gcmTag} = decomposeEncryptedValue(Buffer.from(header.sig));
+    return encryptBytes(headerPb, dek, iv).flatMap((encryptedPb) => {
+        const verifiedAuthTag = decomposeEncryptedValue(encryptedPb).gcmTag;
+        return verifiedAuthTag.equals(gcmTag)
             ? Future.of(undefined)
-            : Future.reject(new TenantSecurityClientException(ErrorCodes.DOCUMENT_DECRYPT_FAILED, "Invalid DEK provided to decrypt this document"))
-    );
+            : Future.reject(new TenantSecurityClientException(ErrorCodes.DOCUMENT_DECRYPT_FAILED, "Invalid DEK provided to decrypt this document"));
+    });
 };
 
 /**
  * Encrypt the provided document with the provided DEK. Encrypts all fields within the document with the same key but with separate IVs per field.
  */
-export const encryptDocument = (document: PlaintextDocument, dek: Base64String): Future<TenantSecurityClientException, EncryptedDocument> => {
+export const encryptDocument = (document: PlaintextDocument, dek: Base64String, tenantId: string): Future<TenantSecurityClientException, EncryptedDocument> => {
     const dekBytes = Buffer.from(dek, "base64");
     const futuresMap = Object.entries(document).reduce((currentMap, [fieldId, fieldBytes]) => {
-        currentMap[fieldId] = encryptField(fieldBytes, dekBytes);
+        currentMap[fieldId] = encryptField(fieldBytes, dekBytes, {tenantId});
         return currentMap;
     }, {} as Record<string, Future<TenantSecurityClientException, Buffer>>);
 
@@ -131,10 +132,11 @@ export const encryptDocument = (document: PlaintextDocument, dek: Base64String):
 export const encryptStream = (
     inputStream: NodeJS.ReadableStream,
     outputStream: NodeJS.WritableStream,
-    dek: Base64String
+    dek: Base64String,
+    tenantId: string
 ): Future<TenantSecurityClientException, void> => {
     const dekBytes = Buffer.from(dek, "base64");
-    return generateEncryptedDocumentHeader(dekBytes).flatMap((docHeader) =>
+    return generateEncryptedDocumentHeader(dekBytes, {tenantId}).flatMap((docHeader) =>
         Future.tryP(() => pPipeline(inputStream, new StreamingEncryption(dekBytes, docHeader).getEncryptionStream(), outputStream)).errorMap(
             (e) => new TenantSecurityClientException(ErrorCodes.DOCUMENT_ENCRYPT_FAILED, e.message)
         )
@@ -147,7 +149,8 @@ export const encryptStream = (
  */
 export const encryptBatchDocuments = (
     documentKeys: BatchWrapKeyResponse,
-    documents: PlaintextDocumentCollection
+    documents: PlaintextDocumentCollection,
+    tenantId: string
 ): Future<TenantSecurityClientException, Record<string, BatchEncryptResult>> => {
     const reduceResult: Record<string, Future<TenantSecurityClientException, BatchEncryptResult>> = {};
     const futuresMap = Object.entries(documents).reduce((currentMap, [documentId, plaintextDocument]) => {
@@ -155,7 +158,7 @@ export const encryptBatchDocuments = (
             const {code, message} = documentKeys.failures[documentId];
             currentMap[documentId] = Future.of(new TenantSecurityClientException(code, message));
         } else {
-            currentMap[documentId] = encryptDocument(plaintextDocument, documentKeys.keys[documentId].dek)
+            currentMap[documentId] = encryptDocument(plaintextDocument, documentKeys.keys[documentId].dek, tenantId)
                 .map<BatchEncryptResult>((eDoc) => ({
                     encryptedDocument: eDoc,
                     edek: documentKeys.keys[documentId].edek,
@@ -174,7 +177,8 @@ export const encryptBatchDocuments = (
  */
 export const encryptBatchDocumentsWithExistingKey = (
     documentDeks: BatchUnwrapKeyResponse,
-    documents: PlaintextDocumentWithEdekCollection
+    documents: PlaintextDocumentWithEdekCollection,
+    tenantId: string
 ): Future<TenantSecurityClientException, Record<string, BatchEncryptResult>> => {
     const reduceResult: Record<string, Future<TenantSecurityClientException, BatchEncryptResult>> = {};
     const futuresMap = Object.entries(documents).reduce((currentMap, [documentId, {plaintextDocument, edek}]) => {
@@ -182,7 +186,7 @@ export const encryptBatchDocumentsWithExistingKey = (
             const {code, message} = documentDeks.failures[documentId];
             currentMap[documentId] = Future.of(new TenantSecurityClientException(code, message));
         } else {
-            currentMap[documentId] = encryptDocument(plaintextDocument, documentDeks.keys[documentId].dek)
+            currentMap[documentId] = encryptDocument(plaintextDocument, documentDeks.keys[documentId].dek, tenantId)
                 .map<BatchEncryptResult>((eDoc) => ({
                     encryptedDocument: eDoc,
                     edek,
@@ -216,7 +220,7 @@ export const decryptStream = (
 ): Future<TenantSecurityClientException, void> => {
     const dekBytes = Buffer.from(dek, "base64");
     return Util.extractDocumentHeaderFromStream(inputStream)
-        .flatMap((maybeHeader) => verifyHeaderAuthTag(maybeHeader, dekBytes))
+        .flatMap((maybeHeader) => verifyHeaderSignature(maybeHeader, dekBytes))
         .flatMap(() =>
             Future.tryP(() => pPipeline(inputStream, new StreamingDecryption(dekBytes).getDecryptionStream(), outputStream)).errorMap(
                 (e) => new TenantSecurityClientException(ErrorCodes.DOCUMENT_DECRYPT_FAILED, e.message)
