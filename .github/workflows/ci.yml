@@ -49,4 +49,4 @@ jobs:
           cargo build --release
           env $(cat .env.integration) cargo run --release &
           timeout 300 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:9000/ready)" != "200" ]]; do sleep 5; done' || false
-          yarn
+          yarn integration

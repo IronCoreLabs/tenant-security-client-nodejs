@@ -7,11 +7,13 @@ import {
     PlaintextDocumentCollection,
     PlaintextDocumentWithEdek,
     PlaintextDocumentWithEdekCollection,
+    StreamingResponse,
 } from "../../tenant-security-nodejs";
 import RequestMetadata from "../RequestMetadata";
 import {TenantSecurityClientException} from "../TenantSecurityClientException";
 import * as Crypto from "./Crypto";
 import * as KmsApi from "./KmsApi";
+import * as Util from "./Util";
 
 /**
  * Take a batch result of encrypt/decrypt operations and convert it into the return structure from the SDK, calculating
@@ -56,7 +58,7 @@ export class TenantSecurityKmsClient {
     /**
      * Determine if the provided bytes are a CMK encrypted document.
      */
-    isCiphertext = (bytes: Buffer): boolean => Crypto.isCmkEncryptedDocument(bytes);
+    isCiphertext = (bytes: Buffer): boolean => Util.isCmkEncryptedDocument(bytes);
 
     /**
      * Encrypt the provided document of 1-N fields using the tenants primary KMS.
@@ -69,6 +71,14 @@ export class TenantSecurityKmsClient {
                     encryptedDocument,
                 }))
             )
+            .toPromise();
+
+    /**
+     * Read in the provided inputSteam, encrypt the bytes, and write them out to the provided outputStream. Returns the EDEK
+     */
+    encryptStream = (inputStream: NodeJS.ReadableStream, outputStream: NodeJS.WritableStream, metadata: RequestMetadata): Promise<StreamingResponse> =>
+        KmsApi.wrapKey(this.tspDomain, this.apiKey, metadata)
+            .flatMap((wrapResponse) => Crypto.encryptStream(inputStream, outputStream, wrapResponse.dek).map(() => ({edek: wrapResponse.edek})))
             .toPromise();
 
     /**
@@ -126,6 +136,21 @@ export class TenantSecurityKmsClient {
                     edek: encryptedDoc.edek,
                 }))
             )
+            .toPromise();
+
+    /**
+     * Take the provided EDEK and unwrap it with the tenants KMS to a DEK. Then read the provided input stream, decrypt it with the DEK,
+     * and write the results to the provided output stream. This method will reject without writing any bytes to the output stream if the
+     * DEK being used is not valid for the encrypted bytes in the inputStream.
+     */
+    decryptStream = (
+        edek: Base64String,
+        inputStream: NodeJS.ReadableStream,
+        outputStream: NodeJS.WritableStream,
+        metadata: RequestMetadata
+    ): Promise<StreamingResponse> =>
+        KmsApi.unwrapKey(this.tspDomain, this.apiKey, edek, metadata)
+            .flatMap((unwrapResponse) => Crypto.decryptStream(inputStream, outputStream, unwrapResponse.dek).map(() => ({edek})))
             .toPromise();
 
     /**
