@@ -17,15 +17,14 @@ const getHeaderProtobufContentSize = (bytes: Buffer): number => bytes.readUInt16
 /**
  * Verify that the provided bytes are our Protobuf header bytes.
  */
-const verifyAndCreateDocHeaderPb = (pbBytes: Buffer): Future<TenantSecurityClientException, ironcorelabs.proto.ISaaSShieldHeader> => {
-    const invalidDoc = Future.reject(
-        new TenantSecurityClientException(ErrorCodes.INVALID_ENCRYPTED_DOCUMENT, "Provided bytes are not a CMK encrypted document.")
-    );
+const verifyAndCreateDocHeaderPb = (pbBytes: Buffer): Future<TenantSecurityClientException, ironcorelabs.proto.Iv3DocumentHeader> => {
+    const invalidDoc = new TenantSecurityClientException(ErrorCodes.INVALID_ENCRYPTED_DOCUMENT, "Provided bytes are not a CMK encrypted document.");
     if (typeof v3DocumentHeader.verify({saasShield: pbBytes}) === "string") {
-        return invalidDoc;
+        return Future.reject(invalidDoc);
     }
-    const header = v3DocumentHeader.decode(pbBytes);
-    return header.saasShield === null || header.saasShield === undefined ? invalidDoc : Future.of(header.saasShield);
+    return Future.tryF(() => v3DocumentHeader.decode(pbBytes))
+        .errorMap(() => invalidDoc)
+        .flatMap((header) => (header.saasShield === null ? Future.reject(invalidDoc) : Future.of(header)));
 };
 
 /**
@@ -41,7 +40,7 @@ export const isCmkEncryptedDocument = (bytes: Buffer): boolean =>
  */
 export const extractDocumentHeaderFromBytes = (
     bytes: Buffer
-): Future<TenantSecurityClientException, {header?: ironcorelabs.proto.ISaaSShieldHeader; encryptedDoc: Buffer}> => {
+): Future<TenantSecurityClientException, {header?: ironcorelabs.proto.Iv3DocumentHeader; encryptedDoc: Buffer}> => {
     if (!isCmkEncryptedDocument(bytes)) {
         return Future.reject(new TenantSecurityClientException(ErrorCodes.INVALID_ENCRYPTED_DOCUMENT, "Provided bytes are not a CMK encrypted document."));
     }
@@ -64,7 +63,7 @@ export const extractDocumentHeaderFromBytes = (
  */
 export const extractDocumentHeaderFromStream = (
     inputStream: NodeJS.ReadableStream
-): Future<TenantSecurityClientException, ironcorelabs.proto.ISaaSShieldHeader | undefined> =>
+): Future<TenantSecurityClientException, ironcorelabs.proto.Iv3DocumentHeader | undefined> =>
     new Future<TenantSecurityClientException, Buffer | undefined>((reject, resolve) => {
         const onComplete = (resolvedValue: Buffer | undefined) => {
             //Remove our readable event listener so we can switch this stream to flowing mode once we start decrypting.

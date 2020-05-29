@@ -5,9 +5,6 @@ export const AES_GCM_TAG_LENGTH = 16;
 export const CURRENT_DOCUMENT_HEADER_VERSION = Buffer.from([3]);
 //IRON in ascii. Used to better denote whether this is an IronCore encrypted document
 export const DOCUMENT_MAGIC = Buffer.from([73, 82, 79, 78]);
-//Random bytes that we encrypt with the documents key and insert in the header in order to verify the DEK we have before we decrypt. Mostly
-//used to be able to fail-fast when doing streaming decryption.
-export const DOCUMENT_VALIDATION_TAG_BYTES = Buffer.from([142, 151, 138, 155, 142, 144, 151, 153]);
 //The number of bytes that we use to represent the length of our header protobuf
 export const HEADER_META_LENGTH_LENGTH = 2;
 //The number of fixed size bytes of header at the front of all CMK documents. After this length is the probobuf-encoded header bytes, which

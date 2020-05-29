@@ -1,9 +1,9 @@
 export default class RequestMetadata {
-    private tenantId: string;
-    private requestingUserOrServiceId: string;
-    private dataLabel: string;
-    private requestId?: string;
-    private otherData?: Record<string, string>;
+    tenantId: string;
+    requestingUserOrServiceId: string;
+    dataLabel: string;
+    requestId?: string;
+    otherData?: Record<string, string>;
 
     constructor(tenantId: string, requestingUserOrServiceId: string, dataLabel: string, requestId?: string, otherData?: Record<string, string>) {
         if (!tenantId) {
@@ -22,6 +22,7 @@ export default class RequestMetadata {
         this.otherData = otherData;
     }
 
+    /* eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types*/
     toJsonStructure = () => ({
         tenantID: this.tenantId,
         requestingID: this.requestingUserOrServiceId,

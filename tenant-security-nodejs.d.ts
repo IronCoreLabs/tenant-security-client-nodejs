@@ -75,7 +75,7 @@ export class TenantSecurityKmsClient {
         edek: Base64String,
         inputStream: NodeJS.ReadableStream,
         outputStream: NodeJS.WritableStream,
-        metadta: RequestMetadata
+        metadata: RequestMetadata
     ): Promise<StreamingResponse>;
     decryptDocumentBatch(documentList: EncryptedDocumentWithEdekCollection, metadata: RequestMetadata): Promise<BatchResult<PlaintextDocumentWithEdek>>;
 }

@@ -10,19 +10,19 @@ More extensive documentation about usage is available on our [docs site](https:/
 npm install @ironcorelabs/tenant-security-client-nodejs
 ```
 
-## Documentation
-
-TODO
-
 ### Running a Tenant Security Proxy
 
 See our [TSP documentation](https://ironcorelabs.com/docs/customer-managed-keys/tenant-security-proxy/overview) for information about how to get your own TSP running to test against.
+
+### Documentation
+
+See our documentation on the [IronCore website](http://ironcorelabs.com/docs/customer-managed-keys/tenant-security-client/node-sdk).
 
 ## Tests
 
 This client has both a set of unit tests as well as several integration test suites. Because of the complexity of the various services requried to run non-unit test suites, these tests have a lot more setup requried which is explained below.
 
-#### Unit Tests
+### Unit Tests
 
 Tests that check functionality that is contained within the client.
 
