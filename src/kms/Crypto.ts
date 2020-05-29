@@ -60,9 +60,9 @@ const decomposeField = (encryptedBytesWithHeader: Buffer): Future<TenantSecurity
  *
  */
 const generateEncryptedDocumentHeader = (dek: Buffer, headerData: ironcorelabs.proto.ISaaSShieldHeader): Future<TenantSecurityClientException, Buffer> => {
-    return encryptBytes(Buffer.from(SaaSShieldHeader.encode(headerData).finish()), dek).map((authTag) => {
+    return encryptBytes(Buffer.from(SaaSShieldHeader.encode(headerData).finish()), dek).map((encryptedPb) => {
         //Compose the auth tag using the random IV generated during encrypt with the GCM auth tag
-        const {iv, gcmTag} = decomposeEncryptedValue(authTag);
+        const {iv, gcmTag} = decomposeEncryptedValue(encryptedPb);
         const pbHeader = Buffer.from(v3DocumentHeader.encode({sig: Buffer.concat([iv, gcmTag]), saasShield: headerData}).finish());
         const headerDataView = new DataView(new ArrayBuffer(HEADER_META_LENGTH_LENGTH));
         headerDataView.setUint16(0, pbHeader.length, false);
