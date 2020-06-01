@@ -7,7 +7,7 @@ More extensive documentation about usage is available on our [docs site](https:/
 ## Installation
 
 ```
-npm install @ironcorelabs/tenant-security-client-nodejs
+npm install @ironcorelabs/tenant-security-nodejs
 ```
 
 ### Running a Tenant Security Proxy
