@@ -57,7 +57,7 @@ const decomposeField = (encryptedBytesWithHeader: Buffer): Future<TenantSecurity
     Util.extractDocumentHeaderFromBytes(encryptedBytesWithHeader).map(({encryptedDoc}) => decomposeEncryptedValue(encryptedDoc));
 
 /**
- *
+ * Take the provided document DEK and protobuf header and calculate the full header that goes on the front of the document.
  */
 const generateEncryptedDocumentHeader = (dek: Buffer, headerData: ironcorelabs.proto.ISaaSShieldHeader): Future<TenantSecurityClientException, Buffer> => {
     return encryptBytes(Buffer.from(SaaSShieldHeader.encode(headerData).finish()), dek).map((encryptedPb) => {
