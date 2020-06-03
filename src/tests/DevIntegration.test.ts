@@ -320,6 +320,10 @@ describe("INTEGRATION dev environment tests", () => {
         });
 
         it("fails with expected error when edek looks like protobuf, but isnt", async () => {
+            //This is an Azure key that was generated before we added the additional wrapper of protobuf to store the Azure key version. However, this key
+            //still successfully decodes as an empty protobuf object somehow which was causing failures. This test verifies that we get the proper error back,
+            //namely that the key passed to Azure was invalid (because it's not a key we can decrypt, we got it from somewhere else) and not the error that
+            //says that we didn't pass a key to Azure at all.
             const hackedAzureEdek =
                 "CoYCCoACMmiUBYFpypz6j0cLsIxK5JDHJAvw3uNy4ORmi+8pd5cDbfXGjDajR9U+stXoAKUQP6N3luQFJY3SXhX9w2+8d/vqlhj8zBXj1Zum16iznhl0w24sZIbZj9ar9yCvYmBNrErAVxL31MQYFSFGZjsxAVwLmM1wQI2wAyp7nHrV+f3mNLFF9depEvxhW98aI8SrpV+x4gAeVlfFh4CuhGroGVXfaCIHLQaR+Q3XyYB0OfL882XZSHuRggb77rccjdIZUgjkokKKhEaH0ac0Ylbktj/7x0msiK0nwgSLjnPfkxm4e5PCTc22VD/eFoYQ1jfzuSOOqzSMSKIPYA4l8dFHdxDuAw==";
             const meta = TestUtils.getMetadata(AZURE_TENANT_ID);
