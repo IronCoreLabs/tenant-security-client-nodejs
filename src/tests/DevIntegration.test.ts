@@ -299,4 +299,42 @@ describe("INTEGRATION dev environment tests", () => {
             expect(batchDecryptResult.failures.bad.errorCode).toEqual(ErrorCodes.KMS_CONFIGURATION_DISABLED);
         });
     });
+
+    describe("test Azure key version protobuf", () => {
+        const azureEdekWithoutVersion =
+            "CoYECoAEAaEuAPmN/WgeyhLO1g5uS15GXI/AWikYhcPL1aUQlDlwCw+t1eRJOW6y9/4VKac4rcriDYSRGib5lq60cT+Blfeo/oSd1Te2SKh9ho+vOxqzHOS5uC0jSz5mvoGbZM+C7ZIE0xbJO5vZPP6XcYY+akpu+XnhaaPtYQywtbP24B4V1+w2tSOFHNZfokHwS5aamS4d0rt2EQntuwlJDUX7cKyxrC4Lr1pRoK9uAeQsKvKcqGw8FiJ+zQ3VVQ10yt5QURP4Ob45PDo9vOntCdJaD1Tw+SCFGMPO2yubYYa+XgfgFm21mwcXstzKdEJiBnICxRsH8izXN0qPNGw4f7W4PGMrhkSrlcs32+iQI9YNPHJ81C/B1cFGlFA8TvVspebhGvIjlCxc1OkR2ghysk/eNvsGbKO1VeV2emCztA4C7j3jkYmQD8TOqx2sqO+zVOxFpC5OrOgb43LwI1lDHZkvNsuSBUoUI6C+xwZYFbk8H0+aF20KUA9KL9FQsox3mDkha598gd4Zpa0YQlmc2kVkOv3wJR+7wqajke/dmKpQk8FdD+THSi+LgZ2efEc/xCSSwiaRBe3g1z/p1jrQy8ABAsk3OSfufxgqg9JMB+aOusWAm5fSJ2xQmIVbtv2adsLnl7kLpDTnAzhbgqocK2JdN0H1pQWmKGkzPMrsa+tPjpYQ7gM=";
+        const azureEncryptedDataForEdekWithoutVersion = Buffer.from(
+            "A0lST04APQocNyeUf2nJv1Rs3SmIOw4JmlPNvigJ4Kbq2DH6WhodChtJTlRFR1JBVElPTi1URVNULURFVjEtQVpVUkWGq2ocw72wK2/vR62iBWVrL4g32AndOSZvPVgtb/qNQYn4biKX4mODtA==",
+            "base64"
+        );
+        const meta = TestUtils.getMetadata(AZURE_TENANT_ID);
+
+        it("decrypts EDEK which doesnt have an Azure key version", async () => {
+            const decrypt = await client.decryptDocument(
+                {encryptedDocument: {foo: azureEncryptedDataForEdekWithoutVersion}, edek: azureEdekWithoutVersion},
+                meta
+            );
+
+            expect(decrypt.edek).toEqual(azureEdekWithoutVersion);
+            expect(decrypt.plaintextDocument.foo.toString("utf-8")).toEqual("whatever data");
+        });
+
+        it("fails with expected error when edek looks like protobuf, but isnt", async () => {
+            //This is an Azure key that was generated before we added the additional wrapper of protobuf to store the Azure key version. However, this key
+            //still successfully decodes as an empty protobuf object somehow which was causing failures. This test verifies that we get the proper error back,
+            //namely that the key passed to Azure was invalid (because it's not a key we can decrypt, we got it from somewhere else) and not the error that
+            //says that we didn't pass a key to Azure at all.
+            const hackedAzureEdek =
+                "CoYCCoACMmiUBYFpypz6j0cLsIxK5JDHJAvw3uNy4ORmi+8pd5cDbfXGjDajR9U+stXoAKUQP6N3luQFJY3SXhX9w2+8d/vqlhj8zBXj1Zum16iznhl0w24sZIbZj9ar9yCvYmBNrErAVxL31MQYFSFGZjsxAVwLmM1wQI2wAyp7nHrV+f3mNLFF9depEvxhW98aI8SrpV+x4gAeVlfFh4CuhGroGVXfaCIHLQaR+Q3XyYB0OfL882XZSHuRggb77rccjdIZUgjkokKKhEaH0ac0Ylbktj/7x0msiK0nwgSLjnPfkxm4e5PCTc22VD/eFoYQ1jfzuSOOqzSMSKIPYA4l8dFHdxDuAw==";
+            const meta = TestUtils.getMetadata(AZURE_TENANT_ID);
+
+            try {
+                await client.decryptDocument({encryptedDocument: {foo: azureEncryptedDataForEdekWithoutVersion}, edek: hackedAzureEdek}, meta);
+            } catch (e) {
+                expect(e.message).toContain("Failed to unwrap key via Azure");
+                expect(e.message).toContain("The parameter is incorrect");
+                expect(e.message).not.toContain("Propery 'value' is required");
+            }
+        });
+    });
 });
