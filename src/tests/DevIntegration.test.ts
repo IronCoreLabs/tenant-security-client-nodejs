@@ -337,4 +337,45 @@ describe("INTEGRATION dev environment tests", () => {
             }
         });
     });
+
+    describe("decrypted previously leased data", () => {
+        //Verify that we can decrypt data that was encrypted when the configuration had leasing enabled. To generate this data I encrypted some data when
+        //leasing was turned off (nonLeasedDocument) and another document when leasing was turned on (leasedDocument). Then leasing was disabled again. This
+        //test verifies that the leased document can still be decrypted and that we have access to the leased data.
+        const nonLeasedDocument = {
+            edek:
+                "CnYKcQokABW+8GeAPN90zTPKLMenLeWmyr0pmGLqmsmhweoPO9ImxYEiEkkAs0w57pQIOcehVWROISlIn+g9kYlgO5uAEvtVc3SbLgwl7Wkf4UBYpSYZXrx7Lt8BGQYHbPx8DqZiGhc+A+5rK2KM/lD5AurtEOwD",
+            data:
+                "A0lST04AOwocmH4+bD5DF0vJpruj8OK+3TNsIUzWfre2tzchyhobChlJTlRFR1JBVElPTi1URVNULURFVjEtR0NQ00asS3TWHsT19WSBmsFY5tv18HwlQVAy1Mv8sMLSlBDPfTvDF0c=",
+        };
+
+        const leasedDocument = {
+            edek:
+                "Cr8BCjA7nnuAiXpD0Jkjc6mOBgcSyxcjFYX813WQhhYg0oKnsDJTmeyAaLs3t9pzkR6mU9cQ7AMY3gQiDCEN6aQFtglBZ0DX7yp3CnUKcAokABW+8Gfu/FSC8WQTqxw528aQXwrpvY0MjlHurZJ6yHx9S/2zEkgAs0w57oTuIHzVmauLGDi/S9zCQH20dezcc/jtw/nqCDnAtAPSB9m17YvGOVpN5xO8960C86NA4AJCoVJ291YW9OkIKto48/YQ7AM=",
+            data:
+                "A0lST04AOwocjKi8E65AAxBCqUjeSqQDc7veZVQehempBfsABBobChlJTlRFR1JBVElPTi1URVNULURFVjEtR0NQbZ+1yhYOoCNdtV+VVTMTUfAQm1FdqtGyjqeE7iYxfW9TKwTc2C0=",
+        };
+
+        it("can still decrypted non-leased document", async () => {
+            const data = {
+                foo: Buffer.from(nonLeasedDocument.data, "base64"),
+            };
+            const meta = TestUtils.getMetadata(GCP_TENANT_ID);
+
+            const {plaintextDocument} = await client.decryptDocument({edek: nonLeasedDocument.edek, encryptedDocument: data}, meta);
+
+            expect(plaintextDocument.foo.toString("utf8")).toEqual("new daters");
+        });
+
+        it("leased document", async () => {
+            const data = {
+                foo: Buffer.from(leasedDocument.data, "base64"),
+            };
+            const meta = TestUtils.getMetadata(GCP_TENANT_ID);
+
+            const {plaintextDocument} = await client.decryptDocument({edek: leasedDocument.edek, encryptedDocument: data}, meta);
+
+            expect(plaintextDocument.foo.toString("utf8")).toEqual("new daters");
+        });
+    });
 });
