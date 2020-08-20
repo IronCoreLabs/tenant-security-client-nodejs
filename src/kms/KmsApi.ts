@@ -1,7 +1,7 @@
 import Future from "futurejs";
 import fetch, {Response} from "node-fetch";
 import {Base64String} from "../../tenant-security-nodejs";
-import RequestMetadata from "../RequestMetadata";
+import {RequestMetadata} from "../RequestMetadata";
 import {ErrorCodes, TenantSecurityClientException} from "../TenantSecurityClientException";
 
 interface ApiErrorResponse {

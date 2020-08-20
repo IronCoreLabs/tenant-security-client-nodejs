@@ -1,6 +1,6 @@
 {
     "name": "@ironcorelabs/tenant-security-nodejs",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "NodeJS client library for the IronCore Labs Tenant Security Proxy.",
     "homepage": "https://ironcorelabs.com/docs",
     "main": "src/index.js",
@@ -23,7 +23,8 @@
     },
     "dependencies": {
         "futurejs": "2.1.1",
-        "node-fetch": "2.6.0"
+        "node-fetch": "2.6.0",
+        "protobufjs": "^6.9.0"
     },
     "devDependencies": {
         "@types/jest": "^25.2.3",
@@ -34,7 +35,6 @@
         "eslint": "^6.8.0",
         "jest": "^26.0.1",
         "jest-extended": "^0.11.5",
-        "protobufjs": "^6.9.0",
         "shelljs": "^0.8.4",
         "ts-jest": "^26.0.0",
         "ts-node": "^8.10.1",

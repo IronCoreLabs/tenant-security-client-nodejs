@@ -98,6 +98,9 @@ shell.exec("yarn");
 shell.echo("\n\nRunning unit tests...");
 shell.exec("yarn test");
 
+shell.echo("\n\nCompiling protobuf source");
+shell.exec("yarn protobuild");
+
 shell.echo("\n\nCompiling all source from TypeScript to ES6 JS and removing unit test files");
 shell.exec("./node_modules/typescript/bin/tsc --target ES6 --sourceMap false --module CommonJS --outDir ./dist/src");
 shell.exec("find dist -type d -name tests -prune -exec rm -rf {} \\;");
@@ -107,6 +110,7 @@ shell.cp("./package.json", "./dist");
 shell.cp("./tenant-security-nodejs.d.ts", "./dist");
 shell.cp("./README.md", "./dist");
 shell.cp("./LICENSE", "./dist");
+shell.cp("-R", "./proto", "./dist");
 
 publishModule();
 tagRepo(package.version);

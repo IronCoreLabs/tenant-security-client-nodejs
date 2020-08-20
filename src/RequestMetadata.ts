@@ -1,4 +1,4 @@
-export default class RequestMetadata {
+export class RequestMetadata {
     tenantId: string;
     requestingUserOrServiceId: string;
     dataLabel: string;

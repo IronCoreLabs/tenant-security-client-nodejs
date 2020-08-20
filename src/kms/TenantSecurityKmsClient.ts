@@ -9,7 +9,7 @@ import {
     PlaintextDocumentWithEdekCollection,
     StreamingResponse,
 } from "../../tenant-security-nodejs";
-import RequestMetadata from "../RequestMetadata";
+import {RequestMetadata} from "../RequestMetadata";
 import {TenantSecurityClientException} from "../TenantSecurityClientException";
 import * as Crypto from "./Crypto";
 import * as KmsApi from "./KmsApi";
