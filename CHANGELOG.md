@@ -1,4 +1,8 @@
-## 1.0.1
+## 1.0.3
+
+-   fix mistake publishing
+
+## 1.0.2
 
 -   include the protobuf in the distribution
 -   fix exports
