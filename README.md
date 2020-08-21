@@ -16,7 +16,7 @@ See our [TSP documentation](https://ironcorelabs.com/docs/saas-shield/tenant-sec
 
 ### Documentation
 
-See our documentation on the [IronCore website](http://ironcorelabs.com/docs/saas-shield/tenant-security-client/node-sdk).
+See our documentation on the [IronCore website](http://ironcorelabs.com/docs/saas-shield/tenant-security-client/node-sdk/).
 
 ## Tests
 
