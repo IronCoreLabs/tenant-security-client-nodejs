@@ -2,7 +2,7 @@
 
 A NodeJS client for implementing CMK within a vendors infrastructure. Makes requests through the [IronCore Tenant Security Proxy](https://gcr.io/ironcore-images/tenant-security-proxy) to tenants' KMS/logging infrastructures.
 
-More extensive documentation about usage is available on our [docs site](https://ironcorelabs.com/docs/saas-shield/tenant-security-client/overview).
+More extensive documentation about usage is available on our [docs site](https://ironcorelabs.com/docs/saas-shield/tenant-security-client/overview/).
 
 ## Installation
 
