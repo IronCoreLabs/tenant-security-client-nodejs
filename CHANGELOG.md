@@ -1,6 +1,7 @@
 ## 1.0.3
 
 -   fix mistake publishing
+-   update dependencies
 
 ## 1.0.2
 
