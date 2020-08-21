@@ -2,7 +2,7 @@
 
 A NodeJS client for implementing CMK within a vendors infrastructure. Makes requests through the [IronCore Tenant Security Proxy](https://gcr.io/ironcore-images/tenant-security-proxy) to tenants' KMS/logging infrastructures.
 
-More extensive documentation about usage is available on our [docs site](https://ironcorelabs.com/docs/customer-managed-keys/tenant-security-client/overview).
+More extensive documentation about usage is available on our [docs site](https://ironcorelabs.com/docs/saas-shield/tenant-security-client/overview/).
 
 ## Installation
 
@@ -12,15 +12,15 @@ npm install @ironcorelabs/tenant-security-nodejs
 
 ### Running a Tenant Security Proxy
 
-See our [TSP documentation](https://ironcorelabs.com/docs/customer-managed-keys/tenant-security-proxy/overview) for information about how to get your own TSP running to test against.
+See our [TSP documentation](https://ironcorelabs.com/docs/saas-shield/tenant-security-proxy/overview) for information about how to get your own TSP running to test against.
 
 ### Documentation
 
-See our documentation on the [IronCore website](http://ironcorelabs.com/docs/customer-managed-keys/tenant-security-client/node-sdk).
+See our documentation on the [IronCore website](http://ironcorelabs.com/docs/saas-shield/tenant-security-client/node-sdk/).
 
 ## Tests
 
-This client has both a set of unit tests as well as several integration test suites. Because of the complexity of the various services requried to run non-unit test suites, these tests have a lot more setup requried which is explained below.
+This client has both a set of unit tests as well as several integration test suites. Because of the complexity of the various services requried to run non-unit test suites, these tests require additional setup, which is explained below.
 
 ### Unit Tests
 
