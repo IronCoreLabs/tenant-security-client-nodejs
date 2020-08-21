@@ -1,4 +1,4 @@
-import RequestMetadata from "../RequestMetadata";
+import {RequestMetadata} from "../RequestMetadata";
 
 describe("UNIT RequestMetdata", () => {
     test("construction fails when invalid arguments are provided", () => {

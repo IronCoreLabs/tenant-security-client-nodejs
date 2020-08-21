@@ -1,4 +1,4 @@
-import RequestMetadata from "../../RequestMetadata";
+import {RequestMetadata} from "../../RequestMetadata";
 import {ErrorCodes, TenantSecurityClientException} from "../../TenantSecurityClientException";
 import {TenantSecurityKmsClient} from "../TenantSecurityKmsClient";
 
