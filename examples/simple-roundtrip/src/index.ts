@@ -10,7 +10,7 @@ if (API_KEY === undefined) {
     process.exit(1);
 }
 
-var TENANT_ID = process.env.TENANT_ID;
+let TENANT_ID = process.env.TENANT_ID;
 
 if (TENANT_ID === undefined) {
     TENANT_ID = "tenant1";

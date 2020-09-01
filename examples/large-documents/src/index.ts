@@ -11,7 +11,7 @@ if (API_KEY === undefined) {
     process.exit(1);
 }
 
-var TENANT_ID = process.env.TENANT_ID;
+let TENANT_ID = process.env.TENANT_ID;
 
 if (TENANT_ID === undefined) {
     TENANT_ID = "tenant1";
@@ -53,14 +53,14 @@ const sourceFile: Buffer = fs.readFileSync(filename);
 const sourceObj: BigDoc = JSON.parse(sourceFile.toString());
 
 // Reduce the document to a map of all the sub documents to be encrypted with the same key
-let docToEncrypt = sourceObj.subDocs.reduce((acc: Record<string, Buffer>, sub_doc: SubDoc) => {
+const docToEncrypt = sourceObj.subDocs.reduce((acc: Record<string, Buffer>, sub_doc: SubDoc) => {
     acc[sub_doc.subDocId] = Buffer.from(JSON.stringify(sub_doc));
     return acc;
 }, {});
 
 // Request a key from the KMS and use it to encrypt all the sub documents
 performance.mark("encryptAllSubdocsS");
-let writeP = client.encryptDocument(docToEncrypt, metadata).then((encryptResult) => {
+const writeP = client.encryptDocument(docToEncrypt, metadata).then((encryptResult) => {
     performance.mark("encryptAllSubdocsE");
     // write the encrypted subdocs and the encrypted key to the filesystem
     fs.rmdirSync(subfolder, {recursive: true});
@@ -72,9 +72,9 @@ let writeP = client.encryptDocument(docToEncrypt, metadata).then((encryptResult)
 //
 // Example 2: update two subdocuments in our persistence layer
 //
-const subDocId1: string = "4c3173c3-8e09-49eb-a4ee-428e2dbf5296";
-const subDocId2: string = "4e57e8bd-d88a-4083-9fac-05a635110e2a";
-let subDecryptP = writeP
+const subDocId1 = "4c3173c3-8e09-49eb-a4ee-428e2dbf5296";
+const subDocId2 = "4e57e8bd-d88a-4083-9fac-05a635110e2a";
+const subDecryptP = writeP
     .then(() => {
         // Read the two files out first
         const encryptedFile1: Buffer = fs.readFileSync(`${subfolder}/${subDocId1}.enc`);
@@ -123,7 +123,7 @@ let subDecryptP = writeP
 //
 // Example 3: decrypt all the subdocuments in the filesystem and reconstitute the original BigDoc subDocs field
 //
-let finishAllP = subDecryptP
+const finishAllP = subDecryptP
     .then((encryptedUpdates) => {
         performance.mark("encryptTwoSubdocsE");
         // Replace the updated subdocs in the persistent layer
