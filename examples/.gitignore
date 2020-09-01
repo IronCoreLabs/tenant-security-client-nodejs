@@ -1,1 +1,5 @@
-yarn.lock
+**/node-modules
+**/.env
+**/decrypted.jpg
+**/*.enc
+**/*.edek
