@@ -21,68 +21,103 @@ console.log(`Using tenant ${TENANT_ID}.`);
 // Typically this would be done once when the application or service initializes
 const client = new TenantSecurityKmsClient("http://localhost:7777", API_KEY); // TODO: back to 32804
 
-//
-// Example 1: encrypting/decrypting a customer record
-//
-
 // Create metadata used to associate this document to a tenant, name the document, and
 // identify the service or user making the call
 const metadata = new RequestMetadata(TENANT_ID, "serviceOrUserId", "PII");
 
-// Create a map containing your data
-const custRecord = {
-    ssn: Buffer.from("000-12-2345", "utf-8"),
-    address: Buffer.from("2825-519 Stone Creek Rd, Bozeman, MT 59715", "utf-8"),
-    name: Buffer.from("Jim Bridger", "utf-8"),
-};
-
-// Request a key from the KMS and use it to encrypt the document
-client
-    .encryptDocument(custRecord, metadata)
-    .then((encryptResult) => {
-        /* … persist the EDEK and encryptedDocument to your persistence layer … */
-        const edek = encryptResult.edek;
-        const encryptedDocument = encryptResult.encryptedDocument;
-
-        /* … retrieve the encrypted fields and EDEK from your persistence layer */
-
-        // Recreate the encrypted document from persisted data
-        const recreated = {encryptedDocument, edek};
-        // Decrypt the document back to plaintext
-        return client.decryptDocument(recreated, metadata);
-    })
-    .then((decryptedDoc) => {
-        // Access decrypted fields from the doc
-        const name = decryptedDoc.plaintextDocument.name.toString("utf-8");
-        console.log(name);
-    });
 //
-// Example 2: encrypting/decrypting a file, using the filesystem for persistence
+// Example 1: encrypting a large document, using the filesystem for persistence
 //
+interface SubDoc {
+    subDocId: string;
+    text: string;
+}
 
-const filename = "success.jpg";
+interface BigDoc {
+    mainDocId: string;
+    title: string;
+    description: string;
+    subDocs: SubDoc[];
+}
+
+const filename = "large-document.json";
+const subfolder = "sub-docs";
 
 const sourceFile: Buffer = fs.readFileSync(filename);
+const sourceObj: BigDoc = JSON.parse(sourceFile.toString());
 
-// Request a key from the KMS and use it to encrypt the file
-client
-    .encryptDocument({file: sourceFile}, metadata)
-    .then((encryptResult) => {
-        // write the encrypted file and the encrypted key to the filesystem
-        fs.writeFileSync(filename + ".enc", encryptResult.encryptedDocument.file);
-        fs.writeFileSync(filename + ".edek", encryptResult.edek);
-    })
+// Reduce the document to a map of all the sub documents to be encrypted with the same key
+let docToEncrypt = sourceObj.subDocs.reduce((acc: Record<string, Buffer>, sub_doc: SubDoc) => {
+    acc[sub_doc.subDocId] = Buffer.from(JSON.stringify(sub_doc));
+    return acc;
+}, {});
+
+// Request a key from the KMS and use it to encrypt all the sub documents
+let writeP = client.encryptDocument(docToEncrypt, metadata).then((encryptResult) => {
+    // write the encrypted subdocs and the encrypted key to the filesystem
+    fs.rmdirSync(subfolder, {recursive: true});
+    fs.mkdirSync(subfolder);
+    Object.entries(encryptResult.encryptedDocument).forEach(([subDocId, encDocBuffer]) => fs.writeFileSync(`${subfolder}/${subDocId}.enc`, encDocBuffer));
+    fs.writeFileSync(`${subfolder}/${filename}.edek`, encryptResult.edek);
+});
+
+//
+// Example 2: decrypt two of the sub documents using the same edek
+//
+let subDecryptP = writeP
     .then(() => {
-        const encryptedFile = fs.readFileSync(filename + ".enc");
-        const edek = fs.readFileSync(filename + ".edek", "utf-8");
+        const subDocId1: string = "4c3173c3-8e09-49eb-a4ee-428e2dbf5296";
+        const subDocId2: string = "4e57e8bd-d88a-4083-9fac-05a635110e2a";
+        const encryptedFile1: Buffer = fs.readFileSync(`${subfolder}/${subDocId1}.enc`);
+        const encryptedFile2: Buffer = fs.readFileSync(`${subfolder}/${subDocId2}.enc`);
+        // In a DB situation this edek could be store with the large doc (if sub docs are only decrypted in that context)
+        // or it could be stored alongside each sub-document. In the latter case you make it harder to accidentally
+        // cryptoshred data by de-syncing edeks at the cost of row size
+        const edek: string = fs.readFileSync(`${subfolder}/${filename}.edek`, "utf-8");
 
-        const fileAndEdek = {
-            encryptedDocument: {file: encryptedFile},
-            edek: edek,
+        // each of the documents could be individually decrypted with their own calls, but by combining them
+        // into one structure we ensure we only make one call to the KMS to unwrap the key
+        const encryptedPartialBigDoc = {
+            encryptedDocument: {
+                [subDocId1]: encryptedFile1,
+                [subDocId2]: encryptedFile2,
+            },
+            edek,
         };
 
-        return client.decryptDocument(fileAndEdek, metadata);
+        return client.decryptDocument(encryptedPartialBigDoc, metadata);
     })
-    .then((decryptedFile) => {
-        fs.writeFileSync("decrypted.jpg", decryptedFile.plaintextDocument.file);
+    .then((decryptedPartialBigDoc) => {
+        const rehydrated = objectMap(decryptedPartialBigDoc.plaintextDocument, (buffer: Buffer) => JSON.parse(buffer.toString()));
+        fs.writeFileSync(`${subfolder}/partial-large-document.json`, Buffer.from(JSON.stringify(rehydrated)));
     });
+
+//
+// Example 3: decrypt all the documents and reconstitute the original BigDoc subDocs field
+//
+subDecryptP
+    .then(() => {
+        const filenames = fs.readdirSync(subfolder).filter((name) => name.includes(".enc"));
+        const subDocBuffers = filenames.map((subDocEncFile) => fs.readFileSync(`${subfolder}/${subDocEncFile}`));
+
+        // the original object's field was just an array, so we don't care about what keys we use here
+        const encryptedDocument = subDocBuffers.reduce((acc: {[key: number]: Buffer}, buffer: Buffer, i: number) => {
+            acc[i] = buffer;
+            return acc;
+        }, {});
+        const edek: string = fs.readFileSync(`${subfolder}/${filename}.edek`, "utf-8");
+        const encryptedBigDoc = {encryptedDocument, edek};
+
+        return client.decryptDocument(encryptedBigDoc, metadata);
+    })
+    .then((decryptedBigDoc) => {
+        const rehydrated = Object.values(decryptedBigDoc.plaintextDocument).map((buffer: Buffer) => JSON.parse(buffer.toString()));
+        fs.writeFileSync(`${subfolder}/subdocuments-large-document.json`, Buffer.from(JSON.stringify({subDocs: rehydrated})));
+    });
+
+// Helper to map over an object
+const objectMap: (obj: any, f: Function) => object = (obj, f) =>
+    Object.keys(obj).reduce<any>((result, key) => {
+        result[key] = f(obj[key]);
+        return result;
+    }, {});
