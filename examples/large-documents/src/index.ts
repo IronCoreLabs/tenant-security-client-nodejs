@@ -156,7 +156,7 @@ const finishAllP = subDecryptP
 // Write timing information to console and (optionally) add to csv
 finishAllP
     .then(() => {
-        const obs = new PerformanceObserver((list, observer) => {
+        const obs = new PerformanceObserver((list) => {
             const encAll = list.getEntriesByName("encryptAllSubdocs")[0].duration;
             const decAll = list.getEntriesByName("decryptAllSubdocs")[0].duration;
             const encTwo = list.getEntriesByName("encryptTwoSubdocs")[0].duration;
@@ -180,8 +180,8 @@ finishAllP
     .catch((reason) => console.log(reason));
 
 // Helper to map over an object, types are whack here, don't use in prod
-const objectMap: (obj: any, f: Function) => any = (obj, f) =>
-    Object.keys(obj).reduce<any>((result, key) => {
+const objectMap = <T1, T2>(obj: Record<string, T1>, f: (v: T1) => T2): Record<string, T2> =>
+    Object.keys(obj).reduce((result, key) => {
         result[key] = f(obj[key]);
         return result;
-    }, {});
+    }, {} as Record<string, T2>);
