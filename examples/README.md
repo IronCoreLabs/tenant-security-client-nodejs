@@ -21,7 +21,7 @@ The following commands will get a TSP running on your computer with the provided
 
 ```bash
 docker pull gcr.io/ironcore-images/tenant-security-proxy:2.1
-docker run --env-file demo-tsp.conf -p 32804:7777 tenant-security-proxy
+docker run --env-file demo-tsp.conf -p 32804:7777 gcr.io/ironcore-images/tenant-security-proxy:2.1
 ```
 
 This starts the TSP locally listening on port 32804.
