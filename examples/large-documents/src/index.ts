@@ -14,7 +14,7 @@ if (API_KEY === undefined) {
 let TENANT_ID = process.env.TENANT_ID;
 
 if (TENANT_ID === undefined) {
-    TENANT_ID = "tenant1";
+    TENANT_ID = "tenant-gcp";
 }
 console.log(`Using tenant ${TENANT_ID}.`);
 
