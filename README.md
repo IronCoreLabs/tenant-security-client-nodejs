@@ -1,6 +1,9 @@
 # Tenant Security Client NodeJS
 
-A NodeJS client for implementing CMK within a vendors infrastructure. Makes requests through the [IronCore Tenant Security Proxy](https://gcr.io/ironcore-images/tenant-security-proxy) to tenants' KMS/logging infrastructures.
+A NodeJS client SDK for implementing Customer Managed Keys (CMK) within a vendor's infrastructure.
+This SDK is inserted into your application. Once it is initialized properly, it makes requests through the
+[IronCore Tenant Security Proxy](https://gcr.io/ironcore-images/tenant-security-proxy) to tenants' KMS and logging infrastructures.
+
 
 More extensive documentation about usage is available on our [docs site](https://ironcorelabs.com/docs/saas-shield/tenant-security-client/overview/).
 
@@ -42,6 +45,10 @@ yarn local
 #### Complete Integration Tests
 
 We've created a number of accounts within a Config Broker dev enviroment that have tenants set up for all the different KMS types that we support. This allows us to run a more complete suite of integration tests that exercise more parts of both the client as well as the Tenant Security Proxy. These tests are not runnable by the public. You can view the results of these test runs in [CI](https://github.com/IronCoreLabs/tenant-security-client-nodejs/actions).
+
+## Examples
+
+Check in the `examples` subdirectory - there are subdirectories for some example Node programs that demonstrate a few of the ways you can use the TSC in your code to secure data.
 
 ## License
 
