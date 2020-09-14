@@ -23,7 +23,7 @@
     },
     "dependencies": {
         "futurejs": "2.1.1",
-        "node-fetch": "2.6.0",
+        "node-fetch": "2.6.1",
         "protobufjs": "^6.10.1"
     },
     "devDependencies": {
