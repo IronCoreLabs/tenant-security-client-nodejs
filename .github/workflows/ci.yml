@@ -43,10 +43,12 @@ jobs:
         with:
           keys: ${{ secrets.IRONHIDE_KEYS }}
           input: tenant-security-proxy/.env.integration.iron
+      - name: install zmq
+        run: sudo apt update && sudo apt install -y --no-install-recommends libzmq3-dev
       - name: integration test
         run: |
           cd tenant-security-proxy
           cargo build --release
           env $(cat .env.integration) cargo run --release &
-          timeout 300 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:9000/ready)" != "200" ]]; do sleep 5; done' || false
+          timeout 700 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:9000/ready)" =~ ''[01346-9][0-9][0-9]'' ]]; do sleep 5; done' || false
           yarn integration
