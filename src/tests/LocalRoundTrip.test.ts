@@ -1,5 +1,5 @@
 import "jest-extended";
-import {TenantSecurityKmsClient} from "../kms/TenantSecurityKmsClient";
+import {TenantSecurityClient} from "../kms/TenantSecurityClient";
 import * as TestUtils from "./TestUtils";
 
 //Placeholders to be filled in by devs running tests
@@ -11,10 +11,10 @@ const LOCAL_API_KEY = "";
 const conditionalTest = LOCAL_TENANT_ID && LOCAL_API_KEY ? it : it.skip;
 
 describe("LOCAL Integration Tests", () => {
-    let client: TenantSecurityKmsClient;
+    let client: TenantSecurityClient;
 
     beforeEach(() => {
-        client = new TenantSecurityKmsClient("http://localhost:7777", LOCAL_API_KEY);
+        client = new TenantSecurityClient("http://localhost:7777", LOCAL_API_KEY);
     });
 
     describe("roundtrip encrypt and decrypt", () => {

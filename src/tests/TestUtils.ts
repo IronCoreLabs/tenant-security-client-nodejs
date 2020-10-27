@@ -1,6 +1,6 @@
 import "jest-extended";
-import {PlaintextDocument, PlaintextDocumentCollection, PlaintextDocumentWithEdekCollection, TenantSecurityKmsClient} from "../../tenant-security-nodejs";
-import {RequestMetadata} from "../RequestMetadata";
+import {PlaintextDocument, PlaintextDocumentCollection, PlaintextDocumentWithEdekCollection, TenantSecurityClient} from "../../tenant-security-nodejs";
+import {DocumentMetadata} from "../kms/DocumentMetadata";
 
 export const getDataToEncrypt = (): PlaintextDocument => ({
     field1: Buffer.from("Cras sit amet neque vel eros fermentum molestie.", "utf8"),
@@ -19,9 +19,9 @@ export const getBatchDataToEncrypt = (): PlaintextDocumentCollection => ({
 });
 
 export const getMetadata = (tenant: string) =>
-    new RequestMetadata(tenant, "nodejs-dev-integration-test", "lipsum", "integration-test-ray-id", {thingOne: "thingTwo"});
+    new DocumentMetadata(tenant, "nodejs-dev-integration-test", "lipsum", "integration-test-ray-id", undefined, undefined, {thingOne: "thingTwo"});
 
-export const assertEncryptedData = (client: TenantSecurityKmsClient, encryptedDocument: Record<string, Buffer>) => {
+export const assertEncryptedData = (client: TenantSecurityClient, encryptedDocument: Record<string, Buffer>) => {
     const data = getDataToEncrypt();
     expect(encryptedDocument.field1).toBeInstanceOf(Buffer);
     expect(encryptedDocument.field1.length).toBeGreaterThan(data.field1.length);
@@ -34,7 +34,7 @@ export const assertEncryptedData = (client: TenantSecurityKmsClient, encryptedDo
     expect(client.isCiphertext(encryptedDocument.field3)).toBeTrue();
 };
 
-export const runSingleDocumentRoundTripForTenant = async (client: TenantSecurityKmsClient, tenant: string) => {
+export const runSingleDocumentRoundTripForTenant = async (client: TenantSecurityClient, tenant: string) => {
     const metadata = getMetadata(tenant);
     const data = getDataToEncrypt();
 
@@ -48,7 +48,7 @@ export const runSingleDocumentRoundTripForTenant = async (client: TenantSecurity
     expect(decryptResult.plaintextDocument.field1).toEqual(data.field1);
 };
 
-export const runSingleExistingDocumentRoundTripForTenant = async (client: TenantSecurityKmsClient, tenant: string) => {
+export const runSingleExistingDocumentRoundTripForTenant = async (client: TenantSecurityClient, tenant: string) => {
     const metadata = getMetadata(tenant);
     const data = getDataToEncrypt();
 
@@ -67,7 +67,7 @@ export const runSingleExistingDocumentRoundTripForTenant = async (client: Tenant
     expect(res.plaintextDocument.field3).toEqual(data.field3);
 };
 
-export const runBatchDocumentRoundtripForTenant = async (client: TenantSecurityKmsClient, tenant: string) => {
+export const runBatchDocumentRoundtripForTenant = async (client: TenantSecurityClient, tenant: string) => {
     const metadata = getMetadata(tenant);
     const data = getBatchDataToEncrypt();
 
@@ -101,7 +101,7 @@ export const runBatchDocumentRoundtripForTenant = async (client: TenantSecurityK
     expect(decryptResult.successes.batch5.plaintextDocument).toEqual(data.batch5);
 };
 
-export const runReusedBatchDocumentRoundtripForTenant = async (client: TenantSecurityKmsClient, tenant: string) => {
+export const runReusedBatchDocumentRoundtripForTenant = async (client: TenantSecurityClient, tenant: string) => {
     const metadata = getMetadata(tenant);
     const data = getBatchDataToEncrypt();
 

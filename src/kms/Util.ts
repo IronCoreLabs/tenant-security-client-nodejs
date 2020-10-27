@@ -1,6 +1,6 @@
 import Future from "futurejs";
 import {ironcorelabs} from "../../proto/ts/DocumentHeader";
-import {ErrorCodes, TenantSecurityClientException} from "../TenantSecurityClientException";
+import {TenantSecurityErrorCode, TenantSecurityException} from "../TenantSecurityException";
 import {CURRENT_DOCUMENT_HEADER_VERSION, DOCUMENT_MAGIC, HEADER_FIXED_SIZE_CONTENT_LENGTH} from "./Constants";
 const v3DocumentHeader = ironcorelabs.proto.v3DocumentHeader;
 
@@ -17,8 +17,8 @@ const getHeaderProtobufContentSize = (bytes: Buffer): number => bytes.readUInt16
 /**
  * Verify that the provided bytes are our Protobuf header bytes.
  */
-const verifyAndCreateDocHeaderPb = (pbBytes: Buffer): Future<TenantSecurityClientException, ironcorelabs.proto.Iv3DocumentHeader> => {
-    const invalidDoc = new TenantSecurityClientException(ErrorCodes.INVALID_ENCRYPTED_DOCUMENT, "Provided bytes are not a CMK encrypted document.");
+const verifyAndCreateDocHeaderPb = (pbBytes: Buffer): Future<TenantSecurityException, ironcorelabs.proto.Iv3DocumentHeader> => {
+    const invalidDoc = new TenantSecurityException(TenantSecurityErrorCode.INVALID_ENCRYPTED_DOCUMENT, "Provided bytes are not a CMK encrypted document.");
     if (typeof v3DocumentHeader.verify({saasShield: pbBytes}) === "string") {
         return Future.reject(invalidDoc);
     }
@@ -40,9 +40,11 @@ export const isCmkEncryptedDocument = (bytes: Buffer): boolean =>
  */
 export const extractDocumentHeaderFromBytes = (
     bytes: Buffer
-): Future<TenantSecurityClientException, {header?: ironcorelabs.proto.Iv3DocumentHeader; encryptedDoc: Buffer}> => {
+): Future<TenantSecurityException, {header?: ironcorelabs.proto.Iv3DocumentHeader; encryptedDoc: Buffer}> => {
     if (!isCmkEncryptedDocument(bytes)) {
-        return Future.reject(new TenantSecurityClientException(ErrorCodes.INVALID_ENCRYPTED_DOCUMENT, "Provided bytes are not a CMK encrypted document."));
+        return Future.reject(
+            new TenantSecurityException(TenantSecurityErrorCode.INVALID_ENCRYPTED_DOCUMENT, "Provided bytes are not a CMK encrypted document.")
+        );
     }
     const protobufHeaderSize = getHeaderProtobufContentSize(bytes);
     if (protobufHeaderSize === 0) {
@@ -63,8 +65,8 @@ export const extractDocumentHeaderFromBytes = (
  */
 export const extractDocumentHeaderFromStream = (
     inputStream: NodeJS.ReadableStream
-): Future<TenantSecurityClientException, ironcorelabs.proto.Iv3DocumentHeader | undefined> =>
-    new Future<TenantSecurityClientException, Buffer | undefined>((reject, resolve) => {
+): Future<TenantSecurityException, ironcorelabs.proto.Iv3DocumentHeader | undefined> =>
+    new Future<TenantSecurityException, Buffer | undefined>((reject, resolve) => {
         const onComplete = (resolvedValue: Buffer | undefined) => {
             //Remove our readable event listener so we can switch this stream to flowing mode once we start decrypting.
             //eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -80,7 +82,9 @@ export const extractDocumentHeaderFromStream = (
             hasRead = true;
             const fixedHeaderBytes = inputStream.read(HEADER_FIXED_SIZE_CONTENT_LENGTH) as Buffer;
             if (fixedHeaderBytes === null || fixedHeaderBytes.length < HEADER_FIXED_SIZE_CONTENT_LENGTH) {
-                return reject(new TenantSecurityClientException(ErrorCodes.INVALID_ENCRYPTED_DOCUMENT, "Was not able to read from encrypted file stream."));
+                return reject(
+                    new TenantSecurityException(TenantSecurityErrorCode.INVALID_ENCRYPTED_DOCUMENT, "Was not able to read from encrypted file stream.")
+                );
             }
             const protobufHeaderLength = getHeaderProtobufContentSize(fixedHeaderBytes);
             if (protobufHeaderLength === 0) {
@@ -89,7 +93,7 @@ export const extractDocumentHeaderFromStream = (
             const protobufHeaderContent = inputStream.read(protobufHeaderLength) as Buffer;
             if (protobufHeaderContent === null || protobufHeaderContent.length < HEADER_FIXED_SIZE_CONTENT_LENGTH) {
                 return reject(
-                    new TenantSecurityClientException(ErrorCodes.INVALID_ENCRYPTED_DOCUMENT, "Provided file stream was not a valid encrypted document.")
+                    new TenantSecurityException(TenantSecurityErrorCode.INVALID_ENCRYPTED_DOCUMENT, "Provided file stream was not a valid encrypted document.")
                 );
             }
             onComplete(protobufHeaderContent);

@@ -1,4 +1,4 @@
-import {RequestMetadata, TenantSecurityKmsClient} from "@ironcorelabs/tenant-security-nodejs";
+import {DocumentMetadata, TenantSecurityClient} from "@ironcorelabs/tenant-security-nodejs";
 import * as fs from "fs";
 import {performance, PerformanceObserver} from "perf_hooks";
 
@@ -20,11 +20,11 @@ console.log(`Using tenant ${TENANT_ID}.`);
 
 // Initialize the client with a Tenant Security Proxy domain and API key.
 // Typically this would be done once when the application or service initializes
-const client = new TenantSecurityKmsClient("http://localhost:32804", API_KEY);
+const client = new TenantSecurityClient("http://localhost:32804", API_KEY);
 
 // Create metadata used to associate this document to a tenant, name the document, and
 // identify the service or user making the call
-const metadata = new RequestMetadata(TENANT_ID, "serviceOrUserId", "PII");
+const metadata = new DocumentMetadata(TENANT_ID, "serviceOrUserId", "PII");
 
 //
 // Example 1: encrypting a large document, using the filesystem for persistence
