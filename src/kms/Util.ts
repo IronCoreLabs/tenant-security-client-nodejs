@@ -1,6 +1,7 @@
 import Future from "futurejs";
 import {ironcorelabs} from "../../proto/ts/DocumentHeader";
 import {TenantSecurityErrorCode, TenantSecurityException} from "../TenantSecurityException";
+import {TscException} from "../TscException";
 import {CURRENT_DOCUMENT_HEADER_VERSION, DOCUMENT_MAGIC, HEADER_FIXED_SIZE_CONTENT_LENGTH} from "./Constants";
 const v3DocumentHeader = ironcorelabs.proto.v3DocumentHeader;
 
@@ -18,7 +19,7 @@ const getHeaderProtobufContentSize = (bytes: Buffer): number => bytes.readUInt16
  * Verify that the provided bytes are our Protobuf header bytes.
  */
 const verifyAndCreateDocHeaderPb = (pbBytes: Buffer): Future<TenantSecurityException, ironcorelabs.proto.Iv3DocumentHeader> => {
-    const invalidDoc = new TenantSecurityException(TenantSecurityErrorCode.INVALID_ENCRYPTED_DOCUMENT, "Provided bytes are not a CMK encrypted document.");
+    const invalidDoc = new TscException(TenantSecurityErrorCode.INVALID_ENCRYPTED_DOCUMENT, "Provided bytes are not a CMK encrypted document.");
     if (typeof v3DocumentHeader.verify({saasShield: pbBytes}) === "string") {
         return Future.reject(invalidDoc);
     }
@@ -42,9 +43,7 @@ export const extractDocumentHeaderFromBytes = (
     bytes: Buffer
 ): Future<TenantSecurityException, {header?: ironcorelabs.proto.Iv3DocumentHeader; encryptedDoc: Buffer}> => {
     if (!isCmkEncryptedDocument(bytes)) {
-        return Future.reject(
-            new TenantSecurityException(TenantSecurityErrorCode.INVALID_ENCRYPTED_DOCUMENT, "Provided bytes are not a CMK encrypted document.")
-        );
+        return Future.reject(new TscException(TenantSecurityErrorCode.INVALID_ENCRYPTED_DOCUMENT, "Provided bytes are not a CMK encrypted document."));
     }
     const protobufHeaderSize = getHeaderProtobufContentSize(bytes);
     if (protobufHeaderSize === 0) {
@@ -82,9 +81,7 @@ export const extractDocumentHeaderFromStream = (
             hasRead = true;
             const fixedHeaderBytes = inputStream.read(HEADER_FIXED_SIZE_CONTENT_LENGTH) as Buffer;
             if (fixedHeaderBytes === null || fixedHeaderBytes.length < HEADER_FIXED_SIZE_CONTENT_LENGTH) {
-                return reject(
-                    new TenantSecurityException(TenantSecurityErrorCode.INVALID_ENCRYPTED_DOCUMENT, "Was not able to read from encrypted file stream.")
-                );
+                return reject(new TscException(TenantSecurityErrorCode.INVALID_ENCRYPTED_DOCUMENT, "Was not able to read from encrypted file stream."));
             }
             const protobufHeaderLength = getHeaderProtobufContentSize(fixedHeaderBytes);
             if (protobufHeaderLength === 0) {
@@ -92,9 +89,7 @@ export const extractDocumentHeaderFromStream = (
             }
             const protobufHeaderContent = inputStream.read(protobufHeaderLength) as Buffer;
             if (protobufHeaderContent === null || protobufHeaderContent.length < HEADER_FIXED_SIZE_CONTENT_LENGTH) {
-                return reject(
-                    new TenantSecurityException(TenantSecurityErrorCode.INVALID_ENCRYPTED_DOCUMENT, "Provided file stream was not a valid encrypted document.")
-                );
+                return reject(new TscException(TenantSecurityErrorCode.INVALID_ENCRYPTED_DOCUMENT, "Provided file stream was not a valid encrypted document."));
             }
             onComplete(protobufHeaderContent);
         };

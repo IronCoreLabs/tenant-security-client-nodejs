@@ -10,6 +10,7 @@ import {
     StreamingResponse,
 } from "../../tenant-security-nodejs";
 import {EventMetadata} from "../security-events/EventMetadata";
+import {SecurityEvent} from "../security-events/SecurityEvent";
 import * as SecurityEventApi from "../security-events/SecurityEventApi";
 import {TenantSecurityException} from "../TenantSecurityException";
 import * as Crypto from "./Crypto";

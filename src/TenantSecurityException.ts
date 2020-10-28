@@ -1,3 +1,9 @@
+/**
+ * 0 - 199   TspServiceException
+ * 200 - 299 KmsException
+ * 300 - 399 SecurityEventException
+ * 900 - 999 TscException
+ */
 export enum TenantSecurityErrorCode {
     // map to TspServiceException
     UNABLE_TO_MAKE_REQUEST = 0,
@@ -19,7 +25,7 @@ export enum TenantSecurityErrorCode {
     // map to SecurityEventException
     SECURITY_EVENT_REJECTED = 301,
 
-    // TODO?
+    // map to TscException
     INVALID_ENCRYPTED_DOCUMENT = 900,
     DOCUMENT_ENCRYPT_FAILED = 901,
     DOCUMENT_DECRYPT_FAILED = 902,
@@ -28,7 +34,7 @@ export enum TenantSecurityErrorCode {
 /**
  * Shared interface for all TSP related exceptions.
  */
-export class TenantSecurityException extends Error {
+export abstract class TenantSecurityException extends Error {
     public errorCode: TenantSecurityErrorCode;
     public httpResponseCode?: number;
     constructor(code: number, message: string, httpResponseCode?: number) {

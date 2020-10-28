@@ -1,5 +1,5 @@
 import "jest-extended";
-import {TenantSecurityClient} from "../kms/TenantSecurityClient";
+import {TenantSecurityClient} from "../index";
 import * as TestUtils from "./TestUtils";
 
 //Placeholders to be filled in by devs running tests

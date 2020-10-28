@@ -1,6 +1,4 @@
-import {TenantSecurityErrorCode, TenantSecurityException} from "../../TenantSecurityException";
-import {DocumentMetadata} from "../DocumentMetadata";
-import {TenantSecurityClient} from "../TenantSecurityClient";
+import {DocumentMetadata, TenantSecurityClient, TenantSecurityErrorCode, TenantSecurityException} from "../../index";
 
 describe("UNIT TenantSecurityClient", () => {
     describe("constructor failures", () => {

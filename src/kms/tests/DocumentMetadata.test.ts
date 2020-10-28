@@ -1,4 +1,4 @@
-import {DocumentMetadata} from "../kms/DocumentMetadata";
+import {DocumentMetadata} from "../../index";
 
 describe("UNIT DocumentMetdata", () => {
     test("construction fails when invalid arguments are provided", () => {
@@ -16,13 +16,28 @@ describe("UNIT DocumentMetdata", () => {
             dataLabel: "label",
         });
 
-        const withAddedFields = new DocumentMetadata("tenantId", "user", "label", undefined, undefined, "rayId", {foo: "bar", one: "two"});
+        const withAddedFields = new DocumentMetadata("tenantId", "user", "label", "8.8.8.8", "myDocumentId", "rayId", {foo: "bar", one: "two"});
 
         expect(withAddedFields.toJsonStructure()).toEqual({
             tenantId: "tenantId",
             requestingId: "user",
             dataLabel: "label",
             requestId: "rayId",
+            sourceIp: "8.8.8.8",
+            objectId: "myDocumentId",
+            customFields: {foo: "bar", one: "two"},
+        });
+    });
+
+    test("returns expected partial JSON structure", () => {
+        const withPartialFields = new DocumentMetadata("tenantId", "user", "label", undefined, "myDocumentId", "rayId", {foo: "bar", one: "two"});
+
+        expect(withPartialFields.toJsonStructure()).toEqual({
+            tenantId: "tenantId",
+            requestingId: "user",
+            dataLabel: "label",
+            requestId: "rayId",
+            objectId: "myDocumentId",
             customFields: {foo: "bar", one: "two"},
         });
     });

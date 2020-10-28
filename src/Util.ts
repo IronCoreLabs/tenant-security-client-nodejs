@@ -1,9 +1,8 @@
 import Future from "futurejs";
 import fetch, {Response} from "node-fetch";
 import {ApiErrorResponse} from "./kms/KmsApi";
-import {KmsException} from "./kms/KmsException";
-import {SecurityEventException} from "./security-events/SecurityEventException";
 import {TenantSecurityErrorCode, TenantSecurityException} from "./TenantSecurityException";
+import {TenantSecurityExceptionUtils} from "./TenantSecurityExceptionUtils";
 import {TspServiceException} from "./TspServiceException";
 
 /**
@@ -11,28 +10,9 @@ import {TspServiceException} from "./TspServiceException";
  */
 const parseErrorFromFailedResponse = (failureResponse: Response) =>
     Future.tryP(() => failureResponse.json())
-        .errorMap(
-            () => new TenantSecurityException(TenantSecurityErrorCode.UNKNOWN_ERROR, "Unknown response from Tenant Security Proxy", failureResponse.status)
-        )
-        .flatMap((errorResp: ApiErrorResponse) => {
-            if (errorResp.code >= 0 && TenantSecurityErrorCode[errorResp.code] != null) {
-                if (errorResp.code === 0) {
-                    return Future.reject(new TspServiceException(TenantSecurityErrorCode.UNABLE_TO_MAKE_REQUEST, errorResp.message, failureResponse.status));
-                } else if (errorResp.code >= 100 && errorResp.code < 199) {
-                    return Future.reject(new TspServiceException(errorResp.code, errorResp.message, failureResponse.status));
-                } else if (errorResp.code >= 200 && errorResp.code < 299) {
-                    return Future.reject(new KmsException(errorResp.code, errorResp.message, failureResponse.status));
-                } else if (errorResp.code >= 300 && errorResp.code < 399) {
-                    return Future.reject(new SecurityEventException(errorResp.code, errorResp.message, failureResponse.status));
-                } else {
-                    return Future.reject(new TspServiceException(TenantSecurityErrorCode.UNKNOWN_ERROR, errorResp.message, failureResponse.status));
-                }
-            } else {
-                return Future.reject(
-                    new TspServiceException(TenantSecurityErrorCode.UNKNOWN_ERROR, "TSP status code outside of recognized range", failureResponse.status)
-                );
-            }
-        });
+        .errorMap(() => new TspServiceException(TenantSecurityErrorCode.UNKNOWN_ERROR, "Unknown response from Tenant Security Proxy", failureResponse.status))
+        .flatMap((errorResp: ApiErrorResponse) => Future.reject(TenantSecurityExceptionUtils.from(errorResp.code, errorResp.message, failureResponse.status)));
+
 /**
  * Request the provided API endpoint with the provided POST data. All requests to the TSP today are in POST. On failure,
  * attempt to parse the failed JSON to extract an error code and message.
@@ -48,7 +28,7 @@ export const makeJsonRequest = <T>(tspDomain: string, apiKey: string, route: str
             },
         })
     )
-        .errorMap((e) => new TenantSecurityException(TenantSecurityErrorCode.UNABLE_TO_MAKE_REQUEST, e.message))
+        .errorMap((e) => new TspServiceException(TenantSecurityErrorCode.UNABLE_TO_MAKE_REQUEST, e.message))
         .flatMap((response) => (response.ok ? Future.tryP(() => response.json()) : parseErrorFromFailedResponse(response)));
 
 /**
@@ -57,7 +37,13 @@ export const makeJsonRequest = <T>(tspDomain: string, apiKey: string, route: str
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const clearUndefinedProperties = (obj: {[key: string]: any}): {[key: string]: Exclude<any, undefined>} => {
     const local = {...obj};
-    Object.keys(local).forEach((key) => local[key] === undefined && delete local[key]);
+    Object.keys(local).forEach((key) => {
+        if (local[key] === undefined) {
+            delete local[key];
+        } else if (typeof local[key] === "object") {
+            clearUndefinedProperties(local[key]);
+        }
+    });
     return local;
 };
 /* eslint-enable @typescript-eslint/no-explicit-any */

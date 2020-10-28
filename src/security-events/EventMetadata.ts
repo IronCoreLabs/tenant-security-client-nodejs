@@ -23,7 +23,7 @@ export class EventMetadata {
     tenantId: string;
     requestingUserOrServiceId: string;
     dataLabel: string;
-    timestampMillis: Date;
+    timestampMillis: number;
     sourceIp?: string;
     objectId?: string;
     requestId?: string;
@@ -50,7 +50,7 @@ export class EventMetadata {
         tenantId: string,
         requestingUserOrServiceId: string,
         dataLabel: string,
-        timestampMillis: Date,
+        timestampMillis?: number,
         sourceIp?: string,
         objectId?: string,
         requestId?: string,
@@ -65,13 +65,11 @@ export class EventMetadata {
         if (!dataLabel) {
             throw new Error("Must provide a valid dataLabel for all Security Event operations.");
         }
-        if (!timestampMillis) {
-            throw new Error("Must provide a valid timestampMillis for all Security Event operations.");
-        }
+        const now = new Date();
         this.tenantId = tenantId;
         this.requestingUserOrServiceId = requestingUserOrServiceId;
         this.dataLabel = dataLabel;
-        this.timestampMillis = timestampMillis;
+        this.timestampMillis = timestampMillis || now.getTime() + now.getTimezoneOffset() * 60 * 1000;
         this.sourceIp = sourceIp;
         this.objectId = objectId;
         this.requestId = requestId;
@@ -82,7 +80,7 @@ export class EventMetadata {
     toJsonStructure = () => {
         const json: EventMetadataJson = {
             tenantId: this.tenantId,
-            timestampMillis: this.timestampMillis.getUTCMilliseconds(),
+            timestampMillis: this.timestampMillis,
             iclFields: {
                 sourceIp: this.sourceIp,
                 objectId: this.objectId,

@@ -9,13 +9,16 @@ export class KmsException extends TenantSecurityException {
      * status code.
      *
      * @param code             TSP generated code corresponding with this
-     *                         error.
+     *                         error. @see TenantSecurityErrorCode for mapping.
      * @param message          The readable error message returned from the Tenant
      *                         Security Proxy for this error.
      * @param httpResponseCode The HTTP response code returned from the
      *                         Tenant Security Proxy for this error.
      */
     constructor(code: number, message: string, httpResponseCode?: number) {
+        if (code < 200 || code > 299) {
+            throw new Error("KmsException constructed with code outside of recognized range.");
+        }
         super(code, message, httpResponseCode);
     }
 }
