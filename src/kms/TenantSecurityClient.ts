@@ -192,7 +192,6 @@ export class TenantSecurityClient {
      * @param metadata Metadata that provides additional context about the event.
      * @return         Void on successful receipt by TSP
      */
-    logSecurityEvent = (event: SecurityEvent, metadata: EventMetadata): Promise<void> => {
-        return SecurityEventApi.logSecurityEvent(this.tspDomain, this.apiKey, event, metadata).toPromise();
-    };
+    logSecurityEvent = (event: SecurityEvent, metadata: EventMetadata): Promise<void> =>
+        SecurityEventApi.logSecurityEvent(this.tspDomain, this.apiKey, event, metadata).toPromise();
 }

@@ -2,6 +2,8 @@ import * as fs from "fs";
 import "jest-extended";
 import {EncryptedDocumentWithEdek} from "../../tenant-security-nodejs";
 import {TenantSecurityClient, TenantSecurityErrorCode, TenantSecurityException} from "../index";
+import {EventMetadata} from "../security-events/EventMetadata";
+import {UserEvent} from "../security-events/UserEvent";
 import {TscException} from "../TscException";
 import * as TestUtils from "./TestUtils";
 
@@ -380,6 +382,17 @@ describe("INTEGRATION dev environment tests", () => {
             const {plaintextDocument} = await client.decryptDocument({edek: leasedDocument.edek, encryptedDocument: data}, meta);
 
             expect(plaintextDocument.foo.toString("utf8")).toEqual("new daters");
+        });
+    });
+
+    describe("log security events", () => {
+        it("sends an event to the TSP for a good tenant.", async () => {
+            const metadata = new EventMetadata(GCP_TENANT_ID, "integrationTest", "sample", undefined, undefined, undefined, "app-request-id");
+
+            // even though this tenant is bad, the response here will be success as the security
+            // event was enqueued for further processing.
+            let resp = await client.logSecurityEvent(UserEvent.ADD, metadata);
+            expect(resp).toBeNull();
         });
     });
 });
