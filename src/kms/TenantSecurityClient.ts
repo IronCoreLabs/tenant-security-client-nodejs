@@ -17,6 +17,7 @@ import * as Crypto from "./Crypto";
 import {DocumentMetadata} from "./DocumentMetadata";
 import * as KmsApi from "./KmsApi";
 import * as Util from "./Util";
+export {KmsException} from "./KmsException";
 
 /**
  * Take a batch result of encrypt/decrypt operations and convert it into the return structure from the SDK, calculating

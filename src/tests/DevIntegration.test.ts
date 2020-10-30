@@ -2,6 +2,7 @@ import * as fs from "fs";
 import "jest-extended";
 import {EncryptedDocumentWithEdek} from "../../tenant-security-nodejs";
 import {TenantSecurityClient, TenantSecurityErrorCode, TenantSecurityException} from "../index";
+import {TscException} from "../TscException";
 import * as TestUtils from "./TestUtils";
 
 const GCP_TENANT_ID = "INTEGRATION-TEST-DEV1-GCP";
@@ -11,11 +12,15 @@ const MULTIPLE_KMS_CONFIG_TENANT_ID = "INTEGRATION-TEST-DEV1-COMBO";
 const INTEGRATION_API_KEY = "qlhqGW+Azctfy1ld";
 
 //prettier-ignore
-const existingEncryptedDataForEnabledConfig = Buffer.from([3, 73, 82, 79, 78, 0, 0, 85, -104, 85, -101, -61, 2, 66, 122, 89, -118, 55, 101, -89, 79, -5, 115, 82, 77, 0, 55, 29, -14, -48, -59, 11, 63, -126, -62, 107, -85, 88, -45, -89, 88, 19, 6, -50, 112, -101 ]);
+const existingEncryptedDataForEnabledConfig = Buffer.from([3, 73, 82, 79, 78, 0, 0, 52,
+    97, 69, -17, -65, 32, 85, -70, 101, 109, -67, 31, -28, -38, -19, -78, 42, 125, 124, -47,
+    80, 31, 10, 127, -109, -20, 90, 7, 88, 104, 103, -64, -56, 38, 95, 96, -97, -92, -54]);
 //prettier-ignore
-const existingEdekForEnabledConfig = "Cr4BCrgBAQIDAHj0ZREHq1bONJuR5ImNOlC8TTbXrFSZ5ETcue/j52IG8AFHigXyTIDryqdkPfVVMC2yAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMGTmWho89vfNOIdymAgEQgDvJnGyaDKgcFGNz3s+TPpZl0eVOYu9Ex4Ym0J7xXO8hlx0QSgvzp+AppxbxHIzTN/weT5fibfSw3yZybRDvAw==";
+const existingEdekForEnabledConfig = "Cr4BCrgBAQICAHhhfiI+R/CnS0NJxVMGLAbLb/uEr64mDJAXLrWWWxAMQgF/DRnb5dvopCbObDSBn/dtAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMxp38R1TYd/u4Ie2oAgEQgDuY9+X/BNebcFdZYV2SC7w723+W2a4QAgFqMAI0W7QKHI2EbZF7d63PNWUoaeXX3Zk3W42q2OPShRAiTRCCBA==";
 //prettier-ignore
-const existingEncryptedDataForDisabledConfig = Buffer.from([3, 73, 82, 79, 78, 0, 0, -77, 108, 93, -13, -20, -69, 116, -17, -41, 107, 49, 56, -8, 109, 105, 107, -108, 4, 2, -50, 21, -127, -124, 69, 34, 78, 84, 56, 101, -98, 126, -79, 46, 65, 91, 95, 66, -111, 8]);
+const existingEncryptedDataForDisabledConfig = Buffer.from([3, 73, 82, 79, 78, 0, 0, -77, 108, 93, -13, -20, -69, 116, -17, -41, 107,
+    49, 56, -8, 109, 105, 107, -108, 4, 2, -50, 21, -127, -124, 69, 34, 78, 84, 56,
+    101, -98, 126, -79, 46, 65, 91, 95, 66, -111, 8]);
 //prettier-ignore
 const existingEdekForDisabledConfig = "CoYCCoACi6JH7ZOggHm0fyIsUc4jVvK0jgPfn1V76xfVxYfBLP7QbfeZD7Gyzj4Xxdj4upJ7grzjCe8ydK3Q6ijeBOt7b050BhUHRsHUgdV7zBGWvaZOhPQ4sYl5bFVcefyQyk7EeN/qd6RGYq9AHEcBTzgx+Nw83Jgr34SPHSbTkhUIIJTzt0NAwJsQ7ZYMv2NHQ1LdjItr8/mJsu9i5R6yd3p2fuKWJozeAPHp9Salc9Vr5uwfGZsAKHNkbDlYvXFs6bO7TV2T2fOmevln2Yi/UEq6RqFa2FmzJMqVxeAbMNpCJ0KlcjqsI4cOD4VjotiXu4umTsMCIkN7I5KCZHKG3Bo+1xDwAw==";
 
@@ -35,8 +40,8 @@ describe("INTEGRATION dev environment tests", () => {
                 await client.decryptDocument({edek: existingEdekForEnabledConfig, encryptedDocument: {bs: randomBytes}}, meta);
                 fail("Should not be able to decrypt BS data");
             } catch (e) {
-                expect(e).toBeInstanceOf(TenantSecurityException);
                 expect(e.errorCode).toEqual(TenantSecurityErrorCode.INVALID_ENCRYPTED_DOCUMENT);
+                expect(e).toBeInstanceOf(TscException);
             }
         });
 
