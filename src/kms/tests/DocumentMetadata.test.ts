@@ -1,11 +1,9 @@
 import {DocumentMetadata} from "../../index";
 
 describe("UNIT DocumentMetdata", () => {
-    test("construction fails when invalid arguments are provided", () => {
-        expect(() => new DocumentMetadata(undefined as any, undefined as any, undefined as any)).toThrow();
-        expect(() => new DocumentMetadata("tenantId", undefined as any, undefined as any)).toThrow();
-        expect(() => new DocumentMetadata("tenantId", "userOrService", undefined as any)).toThrow();
-        expect(() => new DocumentMetadata("tenantId", "userOrService", "dataLabel")).not.toThrow();
+    test("construction fails when tenantId is missing.", () => {
+        expect(() => new DocumentMetadata(undefined as any)).toThrow();
+        expect(() => new DocumentMetadata("tenantId")).not.toThrow();
     });
 
     test("returns expected JSON structure", () => {
@@ -14,6 +12,7 @@ describe("UNIT DocumentMetdata", () => {
             tenantId: "tenantId",
             requestingId: "user",
             dataLabel: "label",
+            customFields: {},
         });
 
         const withAddedFields = new DocumentMetadata("tenantId", "user", "label", "8.8.8.8", "myDocumentId", "rayId", {foo: "bar", one: "two"});

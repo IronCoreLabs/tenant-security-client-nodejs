@@ -8,8 +8,8 @@ import {clearUndefinedProperties} from "../Util";
  */
 export class DocumentMetadata {
     tenantId: string;
-    requestingUserOrServiceId: string;
-    dataLabel: string;
+    requestingUserOrServiceId?: string;
+    dataLabel?: string;
     sourceIp?: string;
     objectId?: string;
     requestId?: string;
@@ -30,8 +30,8 @@ export class DocumentMetadata {
      */
     constructor(
         tenantId: string,
-        requestingUserOrServiceId: string,
-        dataLabel: string,
+        requestingUserOrServiceId?: string,
+        dataLabel?: string,
         sourceIp?: string,
         objectId?: string,
         requestId?: string,
@@ -40,19 +40,13 @@ export class DocumentMetadata {
         if (!tenantId) {
             throw new Error("Must provide a valid tenantId for all CMK operations.");
         }
-        if (!requestingUserOrServiceId) {
-            throw new Error("Must provide a valid requestingUserOrServiceId for all CMK operations.");
-        }
-        if (!dataLabel) {
-            throw new Error("Must provide a valid dataLabel for all CMK operations.");
-        }
         this.tenantId = tenantId;
         this.requestingUserOrServiceId = requestingUserOrServiceId;
         this.dataLabel = dataLabel;
         this.sourceIp = sourceIp;
         this.objectId = objectId;
         this.requestId = requestId;
-        this.otherData = otherData;
+        this.otherData = otherData || {};
     }
 
     /* eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types*/

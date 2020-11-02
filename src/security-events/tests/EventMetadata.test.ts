@@ -1,12 +1,9 @@
 import {EventMetadata} from "../../index";
 
 describe("UNIT EventMetadata", () => {
-    test("construction fails when invalid arguments are provided", () => {
-        expect(() => new EventMetadata(undefined as any, undefined as any, undefined as any, undefined as any)).toThrow();
-        expect(() => new EventMetadata("tenantId", undefined as any, undefined as any, undefined as any)).toThrow();
-        expect(() => new EventMetadata("tenantId", "userOrService", undefined as any, undefined as any)).toThrow();
-        expect(() => new EventMetadata("tenantId", "userOrService", "dataLabel", undefined as any)).not.toThrow();
-        expect(() => new EventMetadata("tenantId", "userOrService", "dataLabel", 1603911546500)).not.toThrow();
+    test("construction fails when tenantId is missing.", () => {
+        expect(() => new EventMetadata(undefined as any)).toThrow();
+        expect(() => new EventMetadata("tenantId")).not.toThrow();
     });
 
     test("returns expected JSON structure", () => {
@@ -18,6 +15,7 @@ describe("UNIT EventMetadata", () => {
                 requestingId: "user",
                 dataLabel: "label",
             },
+            customFields: {},
         });
 
         const withAddedFields = new EventMetadata("tenantId", "user", "label", 1603911546500, "8.8.8.8", "myDocumentId", "rayId", {

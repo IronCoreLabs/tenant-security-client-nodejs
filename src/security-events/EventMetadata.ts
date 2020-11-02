@@ -6,12 +6,12 @@ export interface EventMetadataJson {
     iclFields: {
         requestId?: string;
         event?: string;
-        sourceIp: string | undefined;
-        objectId: string | undefined;
-        requestingId: string;
-        dataLabel: string;
+        sourceIp?: string;
+        objectId?: string;
+        requestingId?: string;
+        dataLabel?: string;
     };
-    customFields: Record<string, string> | undefined;
+    customFields: Record<string, string>;
 }
 
 /**
@@ -21,13 +21,13 @@ export interface EventMetadataJson {
  */
 export class EventMetadata {
     tenantId: string;
-    requestingUserOrServiceId: string;
-    dataLabel: string;
+    requestingUserOrServiceId?: string;
+    dataLabel?: string;
     timestampMillis: number;
     sourceIp?: string;
     objectId?: string;
     requestId?: string;
-    otherData?: Record<string, string>;
+    otherData: Record<string, string>;
 
     /**
      * Constructor for EventMetadata class which contains arbitrary key/value pairs and a unique
@@ -48,8 +48,8 @@ export class EventMetadata {
      */
     constructor(
         tenantId: string,
-        requestingUserOrServiceId: string,
-        dataLabel: string,
+        requestingUserOrServiceId?: string,
+        dataLabel?: string,
         timestampMillis?: number,
         sourceIp?: string,
         objectId?: string,
@@ -59,12 +59,6 @@ export class EventMetadata {
         if (!tenantId) {
             throw new Error("Must provide a valid tenantId for all Security Event operations.");
         }
-        if (!requestingUserOrServiceId) {
-            throw new Error("Must provide a valid requestingUserOrServiceId for all Security Event operations.");
-        }
-        if (!dataLabel) {
-            throw new Error("Must provide a valid dataLabel for all Security Event operations.");
-        }
         const now = new Date();
         this.tenantId = tenantId;
         this.requestingUserOrServiceId = requestingUserOrServiceId;
@@ -73,7 +67,7 @@ export class EventMetadata {
         this.sourceIp = sourceIp;
         this.objectId = objectId;
         this.requestId = requestId;
-        this.otherData = otherData;
+        this.otherData = otherData || {};
     }
 
     /* eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types*/
@@ -86,12 +80,10 @@ export class EventMetadata {
                 objectId: this.objectId,
                 requestingId: this.requestingUserOrServiceId,
                 dataLabel: this.dataLabel,
+                requestId: this.requestId,
             },
             customFields: this.otherData,
         };
-        if (this.requestId) {
-            json.iclFields.requestId = this.requestId;
-        }
         return clearUndefinedProperties(json);
     };
 }
