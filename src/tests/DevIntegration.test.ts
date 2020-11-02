@@ -1,8 +1,10 @@
 import * as fs from "fs";
 import "jest-extended";
 import {EncryptedDocumentWithEdek} from "../../tenant-security-nodejs";
-import {TenantSecurityKmsClient} from "../kms/TenantSecurityKmsClient";
-import {ErrorCodes, TenantSecurityClientException} from "../TenantSecurityClientException";
+import {TenantSecurityClient, TenantSecurityErrorCode, TenantSecurityException} from "../index";
+import {EventMetadata} from "../security-events/EventMetadata";
+import {UserEvent} from "../security-events/UserEvent";
+import {TscException} from "../TscException";
 import * as TestUtils from "./TestUtils";
 
 const GCP_TENANT_ID = "INTEGRATION-TEST-DEV1-GCP";
@@ -12,19 +14,23 @@ const MULTIPLE_KMS_CONFIG_TENANT_ID = "INTEGRATION-TEST-DEV1-COMBO";
 const INTEGRATION_API_KEY = "qlhqGW+Azctfy1ld";
 
 //prettier-ignore
-const existingEncryptedDataForEnabledConfig = Buffer.from([3, 73, 82, 79, 78, 0, 0, 85, -104, 85, -101, -61, 2, 66, 122, 89, -118, 55, 101, -89, 79, -5, 115, 82, 77, 0, 55, 29, -14, -48, -59, 11, 63, -126, -62, 107, -85, 88, -45, -89, 88, 19, 6, -50, 112, -101 ]);
+const existingEncryptedDataForEnabledConfig = Buffer.from([3, 73, 82, 79, 78, 0, 0, 52,
+    97, 69, -17, -65, 32, 85, -70, 101, 109, -67, 31, -28, -38, -19, -78, 42, 125, 124, -47,
+    80, 31, 10, 127, -109, -20, 90, 7, 88, 104, 103, -64, -56, 38, 95, 96, -97, -92, -54]);
 //prettier-ignore
-const existingEdekForEnabledConfig = "Cr4BCrgBAQIDAHj0ZREHq1bONJuR5ImNOlC8TTbXrFSZ5ETcue/j52IG8AFHigXyTIDryqdkPfVVMC2yAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMGTmWho89vfNOIdymAgEQgDvJnGyaDKgcFGNz3s+TPpZl0eVOYu9Ex4Ym0J7xXO8hlx0QSgvzp+AppxbxHIzTN/weT5fibfSw3yZybRDvAw==";
+const existingEdekForEnabledConfig = "Cr4BCrgBAQICAHhhfiI+R/CnS0NJxVMGLAbLb/uEr64mDJAXLrWWWxAMQgF/DRnb5dvopCbObDSBn/dtAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMxp38R1TYd/u4Ie2oAgEQgDuY9+X/BNebcFdZYV2SC7w723+W2a4QAgFqMAI0W7QKHI2EbZF7d63PNWUoaeXX3Zk3W42q2OPShRAiTRCCBA==";
 //prettier-ignore
-const existingEncryptedDataForDisabledConfig = Buffer.from([3, 73, 82, 79, 78, 0, 0, -77, 108, 93, -13, -20, -69, 116, -17, -41, 107, 49, 56, -8, 109, 105, 107, -108, 4, 2, -50, 21, -127, -124, 69, 34, 78, 84, 56, 101, -98, 126, -79, 46, 65, 91, 95, 66, -111, 8]);
+const existingEncryptedDataForDisabledConfig = Buffer.from([3, 73, 82, 79, 78, 0, 0, -77, 108, 93, -13, -20, -69, 116, -17, -41, 107,
+    49, 56, -8, 109, 105, 107, -108, 4, 2, -50, 21, -127, -124, 69, 34, 78, 84, 56,
+    101, -98, 126, -79, 46, 65, 91, 95, 66, -111, 8]);
 //prettier-ignore
 const existingEdekForDisabledConfig = "CoYCCoACi6JH7ZOggHm0fyIsUc4jVvK0jgPfn1V76xfVxYfBLP7QbfeZD7Gyzj4Xxdj4upJ7grzjCe8ydK3Q6ijeBOt7b050BhUHRsHUgdV7zBGWvaZOhPQ4sYl5bFVcefyQyk7EeN/qd6RGYq9AHEcBTzgx+Nw83Jgr34SPHSbTkhUIIJTzt0NAwJsQ7ZYMv2NHQ1LdjItr8/mJsu9i5R6yd3p2fuKWJozeAPHp9Salc9Vr5uwfGZsAKHNkbDlYvXFs6bO7TV2T2fOmevln2Yi/UEq6RqFa2FmzJMqVxeAbMNpCJ0KlcjqsI4cOD4VjotiXu4umTsMCIkN7I5KCZHKG3Bo+1xDwAw==";
 
 describe("INTEGRATION dev environment tests", () => {
-    let client: TenantSecurityKmsClient;
+    let client: TenantSecurityClient;
 
     beforeEach(() => {
-        client = new TenantSecurityKmsClient("http://localhost:7777", INTEGRATION_API_KEY);
+        client = new TenantSecurityClient("http://localhost:7777", INTEGRATION_API_KEY);
     });
 
     describe("verify encrypted bytes", () => {
@@ -36,8 +42,8 @@ describe("INTEGRATION dev environment tests", () => {
                 await client.decryptDocument({edek: existingEdekForEnabledConfig, encryptedDocument: {bs: randomBytes}}, meta);
                 fail("Should not be able to decrypt BS data");
             } catch (e) {
-                expect(e).toBeInstanceOf(TenantSecurityClientException);
-                expect(e.errorCode).toEqual(ErrorCodes.INVALID_ENCRYPTED_DOCUMENT);
+                expect(e.errorCode).toEqual(TenantSecurityErrorCode.INVALID_ENCRYPTED_DOCUMENT);
+                expect(e).toBeInstanceOf(TscException);
             }
         });
 
@@ -49,8 +55,8 @@ describe("INTEGRATION dev environment tests", () => {
                 await client.decryptDocument({edek: randomBytes.toString("base64"), encryptedDocument: {bs: existingEncryptedDataForEnabledConfig}}, meta);
                 fail("Should not be able to decrypt BS data");
             } catch (e) {
-                expect(e).toBeInstanceOf(TenantSecurityClientException);
-                expect(e.errorCode).toEqual(ErrorCodes.INVALID_PROVIDED_EDEK);
+                expect(e).toBeInstanceOf(TenantSecurityException);
+                expect(e.errorCode).toEqual(TenantSecurityErrorCode.INVALID_PROVIDED_EDEK);
             }
         });
     });
@@ -137,7 +143,7 @@ describe("INTEGRATION dev environment tests", () => {
                 await client.decryptStream(otherEdek, cipherTextInputStream, roundtripFileStream, TestUtils.getMetadata(GCP_TENANT_ID));
                 fail("Should fail when provided EDEK is invalid");
             } catch (e) {
-                expect(e.errorCode).toEqual(ErrorCodes.DOCUMENT_DECRYPT_FAILED);
+                expect(e.errorCode).toEqual(TenantSecurityErrorCode.DOCUMENT_DECRYPT_FAILED);
                 //When using the wrong EDEK, we shouldn't write any file content
                 expect(fs.readFileSync(roundtripFilePath, "utf-8")).toEqual("");
             }
@@ -155,7 +161,7 @@ describe("INTEGRATION dev environment tests", () => {
                 await client.decryptStream(streamEncryptRes.edek, cipherTextInputStream, roundtripFileStream, TestUtils.getMetadata(GCP_TENANT_ID));
                 fail("Should fail when encrypted data is invalid");
             } catch (e) {
-                expect(e.errorCode).toEqual(ErrorCodes.DOCUMENT_DECRYPT_FAILED);
+                expect(e.errorCode).toEqual(TenantSecurityErrorCode.DOCUMENT_DECRYPT_FAILED);
                 //Some amount of bytes should have been written
                 expect(fs.readFileSync(roundtripFilePath, "utf-8")).not.toEqual("");
             }
@@ -188,8 +194,8 @@ describe("INTEGRATION dev environment tests", () => {
                 await client.encryptDocument(data, meta);
                 fail("Should fail because tenant has no primary KMS config");
             } catch (e) {
-                expect(e).toBeInstanceOf(TenantSecurityClientException);
-                expect(e.errorCode).toEqual(ErrorCodes.NO_PRIMARY_KMS_CONFIGURATION);
+                expect(e).toBeInstanceOf(TenantSecurityException);
+                expect(e.errorCode).toEqual(TenantSecurityErrorCode.NO_PRIMARY_KMS_CONFIGURATION);
             }
         });
 
@@ -201,8 +207,8 @@ describe("INTEGRATION dev environment tests", () => {
                 await await client.encryptDocumentBatch({fail: data}, meta);
                 fail("Should fail because tenant has no primary KMS config");
             } catch (e) {
-                expect(e).toBeInstanceOf(TenantSecurityClientException);
-                expect(e.errorCode).toEqual(ErrorCodes.NO_PRIMARY_KMS_CONFIGURATION);
+                expect(e).toBeInstanceOf(TenantSecurityException);
+                expect(e.errorCode).toEqual(TenantSecurityErrorCode.NO_PRIMARY_KMS_CONFIGURATION);
             }
         });
 
@@ -214,8 +220,8 @@ describe("INTEGRATION dev environment tests", () => {
                 await client.decryptDocument(data, meta);
                 fail("Decrypt should fail because KMS config was disabled");
             } catch (e) {
-                expect(e).toBeInstanceOf(TenantSecurityClientException);
-                expect(e.errorCode).toEqual(ErrorCodes.KMS_CONFIGURATION_DISABLED);
+                expect(e).toBeInstanceOf(TenantSecurityException);
+                expect(e.errorCode).toEqual(TenantSecurityErrorCode.KMS_CONFIGURATION_DISABLED);
             }
         });
 
@@ -259,8 +265,8 @@ describe("INTEGRATION dev environment tests", () => {
             expect(batchReEncryptResult.successes.good.edek).toEqual(existingEdekForEnabledConfig);
             TestUtils.assertEncryptedData(client, batchReEncryptResult.successes.good.encryptedDocument);
 
-            expect(batchReEncryptResult.failures.bad).toBeInstanceOf(TenantSecurityClientException);
-            expect(batchReEncryptResult.failures.bad.errorCode).toEqual(ErrorCodes.KMS_CONFIGURATION_DISABLED);
+            expect(batchReEncryptResult.failures.bad).toBeInstanceOf(TenantSecurityException);
+            expect(batchReEncryptResult.failures.bad.errorCode).toEqual(TenantSecurityErrorCode.KMS_CONFIGURATION_DISABLED);
         });
 
         it("fails to decrypt data from an unknown tenant", async () => {
@@ -271,8 +277,8 @@ describe("INTEGRATION dev environment tests", () => {
                 await client.encryptDocument(data, meta);
                 fail("Should fail because tenant has no primary KMS config");
             } catch (e) {
-                expect(e).toBeInstanceOf(TenantSecurityClientException);
-                expect(e.errorCode).toEqual(ErrorCodes.UNKNOWN_TENANT_OR_NO_ACTIVE_KMS_CONFIGURATIONS);
+                expect(e).toBeInstanceOf(TenantSecurityException);
+                expect(e.errorCode).toEqual(TenantSecurityErrorCode.UNKNOWN_TENANT_OR_NO_ACTIVE_KMS_CONFIGURATIONS);
             }
         });
 
@@ -295,8 +301,8 @@ describe("INTEGRATION dev environment tests", () => {
             expect(batchDecryptResult.successes.good.edek).toEqual(existingEdekForEnabledConfig);
             expect(batchDecryptResult.successes.good.plaintextDocument.bytes.toString("utf-8")).toEqual("Wont happen");
 
-            expect(batchDecryptResult.failures.bad).toBeInstanceOf(TenantSecurityClientException);
-            expect(batchDecryptResult.failures.bad.errorCode).toEqual(ErrorCodes.KMS_CONFIGURATION_DISABLED);
+            expect(batchDecryptResult.failures.bad).toBeInstanceOf(TenantSecurityException);
+            expect(batchDecryptResult.failures.bad.errorCode).toEqual(TenantSecurityErrorCode.KMS_CONFIGURATION_DISABLED);
         });
     });
 
@@ -376,6 +382,17 @@ describe("INTEGRATION dev environment tests", () => {
             const {plaintextDocument} = await client.decryptDocument({edek: leasedDocument.edek, encryptedDocument: data}, meta);
 
             expect(plaintextDocument.foo.toString("utf8")).toEqual("new daters");
+        });
+    });
+
+    describe("log security events", () => {
+        it("sends an event to the TSP for a good tenant.", async () => {
+            const metadata = new EventMetadata(GCP_TENANT_ID, "integrationTest", "sample", undefined, undefined, undefined, "app-request-id");
+
+            // even though this tenant is bad, the response here will be success as the security
+            // event was enqueued for further processing.
+            let resp = await client.logSecurityEvent(UserEvent.ADD, metadata);
+            expect(resp).toBeNull();
         });
     });
 });

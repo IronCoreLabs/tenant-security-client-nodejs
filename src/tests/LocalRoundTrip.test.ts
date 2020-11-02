@@ -1,5 +1,7 @@
 import "jest-extended";
-import {TenantSecurityKmsClient} from "../kms/TenantSecurityKmsClient";
+import {TenantSecurityClient} from "../index";
+import {EventMetadata} from "../security-events/EventMetadata";
+import {UserEvent} from "../security-events/UserEvent";
 import * as TestUtils from "./TestUtils";
 
 //Placeholders to be filled in by devs running tests
@@ -11,10 +13,10 @@ const LOCAL_API_KEY = "";
 const conditionalTest = LOCAL_TENANT_ID && LOCAL_API_KEY ? it : it.skip;
 
 describe("LOCAL Integration Tests", () => {
-    let client: TenantSecurityKmsClient;
+    let client: TenantSecurityClient;
 
     beforeEach(() => {
-        client = new TenantSecurityKmsClient("http://localhost:7777", LOCAL_API_KEY);
+        client = new TenantSecurityClient("http://localhost:7777", LOCAL_API_KEY);
     });
 
     describe("roundtrip encrypt and decrypt", () => {
@@ -28,6 +30,18 @@ describe("LOCAL Integration Tests", () => {
         conditionalTest("should roundtrip batch documents", async () => {
             await TestUtils.runBatchDocumentRoundtripForTenant(client, LOCAL_TENANT_ID);
             await TestUtils.runReusedBatchDocumentRoundtripForTenant(client, LOCAL_TENANT_ID);
+        });
+    });
+
+    describe("log security event", () => {
+        conditionalTest("with a bad tenant sucessfully passes to the TSP.", async () => {
+            const tenant_id = "bad-tenant-id";
+            const metadata = new EventMetadata(tenant_id, "integrationTest", "sample", undefined, undefined, undefined, "app-request-id");
+
+            // even though this tenant is bad, the response here will be success as the security
+            // event was enqueued for further processing.
+            let resp = await client.logSecurityEvent(UserEvent.ADD, metadata);
+            expect(resp).toBeNull();
         });
     });
 });
