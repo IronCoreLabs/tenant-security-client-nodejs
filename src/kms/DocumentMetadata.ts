@@ -1,5 +1,18 @@
 import {clearUndefinedProperties} from "../Util";
 
+export interface DocumentMetadataJson {
+    tenantId: string;
+    iclFields: {
+        requestId?: string;
+        event?: string;
+        sourceIp?: string;
+        objectId?: string;
+        requestingId: string;
+        dataLabel?: string;
+    };
+    customFields: Record<string, string>;
+}
+
 /**
  * Holds metadata fields as part of an encrypted document. Each encrypted document will have
  * metadata that associates it to a tenant ID, which service is accessing the data, its
@@ -8,12 +21,12 @@ import {clearUndefinedProperties} from "../Util";
  */
 export class DocumentMetadata {
     tenantId: string;
-    requestingUserOrServiceId?: string;
+    requestingUserOrServiceId: string;
     dataLabel?: string;
     sourceIp?: string;
     objectId?: string;
     requestId?: string;
-    otherData?: Record<string, string>;
+    otherData: Record<string, string>;
 
     /**
      * Constructor for DocumentMetadata class which contains arbitrary key/value pairs and a unique
@@ -30,7 +43,7 @@ export class DocumentMetadata {
      */
     constructor(
         tenantId: string,
-        requestingUserOrServiceId?: string,
+        requestingUserOrServiceId: string,
         dataLabel?: string,
         sourceIp?: string,
         objectId?: string,
@@ -39,6 +52,9 @@ export class DocumentMetadata {
     ) {
         if (!tenantId) {
             throw new Error("Must provide a valid tenantId for all CMK operations.");
+        }
+        if (!requestingUserOrServiceId) {
+            throw new Error("Must provide a valid requestingUserOrServiceId for all CMK operations.");
         }
         this.tenantId = tenantId;
         this.requestingUserOrServiceId = requestingUserOrServiceId;
@@ -50,14 +66,18 @@ export class DocumentMetadata {
     }
 
     /* eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types*/
-    toJsonStructure = () =>
-        clearUndefinedProperties({
+    toJsonStructure = () => {
+        const json: DocumentMetadataJson = {
             tenantId: this.tenantId,
-            requestingId: this.requestingUserOrServiceId,
-            dataLabel: this.dataLabel,
-            requestId: this.requestId,
-            sourceIp: this.sourceIp,
-            objectId: this.objectId,
+            iclFields: {
+                sourceIp: this.sourceIp,
+                objectId: this.objectId,
+                requestingId: this.requestingUserOrServiceId,
+                dataLabel: this.dataLabel,
+                requestId: this.requestId,
+            },
             customFields: this.otherData,
-        });
+        };
+        return clearUndefinedProperties(json);
+    };
 }

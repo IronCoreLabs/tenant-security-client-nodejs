@@ -1,7 +1,7 @@
 import "jest-extended";
 import {TenantSecurityClient} from "../index";
-import {EventMetadata} from "../security-events/EventMetadata";
-import {UserEvent} from "../security-events/UserEvent";
+import {EventMetadata} from "../logdriver/EventMetadata";
+import {UserEvent} from "../logdriver/UserEvent";
 import * as TestUtils from "./TestUtils";
 
 //Placeholders to be filled in by devs running tests

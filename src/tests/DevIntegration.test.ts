@@ -2,8 +2,8 @@ import * as fs from "fs";
 import "jest-extended";
 import {EncryptedDocumentWithEdek} from "../../tenant-security-nodejs";
 import {TenantSecurityClient, TenantSecurityErrorCode, TenantSecurityException} from "../index";
-import {EventMetadata} from "../security-events/EventMetadata";
-import {UserEvent} from "../security-events/UserEvent";
+import {EventMetadata} from "../logdriver/EventMetadata";
+import {UserEvent} from "../logdriver/UserEvent";
 import {TscException} from "../TscException";
 import * as TestUtils from "./TestUtils";
 

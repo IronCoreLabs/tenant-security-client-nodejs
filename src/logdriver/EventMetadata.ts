@@ -8,7 +8,7 @@ export interface EventMetadataJson {
         event?: string;
         sourceIp?: string;
         objectId?: string;
-        requestingId?: string;
+        requestingId: string;
         dataLabel?: string;
     };
     customFields: Record<string, string>;
@@ -21,7 +21,7 @@ export interface EventMetadataJson {
  */
 export class EventMetadata {
     tenantId: string;
-    requestingUserOrServiceId?: string;
+    requestingUserOrServiceId: string;
     dataLabel?: string;
     timestampMillis: number;
     sourceIp?: string;
@@ -48,7 +48,7 @@ export class EventMetadata {
      */
     constructor(
         tenantId: string,
-        requestingUserOrServiceId?: string,
+        requestingUserOrServiceId: string,
         dataLabel?: string,
         timestampMillis?: number,
         sourceIp?: string,
@@ -58,6 +58,9 @@ export class EventMetadata {
     ) {
         if (!tenantId) {
             throw new Error("Must provide a valid tenantId for all Security Event operations.");
+        }
+        if (!requestingUserOrServiceId) {
+            throw new Error("Must provide a valid requestingUserOrServiceId for all CMK operations.");
         }
         const now = new Date();
         this.tenantId = tenantId;
