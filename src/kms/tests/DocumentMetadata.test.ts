@@ -2,16 +2,20 @@ import {DocumentMetadata} from "../../index";
 
 describe("UNIT DocumentMetdata", () => {
     test("construction fails when tenantId is missing.", () => {
-        expect(() => new DocumentMetadata(undefined as any)).toThrow();
-        expect(() => new DocumentMetadata("tenantId")).not.toThrow();
+        expect(() => new DocumentMetadata(undefined as any, undefined as any)).toThrow();
+        expect(() => new DocumentMetadata("tenantId", undefined as any)).toThrow();
+        expect(() => new DocumentMetadata(undefined as any, "requestingUserOrServiceId")).toThrow();
+        expect(() => new DocumentMetadata("tenantId", "requestingUserOrServiceId")).not.toThrow();
     });
 
     test("returns expected JSON structure", () => {
         const simpleMeta = new DocumentMetadata("tenantId", "user", "label");
         expect(simpleMeta.toJsonStructure()).toEqual({
             tenantId: "tenantId",
-            requestingId: "user",
-            dataLabel: "label",
+            iclFields: {
+                requestingId: "user",
+                dataLabel: "label",
+            },
             customFields: {},
         });
 
@@ -19,11 +23,7 @@ describe("UNIT DocumentMetdata", () => {
 
         expect(withAddedFields.toJsonStructure()).toEqual({
             tenantId: "tenantId",
-            requestingId: "user",
-            dataLabel: "label",
-            requestId: "rayId",
-            sourceIp: "8.8.8.8",
-            objectId: "myDocumentId",
+            iclFields: {dataLabel: "label", requestId: "rayId", sourceIp: "8.8.8.8", objectId: "myDocumentId", requestingId: "user"},
             customFields: {foo: "bar", one: "two"},
         });
     });
@@ -33,10 +33,12 @@ describe("UNIT DocumentMetdata", () => {
 
         expect(withPartialFields.toJsonStructure()).toEqual({
             tenantId: "tenantId",
-            requestingId: "user",
-            dataLabel: "label",
-            requestId: "rayId",
-            objectId: "myDocumentId",
+            iclFields: {
+                requestId: "rayId",
+                objectId: "myDocumentId",
+                requestingId: "user",
+                dataLabel: "label",
+            },
             customFields: {foo: "bar", one: "two"},
         });
     });

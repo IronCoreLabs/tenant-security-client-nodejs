@@ -1,5 +1,5 @@
 import {KmsException} from "../kms/KmsException";
-import {SecurityEventException} from "../security-events/SecurityEvent";
+import {SecurityEventException} from "../logdriver/SecurityEvent";
 import {TenantSecurityErrorCode} from "../TenantSecurityException";
 import {TenantSecurityExceptionUtils} from "../TenantSecurityExceptionUtils";
 import {TscException} from "../TscException";
