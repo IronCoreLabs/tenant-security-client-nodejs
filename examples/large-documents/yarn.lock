@@ -2,13 +2,13 @@
 # yarn lockfile v1
 
 
-"@ironcorelabs/tenant-security-nodejs@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@ironcorelabs/tenant-security-nodejs/-/tenant-security-nodejs-1.0.3.tgz#b16bc8eae1e0f1e420553ac30efbb4e32365f2c8"
-  integrity sha512-dYCq0ByeTrQ9UhRVaboawF69m7vUSwvJzBbNHZeyLc1TDS0L8B1zVkJQzOWAMqzwVNVGGW+Iaj1bpGAcrkSM3A==
+"@ironcorelabs/tenant-security-nodejs@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@ironcorelabs/tenant-security-nodejs/-/tenant-security-nodejs-2.0.0.tgz#383ad4b7749797804ad6cf91e0a9528237cc09eb"
+  integrity sha512-QjSmp8Wwvi7B08sEjtDZ7P4ESDuSDXXE2YJUhAIuLi4mJt+zh4LVOi9R6sCpSba0teekyFliONynDbimGs2utA==
   dependencies:
     futurejs "2.1.1"
-    node-fetch "2.6.0"
+    node-fetch "2.6.1"
     protobufjs "^6.10.1"
 
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
@@ -89,10 +89,10 @@ long@^4.0.0:
   resolved "https://registry.yarnpkg.com/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
   integrity sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==
 
-node-fetch@2.6.0:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.0.tgz#e633456386d4aa55863f676a7ab0daa8fdecb0fd"
-  integrity sha512-8dG4H5ujfvFiqDmVu9fQ5bOHUC15JMjMY/Zumv26oOvvVJjM67KF8koCWIabKQ1GJIa9r2mMZscBq/TbdOcmNA==
+node-fetch@2.6.1:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
+  integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
 
 protobufjs@^6.10.1:
   version "6.10.1"
