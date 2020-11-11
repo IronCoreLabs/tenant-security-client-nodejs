@@ -12,7 +12,7 @@ export class UserEvent extends SecurityEvent {
     static readonly SESSION_TIMEOUT = new UserEvent("SESSION_TIMEOUT");
     static readonly LOCKOUT = new UserEvent("LOCKOUT");
     static readonly LOGOUT = new UserEvent("LOGOUT");
-    static readonly PERMISSIONS_CHANGE = new UserEvent("PERMISSIONS_CHANGE");
+    static readonly CHANGE_PERMISSIONS = new UserEvent("CHANGE_PERMISSIONS");
     static readonly PASSWORD_EXPIRED = new UserEvent("PASSWORD_EXPIRED");
     static readonly PASSWORD_RESET = new UserEvent("PASSWORD_RESET");
     static readonly PASSWORD_CHANGE = new UserEvent("PASSWORD_CHANGE");

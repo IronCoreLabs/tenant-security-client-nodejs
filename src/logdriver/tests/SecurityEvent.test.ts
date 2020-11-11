@@ -32,7 +32,7 @@ describe("UNIT SecurityEvent", () => {
         expect(UserEvent.SESSION_TIMEOUT.getFlatEvent()).toBe("USER_SESSION_TIMEOUT");
         expect(UserEvent.LOCKOUT.getFlatEvent()).toBe("USER_LOCKOUT");
         expect(UserEvent.LOGOUT.getFlatEvent()).toBe("USER_LOGOUT");
-        expect(UserEvent.PERMISSIONS_CHANGE.getFlatEvent()).toBe("USER_PERMISSIONS_CHANGE");
+        expect(UserEvent.CHANGE_PERMISSIONS.getFlatEvent()).toBe("USER_CHANGE_PERMISSIONS");
         expect(UserEvent.PASSWORD_EXPIRED.getFlatEvent()).toBe("USER_PASSWORD_EXPIRED");
         expect(UserEvent.PASSWORD_RESET.getFlatEvent()).toBe("USER_PASSWORD_RESET");
         expect(UserEvent.PASSWORD_CHANGE.getFlatEvent()).toBe("USER_PASSWORD_CHANGE");
