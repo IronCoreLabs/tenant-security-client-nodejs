@@ -3,9 +3,9 @@
 
 
 "@ironcorelabs/tenant-security-nodejs@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@ironcorelabs/tenant-security-nodejs/-/tenant-security-nodejs-2.0.0.tgz#383ad4b7749797804ad6cf91e0a9528237cc09eb"
-  integrity sha512-QjSmp8Wwvi7B08sEjtDZ7P4ESDuSDXXE2YJUhAIuLi4mJt+zh4LVOi9R6sCpSba0teekyFliONynDbimGs2utA==
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@ironcorelabs/tenant-security-nodejs/-/tenant-security-nodejs-2.0.1.tgz#8785375e6547b85a1c682b83a7b46472b618e879"
+  integrity sha512-PS4YmNHL6TbwBPbL1vjZHe0Ka01ItNbwoples26LSP67ALofrTOkp5Zjb4GfH2yeHAy2XrXTADNWmo7I2iAkwg==
   dependencies:
     futurejs "2.1.1"
     node-fetch "2.6.1"
