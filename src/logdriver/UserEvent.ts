@@ -9,19 +9,19 @@ export class UserEvent extends SecurityEvent {
     static readonly SUSPEND = new UserEvent("SUSPEND");
     static readonly REMOVE = new UserEvent("REMOVE");
     static readonly LOGIN = new UserEvent("LOGIN");
-    static readonly SESSION_TIMEOUT = new UserEvent("SESSION_TIMEOUT");
+    static readonly TIMEOUT_SESSION = new UserEvent("TIMEOUT_SESSION");
     static readonly LOCKOUT = new UserEvent("LOCKOUT");
     static readonly LOGOUT = new UserEvent("LOGOUT");
     static readonly CHANGE_PERMISSIONS = new UserEvent("CHANGE_PERMISSIONS");
-    static readonly PASSWORD_EXPIRED = new UserEvent("PASSWORD_EXPIRED");
-    static readonly PASSWORD_RESET = new UserEvent("PASSWORD_RESET");
-    static readonly PASSWORD_CHANGE = new UserEvent("PASSWORD_CHANGE");
-    static readonly BAD_LOGIN = new UserEvent("BAD_LOGIN");
+    static readonly EXPIRE_PASSWORD = new UserEvent("EXPIRE_PASSWORD");
+    static readonly RESET_PASSWORD = new UserEvent("RESET_PASSWORD");
+    static readonly CHANGE_PASSWORD = new UserEvent("CHANGE_PASSWORD");
+    static readonly REJECT_LOGIN = new UserEvent("REJECT_LOGIN");
     static readonly ENABLE_TWO_FACTOR = new UserEvent("ENABLE_TWO_FACTOR");
     static readonly DISABLE_TWO_FACTOR = new UserEvent("DISABLE_TWO_FACTOR");
-    static readonly EMAIL_CHANGE = new UserEvent("EMAIL_CHANGE");
-    static readonly EMAIL_VERIFICATION_REQUESTED = new UserEvent("EMAIL_VERIFICATION_REQUESTED");
-    static readonly EMAIL_VERIFIED = new UserEvent("EMAIL_VERIFIED");
+    static readonly CHANGE_EMAIL = new UserEvent("CHANGE_EMAIL");
+    static readonly REQUEST_EMAIL_VERIFICATION = new UserEvent("REQUEST_EMAIL_VERIFICATION");
+    static readonly VERIFY_EMAIL = new UserEvent("VERIFY_EMAIL");
 
     getFlatEvent(): string {
         return `USER_${this.name}`;

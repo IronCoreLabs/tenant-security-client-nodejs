@@ -17,30 +17,30 @@ describe("UNIT SecurityEvent", () => {
         expect(DataEvent.DECRYPT.getFlatEvent()).toBe("DATA_DECRYPT");
         expect(DataEvent.CREATE.getFlatEvent()).toBe("DATA_CREATE");
         expect(DataEvent.DELETE.getFlatEvent()).toBe("DATA_DELETE");
-        expect(DataEvent.ACCESS_DENIED.getFlatEvent()).toBe("DATA_ACCESS_DENIED");
+        expect(DataEvent.DENY_ACCESS.getFlatEvent()).toBe("DATA_DENY_ACCESS");
         expect(DataEvent.CHANGE_PERMISSIONS.getFlatEvent()).toBe("DATA_CHANGE_PERMISSIONS");
 
         // PERIODIC
-        expect(PeriodicEvent.RETENTION_POLICY_ENFORCED.getFlatEvent()).toBe("PERIODIC_RETENTION_POLICY_ENFORCED");
-        expect(PeriodicEvent.BACKUP_CREATED.getFlatEvent()).toBe("PERIODIC_BACKUP_CREATED");
+        expect(PeriodicEvent.ENFORCE_RETENTION_POLICY.getFlatEvent()).toBe("PERIODIC_ENFORCE_RETENTION_POLICY");
+        expect(PeriodicEvent.CREATE_BACKUP.getFlatEvent()).toBe("PERIODIC_CREATE_BACKUP");
 
         // USER
         expect(UserEvent.ADD.getFlatEvent()).toBe("USER_ADD");
         expect(UserEvent.SUSPEND.getFlatEvent()).toBe("USER_SUSPEND");
         expect(UserEvent.REMOVE.getFlatEvent()).toBe("USER_REMOVE");
         expect(UserEvent.LOGIN.getFlatEvent()).toBe("USER_LOGIN");
-        expect(UserEvent.SESSION_TIMEOUT.getFlatEvent()).toBe("USER_SESSION_TIMEOUT");
+        expect(UserEvent.TIMEOUT_SESSION.getFlatEvent()).toBe("USER_TIMEOUT_SESSION");
         expect(UserEvent.LOCKOUT.getFlatEvent()).toBe("USER_LOCKOUT");
         expect(UserEvent.LOGOUT.getFlatEvent()).toBe("USER_LOGOUT");
         expect(UserEvent.CHANGE_PERMISSIONS.getFlatEvent()).toBe("USER_CHANGE_PERMISSIONS");
-        expect(UserEvent.PASSWORD_EXPIRED.getFlatEvent()).toBe("USER_PASSWORD_EXPIRED");
-        expect(UserEvent.PASSWORD_RESET.getFlatEvent()).toBe("USER_PASSWORD_RESET");
-        expect(UserEvent.PASSWORD_CHANGE.getFlatEvent()).toBe("USER_PASSWORD_CHANGE");
-        expect(UserEvent.BAD_LOGIN.getFlatEvent()).toBe("USER_BAD_LOGIN");
+        expect(UserEvent.EXPIRE_PASSWORD.getFlatEvent()).toBe("USER_EXPIRE_PASSWORD");
+        expect(UserEvent.RESET_PASSWORD.getFlatEvent()).toBe("USER_RESET_PASSWORD");
+        expect(UserEvent.CHANGE_PASSWORD.getFlatEvent()).toBe("USER_CHANGE_PASSWORD");
+        expect(UserEvent.REJECT_LOGIN.getFlatEvent()).toBe("USER_REJECT_LOGIN");
         expect(UserEvent.ENABLE_TWO_FACTOR.getFlatEvent()).toBe("USER_ENABLE_TWO_FACTOR");
         expect(UserEvent.DISABLE_TWO_FACTOR.getFlatEvent()).toBe("USER_DISABLE_TWO_FACTOR");
-        expect(UserEvent.EMAIL_CHANGE.getFlatEvent()).toBe("USER_EMAIL_CHANGE");
-        expect(UserEvent.EMAIL_VERIFICATION_REQUESTED.getFlatEvent()).toBe("USER_EMAIL_VERIFICATION_REQUESTED");
-        expect(UserEvent.EMAIL_VERIFIED.getFlatEvent()).toBe("USER_EMAIL_VERIFIED");
+        expect(UserEvent.CHANGE_EMAIL.getFlatEvent()).toBe("USER_CHANGE_EMAIL");
+        expect(UserEvent.REQUEST_EMAIL_VERIFICATION.getFlatEvent()).toBe("USER_REQUEST_EMAIL_VERIFICATION");
+        expect(UserEvent.VERIFY_EMAIL.getFlatEvent()).toBe("USER_VERIFY_EMAIL");
     });
 });
