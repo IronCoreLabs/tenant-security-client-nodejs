@@ -47,3 +47,50 @@ export const clearUndefinedProperties = (obj: {[key: string]: any}): {[key: stri
     return local;
 };
 /* eslint-enable @typescript-eslint/no-explicit-any */
+
+export type Base64String = string;
+
+/**
+ * Data to encrypt via the customer's KMS. A document is a collection of 1-N fields that get encrypted
+ * with the same KMS key (but use a different IV). Fields contain a name/ID to the bytes of that field
+ * to encrypt.
+ */
+type Document = Record<string, Buffer>;
+
+//Input type for single encrypt operation
+export type PlaintextDocument = Document;
+
+//Result of single encrypt operation
+export interface EncryptedDocumentWithEdek {
+    encryptedDocument: EncryptedDocument;
+    edek: Base64String;
+}
+
+export interface StreamingResponse {
+    edek: Base64String;
+}
+
+//Input type for single decrypt operation
+export type EncryptedDocument = Document;
+
+//Result of single decrypt operation
+export interface PlaintextDocumentWithEdek {
+    plaintextDocument: PlaintextDocument;
+    edek: Base64String;
+}
+
+//Input type for batch encrypt of new fields
+export type PlaintextDocumentCollection = Record<string, PlaintextDocument>;
+//Input type for batch decrypt of existing fields
+export type PlaintextDocumentWithEdekCollection = Record<string, PlaintextDocumentWithEdek>;
+
+//Input type for batch decrypt
+export type EncryptedDocumentWithEdekCollection = Record<string, EncryptedDocumentWithEdek>;
+
+//Result type of batch operations
+export interface BatchResult<T> {
+    successes: Record<string, T>;
+    failures: Record<string, TenantSecurityException>;
+    hasSuccesses: boolean;
+    hasFailures: boolean;
+}

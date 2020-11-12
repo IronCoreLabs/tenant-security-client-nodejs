@@ -1,7 +1,6 @@
 import Future from "futurejs";
-import {Base64String} from "../../tenant-security-nodejs";
 import {TenantSecurityException} from "../TenantSecurityException";
-import {makeJsonRequest} from "../Util";
+import {Base64String, makeJsonRequest} from "../Util";
 import {DocumentMetadata} from "./DocumentMetadata";
 
 export interface ApiErrorResponse {
