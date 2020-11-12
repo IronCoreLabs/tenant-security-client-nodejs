@@ -2,13 +2,13 @@
 # yarn lockfile v1
 
 
-"@ironcorelabs/tenant-security-nodejs@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@ironcorelabs/tenant-security-nodejs/-/tenant-security-nodejs-1.0.3.tgz#b16bc8eae1e0f1e420553ac30efbb4e32365f2c8"
-  integrity sha512-dYCq0ByeTrQ9UhRVaboawF69m7vUSwvJzBbNHZeyLc1TDS0L8B1zVkJQzOWAMqzwVNVGGW+Iaj1bpGAcrkSM3A==
+"@ironcorelabs/tenant-security-nodejs@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@ironcorelabs/tenant-security-nodejs/-/tenant-security-nodejs-2.0.0.tgz#383ad4b7749797804ad6cf91e0a9528237cc09eb"
+  integrity sha512-QjSmp8Wwvi7B08sEjtDZ7P4ESDuSDXXE2YJUhAIuLi4mJt+zh4LVOi9R6sCpSba0teekyFliONynDbimGs2utA==
   dependencies:
     futurejs "2.1.1"
-    node-fetch "2.6.0"
+    node-fetch "2.6.1"
     protobufjs "^6.10.1"
 
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
@@ -70,14 +70,14 @@
   integrity sha512-5tXH6Bx/kNGd3MgffdmP4dy2Z+G4eaXw0SE81Tq3BNadtnMR5/ySMzX4SLEzHJzSmPNn4HIdpQsBvXMUykr58w==
 
 "@types/node@^13.7.0":
-  version "13.13.29"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.13.29.tgz#2d9362387bd125f02fb111e8fc81cca8e9aaa5b2"
-  integrity sha512-WPGpyEDx4/F4Rx1p1Zar8m+JsMxpSY/wNFPlyNXWV+UzJwkYt3LQg2be/qJgpsLdVJsfxTR5ipY6rv2579jStQ==
+  version "13.13.30"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.13.30.tgz#1ed6e01e4ca576d5aec9cc802cc3bcf94c274192"
+  integrity sha512-HmqFpNzp3TSELxU/bUuRK+xzarVOAsR00hzcvM0TXrMlt/+wcSLa5q6YhTb6/cA6wqDCZLDcfd8fSL95x5h7AA==
 
 "@types/node@^14.6.0":
-  version "14.14.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.5.tgz#e92d3b8f76583efa26c1a63a21c9d3c1143daa29"
-  integrity sha512-H5Wn24s/ZOukBmDn03nnGTp18A60ny9AmCwnEcgJiTgSGsCO7k+NWP7zjCCbhlcnVCoI+co52dUAt9GMhOSULw==
+  version "14.14.7"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.7.tgz#8ea1e8f8eae2430cf440564b98c6dfce1ec5945d"
+  integrity sha512-Zw1vhUSQZYw+7u5dAwNbIA9TuTotpzY/OF7sJM9FqPOF3SPjKnxrjoTktXDZgUjybf4cWVBP7O8wvKdSaGHweg==
 
 futurejs@2.1.1:
   version "2.1.1"
@@ -89,10 +89,10 @@ long@^4.0.0:
   resolved "https://registry.yarnpkg.com/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
   integrity sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==
 
-node-fetch@2.6.0:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.0.tgz#e633456386d4aa55863f676a7ab0daa8fdecb0fd"
-  integrity sha512-8dG4H5ujfvFiqDmVu9fQ5bOHUC15JMjMY/Zumv26oOvvVJjM67KF8koCWIabKQ1GJIa9r2mMZscBq/TbdOcmNA==
+node-fetch@2.6.1:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
+  integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
 
 protobufjs@^6.10.1:
   version "6.10.1"
