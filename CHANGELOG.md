@@ -1,3 +1,7 @@
+## 2.0.1
+
+-   Fixed type definitions for 2.0.0, pulled 2.0.0
+
 ## 2.0.0
 
 -   Added `TenantSecurityClient.logSecurityEvent` method and supporting `SecurityEvent` and `EventMetadata` types
