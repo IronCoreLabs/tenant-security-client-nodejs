@@ -1,3 +1,7 @@
+import {EventMetadata} from "../logdriver/EventMetadata";
+import {SecurityEvent} from "../logdriver/SecurityEvent";
+import * as SecurityEventApi from "../logdriver/SecurityEventApi";
+import {TenantSecurityException} from "../TenantSecurityException";
 import {
     Base64String,
     BatchResult,
@@ -8,11 +12,7 @@ import {
     PlaintextDocumentWithEdek,
     PlaintextDocumentWithEdekCollection,
     StreamingResponse,
-} from "../../tenant-security-nodejs";
-import {EventMetadata} from "../logdriver/EventMetadata";
-import {SecurityEvent} from "../logdriver/SecurityEvent";
-import * as SecurityEventApi from "../logdriver/SecurityEventApi";
-import {TenantSecurityException} from "../TenantSecurityException";
+} from "../Util";
 import * as Crypto from "./Crypto";
 import {DocumentMetadata} from "./DocumentMetadata";
 import * as KmsApi from "./KmsApi";

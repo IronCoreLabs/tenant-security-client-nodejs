@@ -1,10 +1,10 @@
 import * as fs from "fs";
 import "jest-extended";
-import {EncryptedDocumentWithEdek} from "../../tenant-security-nodejs";
 import {TenantSecurityClient, TenantSecurityErrorCode, TenantSecurityException} from "../index";
 import {EventMetadata} from "../logdriver/EventMetadata";
 import {UserEvent} from "../logdriver/UserEvent";
 import {TscException} from "../TscException";
+import {EncryptedDocumentWithEdek} from "../Util";
 import * as TestUtils from "./TestUtils";
 
 const GCP_TENANT_ID = "INTEGRATION-TEST-DEV1-GCP";

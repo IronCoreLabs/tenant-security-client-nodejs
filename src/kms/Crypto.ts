@@ -3,6 +3,9 @@ import Future from "futurejs";
 import {pipeline} from "stream";
 import {promisify} from "util";
 import {ironcorelabs} from "../../proto/ts/DocumentHeader";
+import {TenantSecurityErrorCode, TenantSecurityException} from "../TenantSecurityException";
+import {TenantSecurityExceptionUtils} from "../TenantSecurityExceptionUtils";
+import {TscException} from "../TscException";
 import {
     Base64String,
     EncryptedDocument,
@@ -12,10 +15,7 @@ import {
     PlaintextDocumentCollection,
     PlaintextDocumentWithEdek,
     PlaintextDocumentWithEdekCollection,
-} from "../../tenant-security-nodejs";
-import {TenantSecurityErrorCode, TenantSecurityException} from "../TenantSecurityException";
-import {TenantSecurityExceptionUtils} from "../TenantSecurityExceptionUtils";
-import {TscException} from "../TscException";
+} from "../Util";
 import {AES_ALGORITHM, AES_GCM_TAG_LENGTH, CURRENT_DOCUMENT_HEADER_VERSION, DOCUMENT_MAGIC, HEADER_META_LENGTH_LENGTH, IV_BYTE_LENGTH} from "./Constants";
 import {BatchUnwrapKeyResponse, BatchWrapKeyResponse} from "./KmsApi";
 import {StreamingDecryption, StreamingEncryption} from "./StreamingAes";

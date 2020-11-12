@@ -1,6 +1,7 @@
 import "jest-extended";
-import {PlaintextDocument, PlaintextDocumentCollection, PlaintextDocumentWithEdekCollection, TenantSecurityClient} from "../../tenant-security-nodejs";
+import {TenantSecurityClient} from "../index";
 import {DocumentMetadata} from "../kms/DocumentMetadata";
+import {PlaintextDocument, PlaintextDocumentCollection, PlaintextDocumentWithEdekCollection} from "../Util";
 
 export const getDataToEncrypt = (): PlaintextDocument => ({
     field1: Buffer.from("Cras sit amet neque vel eros fermentum molestie.", "utf8"),

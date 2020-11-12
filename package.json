@@ -1,13 +1,13 @@
 {
     "name": "@ironcorelabs/tenant-security-nodejs",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "description": "NodeJS client library for the IronCore Labs Tenant Security Proxy.",
     "homepage": "https://ironcorelabs.com/docs",
     "main": "src/index.js",
     "repository": "git@github.com:IronCoreLabs/tenant-security-client-nodejs.git",
     "author": "IronCore Labs",
     "license": "AGPL-3.0-only",
-    "types": "tenant-security-nodejs.d.ts",
+    "types": "src/index.d.ts",
     "engines": {
         "node": ">=10.0.0"
     },
