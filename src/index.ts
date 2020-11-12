@@ -5,3 +5,4 @@ export * from "./logdriver/SecurityEvent";
 export * from "./TenantSecurityException";
 export * from "./TscException";
 export * from "./TspServiceException";
+export * from "./Util";
