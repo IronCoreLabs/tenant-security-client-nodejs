@@ -1,3 +1,7 @@
+## 2.0.2
+
+-   Renamed some events for consistency, pulled 2.0.1
+
 ## 2.0.1
 
 -   Fixed type definitions for 2.0.0, pulled 2.0.0
