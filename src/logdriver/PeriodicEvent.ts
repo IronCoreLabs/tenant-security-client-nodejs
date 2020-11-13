@@ -5,8 +5,8 @@ export class PeriodicEvent extends SecurityEvent {
         super(name);
     }
 
-    static readonly RETENTION_POLICY_ENFORCED = new PeriodicEvent("RETENTION_POLICY_ENFORCED");
-    static readonly BACKUP_CREATED = new PeriodicEvent("BACKUP_CREATED");
+    static readonly ENFORCE_RETENTION_POLICY = new PeriodicEvent("ENFORCE_RETENTION_POLICY");
+    static readonly CREATE_BACKUP = new PeriodicEvent("CREATE_BACKUP");
 
     getFlatEvent(): string {
         return `PERIODIC_${this.name}`;

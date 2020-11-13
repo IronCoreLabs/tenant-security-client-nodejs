@@ -11,7 +11,7 @@ export class DataEvent extends SecurityEvent {
     static readonly DECRYPT = new DataEvent("DECRYPT");
     static readonly CREATE = new DataEvent("CREATE");
     static readonly DELETE = new DataEvent("DELETE");
-    static readonly ACCESS_DENIED = new DataEvent("ACCESS_DENIED");
+    static readonly DENY_ACCESS = new DataEvent("DENY_ACCESS");
     static readonly CHANGE_PERMISSIONS = new DataEvent("CHANGE_PERMISSIONS");
 
     getFlatEvent(): string {
