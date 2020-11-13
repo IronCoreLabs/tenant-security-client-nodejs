@@ -14,6 +14,7 @@
 
 const path = require("path");
 const shell = require("shelljs");
+const prompt = require("prompt");
 const package = require("./package.json");
 
 //Fail this script if any of these commands fail
@@ -21,6 +22,7 @@ shell.set("-e");
 
 const args = process.argv.slice(2);
 const SHOULD_PUBLISH = args.indexOf("--publish") !== -1;
+const OTP_REQUIRED = args.indexOf("--otp") !== -1;
 
 if (args.indexOf("-h") !== -1 || args.indexOf("--help") !== -1) {
     shell.echo("Build script to compile the NodeJS TSC.");
@@ -36,7 +38,27 @@ if (args.indexOf("-h") !== -1 || args.indexOf("--help") !== -1) {
  */
 function publishModule() {
     shell.pushd("./dist");
-    shell.exec(SHOULD_PUBLISH ? "npm publish --access public" : "npm publish --dry-run");
+    if (SHOULD_PUBLISH) {
+        if (OTP_REQUIRED) {
+            prompt.start();
+            prompt.get([{
+                    name: 'otp_code',
+                    pattern: /^\d{6}$/,
+                    message: 'Code must be a six-digit number',
+                    required: true
+                }], function (err, result) {
+                if (err) {
+                    console.log(err);
+                    return 1;
+                }
+                shell.exec("npm publish --access public --otp=" + result.otp_code);
+            });
+        } else {
+            shell.exec("npm publish --access public");
+        }
+    } else {
+        shell.exec("npm publish --dry-run");
+    }
     shell.popd();
 }
 
@@ -87,7 +109,7 @@ function ensureNoChangesOnMasterBeforePublish() {
 const buildScriptDirectory = path.dirname(process.argv[1]);
 shell.cd(path.join(buildScriptDirectory));
 
-ensureNoChangesOnMasterBeforePublish();
+//ensureNoChangesOnMasterBeforePublish();
 
 //Clean up any existing dist directory
 shell.rm("-rf", "./dist");
