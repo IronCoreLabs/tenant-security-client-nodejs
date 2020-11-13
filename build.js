@@ -109,7 +109,7 @@ function ensureNoChangesOnMasterBeforePublish() {
 const buildScriptDirectory = path.dirname(process.argv[1]);
 shell.cd(path.join(buildScriptDirectory));
 
-//ensureNoChangesOnMasterBeforePublish();
+ensureNoChangesOnMasterBeforePublish();
 
 //Clean up any existing dist directory
 shell.rm("-rf", "./dist");
