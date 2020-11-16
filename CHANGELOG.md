@@ -1,3 +1,7 @@
+## 2.0.3
+
+-   Fix EventMetadata default timestamp
+
 ## 2.0.2
 
 -   Renamed some events for consistency, pulled 2.0.1
