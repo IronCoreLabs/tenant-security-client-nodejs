@@ -15,7 +15,7 @@ if (API_KEY === undefined) {
 let TENANT_ID = process.env.TENANT_ID;
 
 if (TENANT_ID === undefined) {
-    TENANT_ID = "tenant-gcp";
+    TENANT_ID = "tenant-gcp-l";
 }
 console.log(`Using tenant ${TENANT_ID}.`);
 
@@ -28,7 +28,8 @@ const client = new TenantSecurityClient("http://localhost:32804", API_KEY);
 //
 // Create metadata about the event. This example populates all possible fields with a value, including the
 // otherData map. Sets the timestamp to 5 seconds before the current data/time.
-const metadata1 = new EventMetadata(TENANT_ID, "userId1", "PII", Date.now() - 5000, "127.0.0.1", "userId1", "Rq8675309");
+const otherData = { "field1": "gumby", "field2": "pokey" };
+const metadata1 = new EventMetadata(TENANT_ID, "userId1", "PII", Date.now() - 5000, "127.0.0.1", "userId1", "Rq8675309", otherData);
 client
     .logSecurityEvent(UserEvent.LOGIN, metadata1)
     .then((logResult) => {
