@@ -62,11 +62,10 @@ export class EventMetadata {
         if (!requestingUserOrServiceId) {
             throw new Error("Must provide a valid requestingUserOrServiceId for all CMK operations.");
         }
-        const now = new Date();
         this.tenantId = tenantId;
         this.requestingUserOrServiceId = requestingUserOrServiceId;
         this.dataLabel = dataLabel;
-        this.timestampMillis = timestampMillis || now.getTime() + now.getTimezoneOffset() * 60 * 1000;
+        this.timestampMillis = timestampMillis || Date.now();
         this.sourceIp = sourceIp;
         this.objectId = objectId;
         this.requestId = requestId;

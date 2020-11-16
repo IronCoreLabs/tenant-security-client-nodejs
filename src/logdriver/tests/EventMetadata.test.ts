@@ -51,7 +51,8 @@ describe("UNIT EventMetadata", () => {
 
     test("defaults timestamp to something close to now", () => {
         const withPartialFields = new EventMetadata("tenantId", "user", "label");
+        const now = Date.now();
 
-        expect(withPartialFields.toJsonStructure().timestampMillis).toBeGreaterThan(Date.now() - 1000);
+        expect(withPartialFields.toJsonStructure().timestampMillis).toBeWithin(now - 1000, now + 1000);
     });
 });
