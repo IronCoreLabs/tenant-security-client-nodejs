@@ -1,5 +1,4 @@
 import {AdminEvent, EventMetadata, TenantSecurityClient, UserEvent} from "@ironcorelabs/tenant-security-nodejs";
-import {DocumentMetadata} from "@ironcorelabs/tenant-security-nodejs";
 
 // In order to communicate with the TSP, you need a matching API_KEY. Find the right value from
 // end of the TSP configuration file, and set the API_KEY environment variable to that value.
