@@ -38,3 +38,15 @@ Once the version is updated and committed, simply run `./build.js --publish` to 
 If your account is configured to require a One-Time Passcode (OTP), add `--otp` to the command line.
 When the build is complete and the script is ready to push the package, it will prompt you to enter your OTP to continue.
 
+## CI Automated Tests
+
+The CI job runs tests using the [tenant-security-proxy](https://github.com/IronCoreLabs/tenant-security-proxy) repo.
+If your tests don't build again the default branch of that repo, you can change it by adding a command to the pull request. The
+comment should contain the string `CI_branches` and a JSON object like
+`{"tenant-security-proxy": "some_branch"}`. You can include formatting, prose, or a haiku,
+but no `{` or `}` characters. Example:
+```
+CI_branches: `{"tenant-security-proxy": "some_branch"}`
+
+This new branch needs to build against some_branch.
+```
