@@ -34,7 +34,7 @@ describe("LOCAL Integration Tests", () => {
     });
 
     describe("log security event", () => {
-        conditionalTest("with a bad tenant sucessfully passes to the TSP.", async () => {
+        conditionalTest("with a bad tenant successfully passes to the TSP.", async () => {
             const tenant_id = "bad-tenant-id";
             const metadata = new EventMetadata(tenant_id, "integrationTest", "sample", undefined, undefined, undefined, "app-request-id");
 
