@@ -10,7 +10,7 @@ on:
 jobs:
   build_and_test:
     runs-on: ubuntu-20.04
-    needs: get_refs
+    # needs: get_refs TODO: uncomment
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2.1.2
@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: IronCoreLabs/tenant-security-proxy
-          ref: ${{ needs.get_refs.outputs.tenant-security-proxy }}
+          ref: master # TODO change back to: ${{ needs.get_refs.outputs.tenant-security-proxy }}
           path: tenant-security-proxy
           token: ${{ secrets.TSP_PAT }}
       # Work around https://github.com/actions/cache/issues/133#issuecomment-599102035
