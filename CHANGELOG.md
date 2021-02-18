@@ -1,3 +1,7 @@
+## 2.1.0 (Unreleased)
+
+-   Added `TenantSecurityClient.rekeyDocument` method and support `RekeyResponse` type
+
 ## 2.0.3
 
 -   Fix EventMetadata default timestamp

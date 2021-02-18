@@ -18,6 +18,8 @@ interface WrapKeyResponse {
     edek: Base64String;
 }
 
+export type RekeyResponse = WrapKeyResponse;
+
 export type BatchWrapKeyResponse = BatchResponse<WrapKeyResponse>;
 
 interface UnwrapKeyResponse {
@@ -30,6 +32,7 @@ const WRAP_ENDPOINT = "document/wrap";
 const UNWRAP_ENDPOINT = "document/unwrap";
 const BATCH_WRAP_ENDPOINT = "document/batch-wrap";
 const BATCH_UNWRAP_ENDPOINT = "document/batch-unwrap";
+const REKEY_ENDPOINT = "document/rekey";
 
 /**
  * Generate and wrap a new key via the tenant's KMS.
@@ -91,5 +94,27 @@ export const batchUnwrapKey = (
         JSON.stringify({
             ...metadata.toJsonStructure(),
             edeks,
+        })
+    );
+
+/**
+ * Take an EDEK and send it to the tenant's KMS via the TSP to be unwrapped,
+ * then send the key to the new tenant's KMS via the TSP to be wrapped.
+ */
+export const rekeyKey = (
+    tspDomain: string,
+    apiKey: string,
+    edek: Base64String,
+    newTenantId: string,
+    metadata: DocumentMetadata
+): Future<TenantSecurityException, RekeyResponse> =>
+    makeJsonRequest(
+        tspDomain,
+        apiKey,
+        REKEY_ENDPOINT,
+        JSON.stringify({
+            ...metadata.toJsonStructure(),
+            encryptedDocumentKey: edek,
+            newTenantId,
         })
     );
