@@ -183,8 +183,9 @@ export class TenantSecurityClient {
     };
 
     /**
-     * Re-key a document to the provided tenant ID. Takes the document and EDEK returned on encrypt and unwraps the EDEK via
+     * Re-key a document to the a new tenant ID. Takes the document and EDEK returned on encrypt and unwraps the EDEK via
      * the original tenant's KMS. Then re-wraps that DEK with the new tenant's KMS and returns an unchanged EncryptedDocument with a new EDEK.
+     * The old tenant and new tenant can be the same in order to re-key the document to the tenant's latest primary config.
      */
     rekeyDocument = (encryptedDoc: EncryptedDocumentWithEdek, newTenantId: string, metadata: DocumentMetadata): Promise<EncryptedDocumentWithEdek> =>
         KmsApi.rekeyKey(this.tspDomain, this.apiKey, encryptedDoc.edek, newTenantId, metadata)
