@@ -188,7 +188,7 @@ export class TenantSecurityClient {
      */
     rekeyDocument = (encryptedDoc: EncryptedDocumentWithEdek, newTenantId: string, metadata: DocumentMetadata): Promise<EncryptedDocumentWithEdek> =>
         KmsApi.rekeyKey(this.tspDomain, this.apiKey, encryptedDoc.edek, newTenantId, metadata)
-            .map((rekeyResponse) => <EncryptedDocumentWithEdek>{encryptedDocument: encryptedDoc.encryptedDocument, edek: rekeyResponse.edek})
+            .map((rekeyResponse) => ({encryptedDocument: encryptedDoc.encryptedDocument, edek: rekeyResponse.edek}))
             .toPromise();
 
     /**
