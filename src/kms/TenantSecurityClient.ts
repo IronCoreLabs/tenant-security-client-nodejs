@@ -183,6 +183,16 @@ export class TenantSecurityClient {
     };
 
     /**
+     * Re-key a document to the a new tenant ID. Takes the document and EDEK returned on encrypt and unwraps the EDEK via
+     * the original tenant's KMS. Then re-wraps that DEK with the new tenant's KMS and returns an unchanged EncryptedDocument with a new EDEK.
+     * The old tenant and new tenant can be the same in order to re-key the document to the tenant's latest primary config.
+     */
+    rekeyDocument = (encryptedDoc: EncryptedDocumentWithEdek, newTenantId: string, metadata: DocumentMetadata): Promise<EncryptedDocumentWithEdek> =>
+        KmsApi.rekeyKey(this.tspDomain, this.apiKey, encryptedDoc.edek, newTenantId, metadata)
+            .map((rekeyResponse) => ({encryptedDocument: encryptedDoc.encryptedDocument, edek: rekeyResponse.edek}))
+            .toPromise();
+
+    /**
      * Send the provided security event to the TSP to be logged and analyzed. Returns void if
      * the security event was successfully received. Note that logging a security event is an asynchronous operation
      * at the TSP, so successful receipt of a security event does not mean that the event is deliverable or has

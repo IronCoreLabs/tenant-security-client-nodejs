@@ -49,6 +49,14 @@
         "trailingComma": "es5",
         "bracketSpacing": false,
         "jsxBracketSameLine": true,
-        "arrowParens": "always"
+        "arrowParens": "always",
+        "overrides": [
+            {
+                "files": "*.yml",
+                "options": {
+                    "tabWidth": 2
+                }
+            }
+        ]
     }
 }

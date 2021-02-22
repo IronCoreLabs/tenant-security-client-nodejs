@@ -1,6 +1,6 @@
 import {DocumentMetadata} from "../../index";
 
-describe("UNIT DocumentMetdata", () => {
+describe("UNIT DocumentMetadata", () => {
     test("construction fails when tenantId is missing.", () => {
         expect(() => new DocumentMetadata(undefined as any, undefined as any)).toThrow();
         expect(() => new DocumentMetadata("tenantId", undefined as any)).toThrow();

@@ -185,6 +185,32 @@ describe("INTEGRATION dev environment tests", () => {
         });
     });
 
+    describe("roundtrip re-key encrypt and decrypt", () => {
+        it("roundtrips a collection of fields from AWS to self", async () => {
+            await TestUtils.runSingleDocumentRekeyRoundTripForTenants(client, AWS_TENANT_ID, AWS_TENANT_ID);
+        });
+
+        it("roundtrips a collection of fields from AWS to GCP", async () => {
+            await TestUtils.runSingleDocumentRekeyRoundTripForTenants(client, AWS_TENANT_ID, GCP_TENANT_ID);
+        });
+
+        it("roundtrips a collection of fields from GCP to self", async () => {
+            await TestUtils.runSingleDocumentRekeyRoundTripForTenants(client, GCP_TENANT_ID, GCP_TENANT_ID);
+        });
+
+        it("roundtrips a collection of fields from GCP to Azure", async () => {
+            await TestUtils.runSingleDocumentRekeyRoundTripForTenants(client, GCP_TENANT_ID, AZURE_TENANT_ID);
+        });
+
+        it("roundtrips a collection of fields from Azure to self", async () => {
+            await TestUtils.runSingleDocumentRekeyRoundTripForTenants(client, AZURE_TENANT_ID, AZURE_TENANT_ID);
+        });
+
+        it("roundtrips a collection of fields from Azure to AWS", async () => {
+            await TestUtils.runSingleDocumentRekeyRoundTripForTenants(client, AZURE_TENANT_ID, AWS_TENANT_ID);
+        });
+    });
+
     describe("test tenant with multiple configs", () => {
         it("fails to encrypt new data with no primary config", async () => {
             const data = TestUtils.getDataToEncrypt();

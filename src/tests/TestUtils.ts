@@ -147,3 +147,23 @@ export const runReusedBatchDocumentRoundtripForTenant = async (client: TenantSec
     expect(decryptResult.successes.batch4.plaintextDocument).toEqual(data.batch4);
     expect(decryptResult.successes.batch5.plaintextDocument).toEqual(data.batch5);
 };
+
+export const runSingleDocumentRekeyRoundTripForTenants = async (client: TenantSecurityClient, tenant1: string, tenant2: string) => {
+    const metadata = getMetadata(tenant1);
+    const data = getDataToEncrypt();
+
+    const encryptResult = await client.encryptDocument(data, metadata);
+    expect(encryptResult.edek).not.toBeEmpty();
+    assertEncryptedData(client, encryptResult.encryptedDocument);
+
+    const rekeyResult = await client.rekeyDocument(encryptResult, tenant2, metadata);
+    expect(rekeyResult.edek).not.toBeEmpty();
+    assertEncryptedData(client, rekeyResult.encryptedDocument);
+    expect(rekeyResult.encryptedDocument).toEqual(encryptResult.encryptedDocument);
+
+    const newMetadata = getMetadata(tenant2);
+    const decryptResult = await client.decryptDocument(rekeyResult, newMetadata);
+
+    expect(decryptResult.edek).toEqual(rekeyResult.edek);
+    expect(decryptResult.plaintextDocument.field1).toEqual(data.field1);
+};
