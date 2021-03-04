@@ -4,7 +4,6 @@ A NodeJS client SDK for implementing Customer Managed Keys (CMK) within a vendor
 This SDK is inserted into your application. Once it is initialized properly, it makes requests through the
 [IronCore Tenant Security Proxy](https://gcr.io/ironcore-images/tenant-security-proxy) to tenants' KMS and logging infrastructures.
 
-
 More extensive documentation about usage is available on our [docs site](https://ironcorelabs.com/docs/saas-shield/tenant-security-client/overview/).
 
 ## Installation
@@ -23,6 +22,6 @@ Check in the `examples` subdirectory - there are subdirectories for some example
 
 ## License
 
-The Tenant Security Client is licensed under the [GNU Affero General Public License](https://github.com/IronCoreLabs/ironoxide/blob/master/LICENSE). We also offer commercial licenses - [email](mailto:info@ironcorelabs.com) for more information.
+The Tenant Security Client is licensed under the [GNU Affero General Public License](https://github.com/IronCoreLabs/ironoxide/blob/main/LICENSE). We also offer commercial licenses - [email](mailto:info@ironcorelabs.com) for more information.
 
-Copyright (c) 2020 IronCore Labs, Inc. All rights reserved.
+Copyright (c) 2021 IronCore Labs, Inc. All rights reserved.
