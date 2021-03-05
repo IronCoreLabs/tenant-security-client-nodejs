@@ -20,8 +20,8 @@ created in IronCore's staging infrastructure.
 The following commands will get a TSP running on your computer with the provided configuration:
 
 ```bash
-docker pull gcr.io/ironcore-images/tenant-security-proxy:2.1
-docker run --env-file demo-tsp.conf -p 32804:7777 gcr.io/ironcore-images/tenant-security-proxy:2.1
+docker pull gcr.io/ironcore-images/tenant-security-proxy:3.3
+docker run --env-file demo-tsp.conf -p 32804:7777 gcr.io/ironcore-images/tenant-security-proxy:3.3
 ```
 
 This starts the TSP locally listening on port 32804.
@@ -29,17 +29,15 @@ This starts the TSP locally listening on port 32804.
 Once the TSP is running, you can experiment with the example Node programs. Each of the subdirectories contains
 a different illustrative example, with instructions to run.
 
-
-
 Each of the examples executes as an individual tenant of our demo SaaS vendor. There are six tenants defined;
 their IDs are the following:
 
-- tenant-gcp
-- tenant-aws
-- tenant-azure
-- tenant-gcp-l
-- tenant-aws-l
-- tenant-azure-l
+-   tenant-gcp
+-   tenant-aws
+-   tenant-azure
+-   tenant-gcp-l
+-   tenant-aws-l
+-   tenant-azure-l
 
 The last three are similar to the first three, but they have _key leasing_ enabled.
 
