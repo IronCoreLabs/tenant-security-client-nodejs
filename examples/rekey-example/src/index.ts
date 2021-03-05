@@ -1,5 +1,4 @@
 import {DocumentMetadata, TenantSecurityClient} from "@ironcorelabs/tenant-security-nodejs/";
-import * as fs from "fs";
 
 //
 // Three parts:

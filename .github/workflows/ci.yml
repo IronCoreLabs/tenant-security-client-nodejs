@@ -133,7 +133,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           version: 10.x
-      - name: build and unit test
+      - name: compilation check
         run: |
           yarn
           yarn tsc --target ES6 --sourceMap false --module CommonJS --outDir ./dist/src src/index.ts
