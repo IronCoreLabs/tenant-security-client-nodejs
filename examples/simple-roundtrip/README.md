@@ -7,8 +7,8 @@ yet.
 Once the TSP is running, you can experiment with this example Node program. It illustrates the basics of how
 to use the Tenant Security Client (TSC) SDK to encrypt and decrypt data. The example code shows two scenarios:
 
-* encryption and decryption of a record that you might store in a key-value store or a database, and
-* encryption and decryption of a file.
+-   encryption and decryption of a record that you might store in a key-value store or a database, and
+-   encryption and decryption of a file.
 
 To run the example, you will need to have Node installed on your computer. Try a `node -v` to see
 what version you are using. We tested the example code using v10.22.0 and v12.0.0.
@@ -22,7 +22,7 @@ yarn start
 ```
 
 We've assigned an API key for you, but in production you will make your own and edit the TSP
-configuration with it.  This should produce output like:
+configuration with it. This should produce output like:
 
 ```bash
 yarn run v1.22.5
@@ -33,13 +33,13 @@ Jim Bridger
 ✨  Done in 3.60s.
 ```
 
-The output "Jim Bridger" is printed after round-tripping encrypion and decryption of a Javascript
+The output "Jim Bridger" is printed after round-tripping encryption and decryption of a Javascript
 object with that value.
 
-If you look in the current directory, you'll find a *success.jpg* file. The example code encrypted
-that file to produce a *success.jpg.enc* file containing the encrypted file data, and a second file
-*success.jpt.edek* that contains the Encrypted Data Encryption Key (EDEK) that is required to
-decrypt the file. It then used that EDEK to decrypt the *.enc* file, writing a *decrypted.jpg* file.
+If you look in the current directory, you'll find a _success.jpg_ file. The example code encrypted
+that file to produce a _success.jpg.enc_ file containing the encrypted file data, and a second file
+_success.jpt.edek_ that contains the Encrypted Data Encryption Key (EDEK) that is required to
+decrypt the file. It then used that EDEK to decrypt the _.enc_ file, writing a _decrypted.jpg_ file.
 
 If you do a `cksum success.jpg decrypted.jpg`, you can confirm that the decrypted file is identical
 to the original.

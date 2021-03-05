@@ -12,7 +12,7 @@ jobs:
     needs: get_refs
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2.1.2
+      - uses: actions/setup-node@v2
         with:
           version: 10.x
       - name: build and unit test
@@ -26,9 +26,6 @@ jobs:
           ref: ${{ needs.get_refs.outputs.tenant-security-proxy }}
           path: tenant-security-proxy
           token: ${{ secrets.TSP_PAT }}
-      # Work around https://github.com/actions/cache/issues/133#issuecomment-599102035
-      - name: Fix perms on .cargo so we can restore the cache.
-        run: sudo chown -R $(whoami):$(id -ng) ~/.cargo/
       - name: cache cargo
         uses: actions/cache@v2
         with:
@@ -56,7 +53,7 @@ jobs:
   get_refs:
     # Only run if it's on a PR.
     if: github.base_ref != ''
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     outputs:
       tenant-security-proxy: ${{ steps.get_refs.outputs.tenant-security-proxy }}
     steps:
@@ -77,6 +74,7 @@ jobs:
         with:
           issue-number: ${{ steps.get_pr.outputs.pr }}
           body-includes: CI_branches
+          direction: last
       - name: Parse refs
         if: steps.find_comment.outputs.comment-id != 0
         id: get_refs
@@ -123,3 +121,20 @@ jobs:
           issue-number: ${{ steps.get_pr.outputs.pr }}
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
           reactions: confused
+
+  build_examples:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        example-dir: [large-documents, logging-example, rekey-example, simple-roundtrip]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          version: 10.x
+      - name: build and unit test
+        run: |
+          yarn
+          yarn tsc --target ES6 --sourceMap false --module CommonJS --outDir ./dist/src src/index.ts
+        working-directory: ./examples/${{ matrix.example-dir }}
