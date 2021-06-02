@@ -25,7 +25,7 @@ jobs:
           repository: IronCoreLabs/tenant-security-proxy
           ref: ${{ needs.get_refs.outputs.tenant-security-proxy }}
           path: tenant-security-proxy
-          token: ${{ secrets.TSP_PAT }}
+          token: ${{ secrets.WORKFLOW_PAT }}
       - name: cache cargo
         uses: actions/cache@v2
         with:
