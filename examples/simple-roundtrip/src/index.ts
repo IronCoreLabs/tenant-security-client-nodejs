@@ -19,7 +19,7 @@ console.log(`Using tenant ${TENANT_ID}.`);
 
 // Initialize the client with a Tenant Security Proxy domain and API key.
 // Typically this would be done once when the application or service initializes
-const client = new TenantSecurityClient("http://localhost:7777", API_KEY);
+const client = new TenantSecurityClient("http://localhost:32804", API_KEY);
 
 //
 // Example 1: encrypting/decrypting a customer record
@@ -43,8 +43,6 @@ client
         /* … persist the EDEK and encryptedDocument to your persistence layer … */
         const edek = encryptResult.edek;
         const encryptedDocument = encryptResult.encryptedDocument;
-        console.log(`EDEK ${edek}`);
-        console.log(`Encrypted document: ${JSON.stringify(encryptedDocument)}`);
 
         /* … retrieve the encrypted fields and EDEK from your persistence layer */
 
