@@ -117,7 +117,6 @@ const retrieveDek = async (edekBase64: string): Promise<Uint8Array> => {
     if (encryptedDek.leasedKeyId === 0) {
         // this document was encrypted with an unleased key so we can just call KMS decrypt to get the DEK
         const keyName = client.cryptoKeyPath("discrete-log-2", "global", "icl-demo", "tenant-gcp-key");
-        console.log(encryptedDek.encryptedDekData);
         const [response] = await client.decrypt({name: keyName, ciphertext: encryptedDek.encryptedDekData});
         if (response && response.plaintext && typeof response.plaintext !== "string") {
             const dek = response.plaintext;
@@ -170,17 +169,35 @@ const decryptDocument = async (documentMap: {[fieldName: string]: Buffer}, edek:
 };
 
 (async () => {
+    console.log(
+        `Unleased Encrypted Document: ${JSON.stringify(
+            Object.fromEntries(
+                Object.entries(unleasedEncryptedDocumentMap).map(([fieldName, encryptedFieldBytes]) => [fieldName, encryptedFieldBytes.toString("utf8")])
+            ),
+            null,
+            2
+        )}`
+    );
     const decryptedUnleasedDocumentBytes = await decryptDocument(unleasedEncryptedDocumentMap, unleasedEdek);
     const decryptedUnleasedDocumentText = Object.fromEntries(
         Object.entries(decryptedUnleasedDocumentBytes).map(([fieldName, decryptedFieldBytes]) => [fieldName, decryptedFieldBytes.toString("utf8")])
     );
-    console.log(`Unleased Document: ${JSON.stringify(decryptedUnleasedDocumentText)}`);
+    console.log(`Unleased Document: ${JSON.stringify(decryptedUnleasedDocumentText, null, 2)}`);
 
+    console.log(
+        `Leased Encrypted Document: ${JSON.stringify(
+            Object.fromEntries(
+                Object.entries(leasedEncryptedDocumentMap).map(([fieldName, encryptedFieldBytes]) => [fieldName, encryptedFieldBytes.toString("utf8")])
+            ),
+            null,
+            2
+        )}`
+    );
     const decryptedLeasedDocumentBytes = await decryptDocument(leasedEncryptedDocumentMap, leasedEdek);
     const decryptedLeasedDocumentText = Object.fromEntries(
         Object.entries(decryptedLeasedDocumentBytes).map(([fieldName, decryptedFieldBytes]) => [fieldName, decryptedFieldBytes.toString("utf8")])
     );
-    console.log(`Leased Document: ${JSON.stringify(decryptedLeasedDocumentText)}`);
+    console.log(`Leased Document: ${JSON.stringify(decryptedLeasedDocumentText, null, 2)}`);
 })().catch((e) => {
     console.log(e);
 });
