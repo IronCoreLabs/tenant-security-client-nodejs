@@ -126,6 +126,7 @@ const retrieveDek = async (edekBase64: string): Promise<Uint8Array> => {
         // this document was encrypted with a leased key so we need to KMS decrypt that before we can use it
         const keyName = client.cryptoKeyPath("discrete-log-2", "global", "icl-demo", "tenant-gcp-l-key");
         // the encrypted leased key data itself is also an EDEK, so we need to parse it before sending its internal data to the KMS
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const elkDekData = encryptedDek.encryptedLeasedKeyData!.encryptedDeks[0].encryptedDekData;
         const [response] = await client.decrypt({name: keyName, ciphertext: elkDekData});
         if (response && response.plaintext && typeof response.plaintext !== "string") {
