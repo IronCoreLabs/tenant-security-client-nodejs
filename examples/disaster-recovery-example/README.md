@@ -30,11 +30,11 @@ The EDEK, provided by the TSC as a Base64 String, is actually a protobuf message
 
 ```protobuf
 message EncryptedDek {
-bytes encryptedDekData = 1;
-int32 kmsConfigId = 2;
-int32 leasedKeyId = 3;
-bytes leasedKeyIv = 4;
-EncryptedDeks encryptedLeasedKeyData = 5;
+  bytes encryptedDekData = 1;
+  int32 kmsConfigId = 2;
+  int32 leasedKeyId = 3;
+  bytes leasedKeyIv = 4;
+  EncryptedDeks encryptedLeasedKeyData = 5;
 }
 
 message EncryptedDeks {repeated EncryptedDek encryptedDeks = 1;}
