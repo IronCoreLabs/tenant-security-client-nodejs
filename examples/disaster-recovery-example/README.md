@@ -5,6 +5,56 @@ This example uses previously encrypted data from the other examples and when run
 
 The credentials to make running this yourself aren't provided, but you can see the code and example output for more information about what is happening.
 
+## Recovery Process
+
+### Retrieving the Encrypted Bytes, GCM tag, and IV
+In the `EncryptedDocumentMap` (`Map<String, byte[]>`) returned by the TSC, the `byte[]`’s are of the structure:
+
+```
+VERSION_NUMBER (1 byte, fixed at 3)
+IRONCORE_MAGIC (4 bytes, IRON in ASCII)
+HEADER_LENGTH (2 bytes Uint16)
+PROTOBUF_HEADER_DATA (variable bytes based on prior field)
+DATA IV (12 bytes)
+ENCRYPTED_DATA (remaining_length - 16 bytes)
+GCM_TAG (16 bytes)
+```
+
+`ENCRYPTED_DATA` are the bytes you’ll be decrypting, and the `DATA_IV` is needed to make the AES decryption call. You’ll also need the encryption key, obtained in the next step.
+
+### Retrieving the Document Encryption Key
+The DEK (Document Encryption Key) you need to decrypt the `ENCRYPTED_DATA` is the decrypted value of the EDEK (Encrypted DEK) that was also returned by the TSC.
+
+The process to decrypt this differs based on whether a leased key was used or not.
+The EDEK, provided by the TSC as a Base64 String, is actually a protobuf message with the structure:
+
+```protobuf
+message EncryptedDek {
+bytes encryptedDekData = 1;
+int32 kmsConfigId = 2;
+int32 leasedKeyId = 3;
+bytes leasedKeyIv = 4;
+EncryptedDeks encryptedLeasedKeyData = 5;
+}
+
+message EncryptedDeks {repeated EncryptedDek encryptedDeks = 1;}
+```
+
+#### Un-leased
+If the `EncryptedDek.leasedKeyId` is `0` (zero) you can decrypt the DEK by calling unwrap on your (or the tenant’s) KMS, passing the `EncryptedDek.encryptedDekData` bytes, using the correct credentials and key path. The result will be the DEK which can then be used in the “Decrypting the Document” step. 
+
+#### Leased
+If the `EncryptedDek.leasedKeyId` is nonzero you need to unwrap the leased key before using it to decrypt the EDEK. The leased key itself is also an EDEK, so first retrieve `EncryptedDek.encryptedLeasedKeyData.encryptedDeks[0].encryptedDekData`. Then call unwrap on your (or the tenant’s) KMS, passing the those bytes, using the correct credentials and key. The response is the `DECRYPTED_LEASED_KEY`.
+
+Use the `DECRYPTED_LEASED_KEY`, and the `EncryptedDek.leasedKeyIv` to AES decrypt the `EncryptedDek.encryptedDekData`. The result will be the DEK which can then be used in the “Decrypting the Document” step.
+
+### Decrypting the Document
+Once you have the `DEK`, `ENCRYPTED_DATA`, and `DATA_IV` you can make an AES decrypt call with all three of those parameters. The result will be the original bytes that were sent into the TSC for encryption.
+
+### Gotchas
+This is only possible if you have or can have access to the KMS credentials and key used by the involved account (vendor provided config or tenant provided). If you do have access to all iterations of those credentials and keys you then need to know, or exhaustively determine, which of them was used to encrypt the given document.
+
+
 ## Example Run Output
 ```console
 Unleased Encrypted Document: {
