@@ -1,5 +1,5 @@
 # Disaster Recovery Example
-This provides an example of the code and knowledge required to recover documents encrypted using SaaS Shield in the case of catastrophic IronCore Labs failure. This should never have to happen, even in the event of stopping usage of IronCore you will still be able to migrate documents out of the system more easily than this. This is pretty strictly an "IronCore and all their services were hit by a meteor storm" or "I'm an archeologist trying to recover lost encrypted data" situation.
+This provides an example of the code and knowledge required to recover documents encrypted using SaaS Shield in the case of catastrophic IronCore Labs failure. This should never have to happen. Even in the event of stopping usage of IronCore you will still be able to migrate documents out of the system without resorting to a recovery effort. This to satisfy those who are worried about "IronCore and all their services were hit by a meteor storm" or "I'm an archeologist trying to recover lost encrypted data" situations.
 
 This example uses previously encrypted data from the other examples. When run, it deconstructs that data and reconstitutes the original decrypted data.
 
@@ -52,7 +52,7 @@ Use the `DECRYPTED_LEASED_KEY`, and the `EncryptedDek.leasedKeyIv` to AES decryp
 Once you have the `DEK`, `ENCRYPTED_DATA`, and `DATA_IV` you can make an AES-256 GCM decrypt call with all three of those parameters. The result will be the original bytes that were sent into the TSC for encryption.
 
 ### Gotchas
-This is only possible if you have or can have access to the KMS credentials and key used by the involved account (vendor provided config or tenant provided). If you do have access to all iterations of those credentials and keys you then need to know, or exhaustively determine, which of them was used to encrypt the given document.
+This is only possible if you have or can have access to the KMS credentials and key used by the involved account (vendor provided config or tenant provided). Normally IronCore keeps track of the KMS configurations used to encrypt something in the `kmsConfigId` EDEK header, but without the Configuration Broker, you won't have a way to know what that points to. If the account in question only ever had one KMS configuration you can just use that combination of creds and keypath. If there were multiple configurations over time though, you'll have to use trial and error on all known keypaths / creds and map out the associations.
 
 
 ## Example Run Output
