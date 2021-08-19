@@ -1,5 +1,5 @@
 # Disaster Recovery Example
-This provides an example of the code and knowledge required to recover documents encrypted using SaaS Shield in the case of catastrophic IronCore Labs failure. This should never have to happen. Even in the event of stopping usage of IronCore you will still be able to migrate documents out of the system without resorting to a recovery effort. This to satisfy those who are worried about "IronCore and all their services were hit by a meteor storm" or "I'm an archeologist trying to recover lost encrypted data" situations.
+This provides an example of the code and knowledge required to recover documents encrypted using SaaS Shield in case IronCore's Configuration Broker is unavailable and data must be accessed before it is likely to be accessible again, all of your TSPs are down, and you've lost access to the TSC package. This should never have to happen. Even in the event of stopping usage of IronCore you will still be able to migrate documents out of the system without resorting to a recovery effort. This to satisfy those who are worried about "IronCore and all their services were hit by a meteor storm" or "I'm an archeologist trying to recover lost encrypted data" situations.
 
 This example uses previously encrypted data from the other examples. When run, it deconstructs that data and reconstitutes the original decrypted data.
 
