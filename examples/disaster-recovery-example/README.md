@@ -1,7 +1,7 @@
 # Disaster Recovery Example
 This provides an example of the code and knowledge required to recover documents encrypted using SaaS Shield in the case of catastrophic IronCore Labs failure. This should never have to happen, even in the event of stopping usage of IronCore you will still be able to migrate documents out of the system more easily than this. This is pretty strictly an "IronCore and all their services were hit by a meteor storm" or "I'm an archeologist trying to recover lost encrypted data" situation.
 
-This example uses previously encrypted data from the other examples and when run deconstructs that data and reconstitutes the original decrypted data.
+This example uses previously encrypted data from the other examples. When run, it deconstructs that data and reconstitutes the original decrypted data.
 
 The credentials to make running this yourself aren't provided, but you can see the code and example output for more information about what is happening.
 
@@ -49,7 +49,7 @@ If the `EncryptedDek.leasedKeyId` is nonzero you need to unwrap the leased key b
 Use the `DECRYPTED_LEASED_KEY`, and the `EncryptedDek.leasedKeyIv` to AES decrypt the `EncryptedDek.encryptedDekData`. The result will be the DEK which can then be used in the “Decrypting the Document” step.
 
 ### Decrypting the Document
-Once you have the `DEK`, `ENCRYPTED_DATA`, and `DATA_IV` you can make an AES decrypt call with all three of those parameters. The result will be the original bytes that were sent into the TSC for encryption.
+Once you have the `DEK`, `ENCRYPTED_DATA`, and `DATA_IV` you can make an AES-256 GCM decrypt call with all three of those parameters. The result will be the original bytes that were sent into the TSC for encryption.
 
 ### Gotchas
 This is only possible if you have or can have access to the KMS credentials and key used by the involved account (vendor provided config or tenant provided). If you do have access to all iterations of those credentials and keys you then need to know, or exhaustively determine, which of them was used to encrypt the given document.
