@@ -1,5 +1,17 @@
 # Disaster Recovery Example
-This provides an example of the code and knowledge required to recover documents encrypted using SaaS Shield in case IronCore's Configuration Broker is unavailable and data must be accessed before it is likely to be accessible again, all of your TSPs are down, and you've lost access to the TSC package. This should never have to happen. Even in the event of stopping usage of IronCore you will still be able to migrate documents out of the system without resorting to a recovery effort. This to satisfy those who are worried about "IronCore and all their services were hit by a meteor storm" or "I'm an archeologist trying to recover lost encrypted data" situations.
+This provides an example of the code and knowledge required to recover documents encrypted using SaaS Shield
+in the event that the TSC is unable to decrypt them. There are some almost impossible situations that would
+be required for this to occur:
+
+- IronCore's Configuration Broker is unavailable for a long period of time, and all of your TSPs have
+restarted and are unable to retrieve their configuration
+- All your TSPs have failed and you can't get them restarted in your infrastructure
+- You lost access to the TSC package that you use in your application
+
+Even in the event that you are removing your usage of IronCore, you would still be able to migrate documents
+from the system without resorting to a recovery effort. But robust Disaster Recovery and Business Continuity
+plans require you to prepare for impossible situations, so we offer this as a starting point to show how you
+can develop a plan.
 
 This example uses previously encrypted data from the other examples. When run, it deconstructs that data and reconstitutes the original decrypted data.
 
@@ -52,7 +64,13 @@ Use the `DECRYPTED_LEASED_KEY`, and the `EncryptedDek.leasedKeyIv` to AES decryp
 Once you have the `DEK`, `ENCRYPTED_DATA`, and `DATA_IV` you can make an AES-256 GCM decrypt call with all three of those parameters. The result will be the original bytes that were sent into the TSC for encryption.
 
 ### Gotchas
-This is only possible if you have or can have access to the KMS credentials and key used by the involved account (vendor provided config or tenant provided). Normally IronCore keeps track of the KMS configurations used to encrypt something in the `kmsConfigId` EDEK header, but without the Configuration Broker, you won't have a way to know what that points to. If the account in question only ever had one KMS configuration you can just use that combination of creds and keypath. If there were multiple configurations over time though, you'll have to use trial and error on all known keypaths / creds and map out the associations.
+This is only possible if you have or can have access to the KMS credentials and key used by the involved
+tenant (whether the KMS configuration was provided by the vendor or by the tenant). Normally, IronCore tracks
+the KMS configuration used to encrypt a piece of data in the `kmsConfigId` EDEK header, but without the
+Configuration Broker, it will be difficult to map from this ID to the actual KMS settings that were used.
+If the tenant in question only ever had one KMS configuration, you can just use that combination of creds and
+keypath. However, if there were multiple configurations used over time, you'll have to use trial and error on
+all known keypaths / creds and map out the associations.
 
 
 ## Example Run Output
