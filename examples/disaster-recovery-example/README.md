@@ -26,7 +26,7 @@ GCM_TAG (16 bytes)
 The DEK (Document Encryption Key) you need to decrypt the `ENCRYPTED_DATA` is the decrypted value of the EDEK (Encrypted DEK) that was also returned by the TSC.
 
 The process to decrypt this differs based on whether a leased key was used or not.
-The EDEK, provided by the TSC as a Base64 String, is actually a protobuf message with the structure:
+The EDEK, provided by the TSC as a base64 string, is actually a protobuf message with the structure:
 
 ```protobuf
 message EncryptedDek {
@@ -39,6 +39,8 @@ message EncryptedDek {
 
 message EncryptedDeks {repeated EncryptedDek encryptedDeks = 1;}
 ```
+
+You need to decode the EDEK base64 as an `EncryptedDeks` message, then for disaster recovery you're safe to just use the first `EncryptedDek` in the resulting list of them. 
 
 #### Un-leased
 If the `EncryptedDek.leasedKeyId` is `0` (zero) you can decrypt the DEK by calling unwrap on your (or the tenant’s) KMS, passing the `EncryptedDek.encryptedDekData` bytes, using the correct credentials and key path. The result will be the DEK which can then be used in the “Decrypting the Document” step. 
