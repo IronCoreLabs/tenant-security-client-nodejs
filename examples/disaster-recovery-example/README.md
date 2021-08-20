@@ -11,7 +11,9 @@ restarted and are unable to retrieve their configuration
 Even in the event that you are removing your usage of IronCore, you would still be able to migrate documents
 from the system without resorting to a recovery effort. But robust Disaster Recovery and Business Continuity
 plans require you to prepare for impossible situations, so we offer this as a starting point to show how you
-can develop a plan.
+can develop a plan. We also offer this as assistance for those who are contemplating "IronCore and all
+their services were hit by a meteor storm" or "I'm an archeologist trying to recover lost encrypted data"
+situations. 'Cause archeologists need love too!
 
 This example uses previously encrypted data from the other examples. When run, it deconstructs that data and reconstitutes the original decrypted data.
 
