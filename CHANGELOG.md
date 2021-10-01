@@ -44,4 +44,4 @@ Initial open source release
 
 ### Compatibility
 
-This version of the Tenant Security NodeJS Client will only work with version `>= 2.0.0 < 4.0.0` of the Tenant Security Proxy container.
+This version of the Tenant Security NodeJS Client will only work with version `>= 2.0.0 < 4.0.0` of the Tenant Security Proxy container due to a deprecated interface. `TSP v3` supports both the old and new interfaces and can be used to migrate TSCs if necessary.
