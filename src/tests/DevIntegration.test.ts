@@ -11,7 +11,7 @@ const GCP_TENANT_ID = "INTEGRATION-TEST-DEV1-GCP";
 const AWS_TENANT_ID = "INTEGRATION-TEST-DEV1-AWS";
 const AZURE_TENANT_ID = "INTEGRATION-TEST-DEV1-AZURE";
 const MULTIPLE_KMS_CONFIG_TENANT_ID = "INTEGRATION-TEST-DEV1-COMBO";
-const INTEGRATION_API_KEY = "qlhqGW+Azctfy1ld";
+const INTEGRATION_API_KEY = process.env.API_KEY ?? "";
 
 //prettier-ignore
 const existingEncryptedDataForEnabledConfig = Buffer.from([3, 73, 82, 79, 78, 0, 0, 52,
@@ -375,17 +375,13 @@ describe("INTEGRATION dev environment tests", () => {
         //leasing was turned off (nonLeasedDocument) and another document when leasing was turned on (leasedDocument). Then leasing was disabled again. This
         //test verifies that the leased document can still be decrypted and that we have access to the leased data.
         const nonLeasedDocument = {
-            edek:
-                "CnYKcQokABW+8GeAPN90zTPKLMenLeWmyr0pmGLqmsmhweoPO9ImxYEiEkkAs0w57pQIOcehVWROISlIn+g9kYlgO5uAEvtVc3SbLgwl7Wkf4UBYpSYZXrx7Lt8BGQYHbPx8DqZiGhc+A+5rK2KM/lD5AurtEOwD",
-            data:
-                "A0lST04AOwocmH4+bD5DF0vJpruj8OK+3TNsIUzWfre2tzchyhobChlJTlRFR1JBVElPTi1URVNULURFVjEtR0NQ00asS3TWHsT19WSBmsFY5tv18HwlQVAy1Mv8sMLSlBDPfTvDF0c=",
+            edek: "CnYKcQokABW+8GeAPN90zTPKLMenLeWmyr0pmGLqmsmhweoPO9ImxYEiEkkAs0w57pQIOcehVWROISlIn+g9kYlgO5uAEvtVc3SbLgwl7Wkf4UBYpSYZXrx7Lt8BGQYHbPx8DqZiGhc+A+5rK2KM/lD5AurtEOwD",
+            data: "A0lST04AOwocmH4+bD5DF0vJpruj8OK+3TNsIUzWfre2tzchyhobChlJTlRFR1JBVElPTi1URVNULURFVjEtR0NQ00asS3TWHsT19WSBmsFY5tv18HwlQVAy1Mv8sMLSlBDPfTvDF0c=",
         };
 
         const leasedDocument = {
-            edek:
-                "Cr8BCjA7nnuAiXpD0Jkjc6mOBgcSyxcjFYX813WQhhYg0oKnsDJTmeyAaLs3t9pzkR6mU9cQ7AMY3gQiDCEN6aQFtglBZ0DX7yp3CnUKcAokABW+8Gfu/FSC8WQTqxw528aQXwrpvY0MjlHurZJ6yHx9S/2zEkgAs0w57oTuIHzVmauLGDi/S9zCQH20dezcc/jtw/nqCDnAtAPSB9m17YvGOVpN5xO8960C86NA4AJCoVJ291YW9OkIKto48/YQ7AM=",
-            data:
-                "A0lST04AOwocjKi8E65AAxBCqUjeSqQDc7veZVQehempBfsABBobChlJTlRFR1JBVElPTi1URVNULURFVjEtR0NQbZ+1yhYOoCNdtV+VVTMTUfAQm1FdqtGyjqeE7iYxfW9TKwTc2C0=",
+            edek: "Cr8BCjA7nnuAiXpD0Jkjc6mOBgcSyxcjFYX813WQhhYg0oKnsDJTmeyAaLs3t9pzkR6mU9cQ7AMY3gQiDCEN6aQFtglBZ0DX7yp3CnUKcAokABW+8Gfu/FSC8WQTqxw528aQXwrpvY0MjlHurZJ6yHx9S/2zEkgAs0w57oTuIHzVmauLGDi/S9zCQH20dezcc/jtw/nqCDnAtAPSB9m17YvGOVpN5xO8960C86NA4AJCoVJ291YW9OkIKto48/YQ7AM=",
+            data: "A0lST04AOwocjKi8E65AAxBCqUjeSqQDc7veZVQehempBfsABBobChlJTlRFR1JBVElPTi1URVNULURFVjEtR0NQbZ+1yhYOoCNdtV+VVTMTUfAQm1FdqtGyjqeE7iYxfW9TKwTc2C0=",
         };
 
         it("can still decrypted non-leased document", async () => {

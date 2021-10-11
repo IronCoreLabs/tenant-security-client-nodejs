@@ -46,7 +46,7 @@ jobs:
           cargo build --release
           env $(cat .env.integration) cargo run --release &
           timeout 700 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:9000/ready)" =~ ''[01346-9][0-9][0-9]'' ]]; do sleep 5; done' || false
-          yarn integration
+          env $(cat .env.integration) yarn integration
 
   # Look for a comment telling us what refs to use from the other repos we depend on.
   # To add additional repositories, add them to "outputs" and to the "Setup list of required repos" step.
