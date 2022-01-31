@@ -1,3 +1,8 @@
+## 2.2.0
+
+-   Added `TenantSecurityClient.rekeyEdek` method
+-   Deprecate `TenantSecurityClient.rekeyDocument` method
+
 ## 2.1.0
 
 -   Added `TenantSecurityClient.rekeyDocument` method and support `RekeyResponse` type

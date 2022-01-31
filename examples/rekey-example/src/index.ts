@@ -56,10 +56,12 @@ client
 
         // Rekey the document to `tenant-aws` using their primary config. The metadata's name and
         // identifying information could also be changed at this time.
-        return client.rekeyDocument(encryptedDocument, NEW_TENANT_ID, metadata).then((rekeyedDocument) => {
+        return client.rekeyEdek(encryptedDocument.edek, NEW_TENANT_ID, metadata).then((rekeyedEdek) => {
             //
             // Part 3: Decrypt the encrypted record using the new tenant
             //
+
+            const rekeyedDocument = {encryptedDocument: encryptedDocument.encryptedDocument, edek: rekeyedEdek};
 
             // Create new metadata for this document indicating that it was rekeyed to the second tenant.
             // The name and identifying information could also be changed at this time.

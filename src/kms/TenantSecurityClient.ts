@@ -183,13 +183,24 @@ export class TenantSecurityClient {
     };
 
     /**
-     * Re-key a document to the a new tenant ID. Takes the document and EDEK returned on encrypt and unwraps the EDEK via
+     * @deprecated The `rekeyEdek` method is preferred over this method because the encrypted document is not necessary for re-keying to take place.
+     *
+     * Re-key a document to a new tenant ID. Takes the document and EDEK returned on encrypt and unwraps the EDEK via
      * the original tenant's KMS. Then re-wraps that DEK with the new tenant's KMS and returns an unchanged EncryptedDocument with a new EDEK.
      * The old tenant and new tenant can be the same in order to re-key the document to the tenant's latest primary config.
      */
     rekeyDocument = (encryptedDoc: EncryptedDocumentWithEdek, newTenantId: string, metadata: DocumentMetadata): Promise<EncryptedDocumentWithEdek> =>
         KmsApi.rekeyKey(this.tspDomain, this.apiKey, encryptedDoc.edek, newTenantId, metadata)
             .map((rekeyResponse) => ({encryptedDocument: encryptedDoc.encryptedDocument, edek: rekeyResponse.edek}))
+            .toPromise();
+
+    /**
+     * Re-key a document's encrypted document key (EDEK) to a new tenant ID. Unwraps the EDEK via the original tenant's KMS, then re-wraps that DEK
+     * with the new tenant's KMS. The old tenant and new tenant can be the same in order to re-key the EDEK to the tenant's latest primary config.
+     */
+    rekeyEdek = (edek: Base64String, newTenantId: string, metadata: DocumentMetadata): Promise<Base64String> =>
+        KmsApi.rekeyKey(this.tspDomain, this.apiKey, edek, newTenantId, metadata)
+            .map((rekeyResponse) => rekeyResponse.edek)
             .toPromise();
 
     /**
