@@ -1,4 +1,4 @@
-## 2.2.0
+## 2.2.1
 
 -   Added `TenantSecurityClient.rekeyEdek` method
 -   Deprecate `TenantSecurityClient.rekeyDocument` method
@@ -45,7 +45,6 @@ This version of the Tenant Security NodeJS Client will only work with version `3
 ## 1.0.0
 
 Initial open source release
-
 
 ### Compatibility
 
