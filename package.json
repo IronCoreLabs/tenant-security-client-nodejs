@@ -1,6 +1,6 @@
 {
     "name": "@ironcorelabs/tenant-security-nodejs",
-    "version": "2.2.0",
+    "version": "2.2.1",
     "description": "NodeJS client library for the IronCore Labs Tenant Security Proxy.",
     "homepage": "https://ironcorelabs.com/docs",
     "main": "src/index.js",
