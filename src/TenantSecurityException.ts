@@ -21,6 +21,7 @@ export enum TenantSecurityErrorCode {
     KMS_AUTHORIZATION_FAILED = 206,
     KMS_CONFIGURATION_INVALID = 207,
     KMS_UNREACHABLE = 208,
+    KMS_THROTTLED = 209,
 
     // map to SecurityEventException
     SECURITY_EVENT_REJECTED = 301,
