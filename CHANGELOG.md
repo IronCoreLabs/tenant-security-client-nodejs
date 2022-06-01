@@ -1,3 +1,7 @@
+## 2.3.0
+
+-   Added `KmsException` for KmsThrottled. Need TSP 4.4.1+ to make use of this.
+
 ## 2.2.1
 
 -   Added `TenantSecurityClient.rekeyEdek` method
