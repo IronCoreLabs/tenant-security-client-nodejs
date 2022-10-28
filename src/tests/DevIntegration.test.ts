@@ -7,24 +7,28 @@ import {TscException} from "../TscException";
 import {EncryptedDocumentWithEdek} from "../Util";
 import * as TestUtils from "./TestUtils";
 
-const GCP_TENANT_ID = "INTEGRATION-TEST-DEV1-GCP";
-const AWS_TENANT_ID = "INTEGRATION-TEST-DEV1-AWS";
-const AZURE_TENANT_ID = "INTEGRATION-TEST-DEV1-AZURE";
-const MULTIPLE_KMS_CONFIG_TENANT_ID = "INTEGRATION-TEST-DEV1-COMBO";
+const GCP_TENANT_ID = "INTEGRATION-TEST-GCP";
+const AWS_TENANT_ID = "INTEGRATION-TEST-AWS";
+const AZURE_TENANT_ID = "INTEGRATION-TEST-AZURE";
+const MULTIPLE_KMS_CONFIG_TENANT_ID = "INTEGRATION-TEST-COMBO";
 const INTEGRATION_API_KEY = process.env.API_KEY ?? "";
 
 //prettier-ignore
-const existingEncryptedDataForEnabledConfig = Buffer.from([3, 73, 82, 79, 78, 0, 0, 52,
-    97, 69, -17, -65, 32, 85, -70, 101, 109, -67, 31, -28, -38, -19, -78, 42, 125, 124, -47,
-    80, 31, 10, 127, -109, -20, 90, 7, 88, 104, 103, -64, -56, 38, 95, 96, -97, -92, -54]);
+const existingEncryptedDataForEnabledConfig = Buffer.from(
+    [3,73,82,79,78,0,56,10,28,208,182,142,211,198,151,111,15,20,146,86,250,170,109,36,208,141,243,129,243,
+     170,77,31,118,164,202,16,162,26,24,10,22,73,78,84,69,71,82,65,84,73,79,78,45,84,69,83,84,45,67,79,77,
+     66,79,26,52,171,230,127,70,255,176,159,101,188,45,190,225,125,190,32,161,245,113,170,72,115,232,204,
+     142,228,144,123,83,16,30,107,196,240,131,72,45,101,226,100,39,126,216]);
 //prettier-ignore
-const existingEdekForEnabledConfig = "Cr4BCrgBAQICAHhhfiI+R/CnS0NJxVMGLAbLb/uEr64mDJAXLrWWWxAMQgF/DRnb5dvopCbObDSBn/dtAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMxp38R1TYd/u4Ie2oAgEQgDuY9+X/BNebcFdZYV2SC7w723+W2a4QAgFqMAI0W7QKHI2EbZF7d63PNWUoaeXX3Zk3W42q2OPShRAiTRCCBA==";
+const existingEdekForEnabledConfig = "Cr4BCrgBAQICAHhhfiI+R/CnS0NJxVMGLAbLb/uEr64mDJAXLrWWWxAMQgEE/9yB7Dit96VAM3c5UDCzAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMquE2DnIIesdP/UknAgEQgDsHqfur2fJaAS8ZwnJNXr5cZWH1xL7xvIWgCzD9Aa1peULVadhDgUHXVUNTHodEr2JuUKXFGuX1aYMyehCaBA==";
 //prettier-ignore
-const existingEncryptedDataForDisabledConfig = Buffer.from([3, 73, 82, 79, 78, 0, 0, -77, 108, 93, -13, -20, -69, 116, -17, -41, 107,
-    49, 56, -8, 109, 105, 107, -108, 4, 2, -50, 21, -127, -124, 69, 34, 78, 84, 56,
-    101, -98, 126, -79, 46, 65, 91, 95, 66, -111, 8]);
+const existingEncryptedDataForDisabledConfig = Buffer.from(
+    [3,73,82,79,78,0,56,10,28,173,13,21,195,209,147,53,178,230,76,22,145,234,235,177,90,138,107,134,69,145,
+     126,42,75,190,66,246,198,26,24,10,22,73,78,84,69,71,82,65,84,73,79,78,45,84,69,83,84,45,67,79,77,66,79,
+     190,77,198,69,195,57,110,188,68,250,205,161,118,93,188,182,71,184,93,82,58,122,76,104,33,204,215,161,
+     221,213,56,246,123,122,148,5,71,71,222,192,50,219,4,27]);
 //prettier-ignore
-const existingEdekForDisabledConfig = "CoYCCoACi6JH7ZOggHm0fyIsUc4jVvK0jgPfn1V76xfVxYfBLP7QbfeZD7Gyzj4Xxdj4upJ7grzjCe8ydK3Q6ijeBOt7b050BhUHRsHUgdV7zBGWvaZOhPQ4sYl5bFVcefyQyk7EeN/qd6RGYq9AHEcBTzgx+Nw83Jgr34SPHSbTkhUIIJTzt0NAwJsQ7ZYMv2NHQ1LdjItr8/mJsu9i5R6yd3p2fuKWJozeAPHp9Salc9Vr5uwfGZsAKHNkbDlYvXFs6bO7TV2T2fOmevln2Yi/UEq6RqFa2FmzJMqVxeAbMNpCJ0KlcjqsI4cOD4VjotiXu4umTsMCIkN7I5KCZHKG3Bo+1xDwAw==";
+const existingEdekForDisabledConfig = "CqsCCqUCCoACNPQp9pKbmS+QmQhUfsBE9HKkXMA+cREXiuDrgD/B/hI8zn7rU5Sk4a6trDSr7DoUsG3y6dtBpcoeVIMzgztVr0xo2jzmC1BkyS1CcopUDV7WOq+giZ6NMUTXCQV1fd4sX+yFYQPJrsJ7zHlL72QScxDb66qOjkYu+jLSXj77JHBbFMYPBLRL2rMzZLJ1UIvhmZ1kFpxg5UFQOvitOIT/qSwAZXrqP7yJ1WoFMPg9PypPbMErHLv/ScoNFpMFFbM/X2c/HJXMwL7XSE4uJMRQeXooJ/waXe9nZ1NP/VFQnt9waMn0jYAdnQEbZOd6qp/Ib0HUDyAu2G0ymTGJmooBCRIgOWY5NWZkMjk0NjRhNDA0YzhjNzI1N2U3Njc5Y2MyZWYQoAQ=";
 
 describe("INTEGRATION dev environment tests", () => {
     let client: TenantSecurityClient;
@@ -258,7 +262,7 @@ describe("INTEGRATION dev environment tests", () => {
             const decryptResult = await client.decryptDocument(data, meta);
 
             expect(decryptResult.edek).toEqual(existingEdekForEnabledConfig);
-            expect(decryptResult.plaintextDocument.doc.toString("utf-8")).toEqual("Wont happen");
+            expect(decryptResult.plaintextDocument.doc.toString("utf-8")).toEqual("I'm Gumby dammit");
         });
 
         it("successfuly re-encrypts with EDEK from active config", async () => {
@@ -325,13 +329,14 @@ describe("INTEGRATION dev environment tests", () => {
             expect(batchDecryptResult.hasFailures).toBeTrue();
             expect(batchDecryptResult.hasSuccesses).toBeTrue();
             expect(batchDecryptResult.successes.good.edek).toEqual(existingEdekForEnabledConfig);
-            expect(batchDecryptResult.successes.good.plaintextDocument.bytes.toString("utf-8")).toEqual("Wont happen");
+            expect(batchDecryptResult.successes.good.plaintextDocument.bytes.toString("utf-8")).toEqual("I'm Gumby dammit");
 
             expect(batchDecryptResult.failures.bad).toBeInstanceOf(TenantSecurityException);
             expect(batchDecryptResult.failures.bad.errorCode).toEqual(TenantSecurityErrorCode.KMS_CONFIGURATION_DISABLED);
         });
     });
 
+    /* Commenting out this test until I can reconstruct the old headers again.
     describe("test Azure key version protobuf", () => {
         const azureEdekWithoutVersion =
             "CoYECoAEAaEuAPmN/WgeyhLO1g5uS15GXI/AWikYhcPL1aUQlDlwCw+t1eRJOW6y9/4VKac4rcriDYSRGib5lq60cT+Blfeo/oSd1Te2SKh9ho+vOxqzHOS5uC0jSz5mvoGbZM+C7ZIE0xbJO5vZPP6XcYY+akpu+XnhaaPtYQywtbP24B4V1+w2tSOFHNZfokHwS5aamS4d0rt2EQntuwlJDUX7cKyxrC4Lr1pRoK9uAeQsKvKcqGw8FiJ+zQ3VVQ10yt5QURP4Ob45PDo9vOntCdJaD1Tw+SCFGMPO2yubYYa+XgfgFm21mwcXstzKdEJiBnICxRsH8izXN0qPNGw4f7W4PGMrhkSrlcs32+iQI9YNPHJ81C/B1cFGlFA8TvVspebhGvIjlCxc1OkR2ghysk/eNvsGbKO1VeV2emCztA4C7j3jkYmQD8TOqx2sqO+zVOxFpC5OrOgb43LwI1lDHZkvNsuSBUoUI6C+xwZYFbk8H0+aF20KUA9KL9FQsox3mDkha598gd4Zpa0YQlmc2kVkOv3wJR+7wqajke/dmKpQk8FdD+THSi+LgZ2efEc/xCSSwiaRBe3g1z/p1jrQy8ABAsk3OSfufxgqg9JMB+aOusWAm5fSJ2xQmIVbtv2adsLnl7kLpDTnAzhbgqocK2JdN0H1pQWmKGkzPMrsa+tPjpYQ7gM=";
@@ -369,19 +374,20 @@ describe("INTEGRATION dev environment tests", () => {
             }
         });
     });
+    */
 
     describe("decrypted previously leased data", () => {
         //Verify that we can decrypt data that was encrypted when the configuration had leasing enabled. To generate this data I encrypted some data when
         //leasing was turned off (nonLeasedDocument) and another document when leasing was turned on (leasedDocument). Then leasing was disabled again. This
         //test verifies that the leased document can still be decrypted and that we have access to the leased data.
         const nonLeasedDocument = {
-            edek: "CnYKcQokABW+8GeAPN90zTPKLMenLeWmyr0pmGLqmsmhweoPO9ImxYEiEkkAs0w57pQIOcehVWROISlIn+g9kYlgO5uAEvtVc3SbLgwl7Wkf4UBYpSYZXrx7Lt8BGQYHbPx8DqZiGhc+A+5rK2KM/lD5AurtEOwD",
-            data: "A0lST04AOwocmH4+bD5DF0vJpruj8OK+3TNsIUzWfre2tzchyhobChlJTlRFR1JBVElPTi1URVNULURFVjEtR0NQ00asS3TWHsT19WSBmsFY5tv18HwlQVAy1Mv8sMLSlBDPfTvDF0c=",
+            edek: "CnYKcQokAMuLEZXMyIGIGj3qsI9uMPPIu3IjrQXRGdZuwWTj5OGOlp8LEkkAL8l2cUyJvtUTsWlWxzKByKGEdyDkn6d+3s86LQR0eEYxVNOosiLggyHmeuopfuMw21qfW2nTx5ughZJTUPMyA7VJggG9HjqVEJYE",
+            data: "A0lST04ANgoc3NWCzR+7mXDkg2OMpRoqujSFzHlat0Vhax924xoWChRJTlRFR1JBVElPTi1URVNULUdDUHO5bi5yhCq2zd5lUX8Df0g0X8GooUjNTdPu4jsea6VDWMIdgenaxa7tGfoy",
         };
 
         const leasedDocument = {
-            edek: "Cr8BCjA7nnuAiXpD0Jkjc6mOBgcSyxcjFYX813WQhhYg0oKnsDJTmeyAaLs3t9pzkR6mU9cQ7AMY3gQiDCEN6aQFtglBZ0DX7yp3CnUKcAokABW+8Gfu/FSC8WQTqxw528aQXwrpvY0MjlHurZJ6yHx9S/2zEkgAs0w57oTuIHzVmauLGDi/S9zCQH20dezcc/jtw/nqCDnAtAPSB9m17YvGOVpN5xO8960C86NA4AJCoVJ291YW9OkIKto48/YQ7AM=",
-            data: "A0lST04AOwocjKi8E65AAxBCqUjeSqQDc7veZVQehempBfsABBobChlJTlRFR1JBVElPTi1URVNULURFVjEtR0NQbZ+1yhYOoCNdtV+VVTMTUfAQm1FdqtGyjqeE7iYxfW9TKwTc2C0=",
+            edek: "CsABCjCNEF2vxOsHAjFQservCufgFU7sdqrvy972uZvxB/FAyrH0nQrMIN3Cwvp4NdaSjBYQlgQY8QQiDMdgyc4wAvAH2y51JSp4CnYKcQokAMuLEZWEVofFnA3hHrgCzUXrGjDAb9wet28VKw4Nakn35ZnSEkkAL8l2cSCzG+n8LnpU0eW9wTFYgPnIckzDDcbnEgRj6dmz6IpCk2WzsX7dlvzRWi0UXvA87ukYAgYkrmmCUse2wWIYbzNruP6uEJYE",
+            data: "A0lST04ANgocVzWAgU8k159ETeoE+b9F0wkZFjn6psKQhQ8dWhoWChRJTlRFR1JBVElPTi1URVNULUdDUNRZlwKbH7ZHtnQ2hdiGdNBJhqIC0p+hqMnzRO7AymqrCo8ohE8bIscVfTFk",
         };
 
         it("can still decrypted non-leased document", async () => {
@@ -392,7 +398,7 @@ describe("INTEGRATION dev environment tests", () => {
 
             const {plaintextDocument} = await client.decryptDocument({edek: nonLeasedDocument.edek, encryptedDocument: data}, meta);
 
-            expect(plaintextDocument.foo.toString("utf8")).toEqual("new daters");
+            expect(plaintextDocument.foo.toString("utf8")).toEqual("I'm Gumby dammit");
         });
 
         it("leased document", async () => {
@@ -403,7 +409,7 @@ describe("INTEGRATION dev environment tests", () => {
 
             const {plaintextDocument} = await client.decryptDocument({edek: leasedDocument.edek, encryptedDocument: data}, meta);
 
-            expect(plaintextDocument.foo.toString("utf8")).toEqual("new daters");
+            expect(plaintextDocument.foo.toString("utf8")).toEqual("I'm Gumby dammit");
         });
     });
 
