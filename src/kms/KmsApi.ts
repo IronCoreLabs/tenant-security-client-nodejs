@@ -28,11 +28,35 @@ interface UnwrapKeyResponse {
 
 export type BatchUnwrapKeyResponse = BatchResponse<UnwrapKeyResponse>;
 
+interface DeriveKeyResponse {
+    derivedKeys: DerivedKeys;
+}
+
+export type DerivedKeys = Record<string, DerivedKey[]>;
+
+export interface DerivedKey {
+    derivedKey: Base64String;
+    tenantSecretId: string; // TODO: worth using uuid type?
+    tenantSecretNumericId: number;
+    primary: boolean;
+}
+
+enum DerivationType {
+    Argon2,
+    Sha256,
+}
+
+enum SecretType {
+    CloakedSearch = 1,
+    DeterministicEncryption = 2,
+}
+
 const WRAP_ENDPOINT = "document/wrap";
 const UNWRAP_ENDPOINT = "document/unwrap";
 const BATCH_WRAP_ENDPOINT = "document/batch-wrap";
 const BATCH_UNWRAP_ENDPOINT = "document/batch-unwrap";
 const REKEY_ENDPOINT = "document/rekey";
+const DERIVE_ENDPOINT = "key/derive";
 
 /**
  * Generate and wrap a new key via the tenant's KMS.
@@ -116,5 +140,28 @@ export const rekeyKey = (
             ...metadata.toJsonStructure(),
             encryptedDocumentKey: edek,
             newTenantId,
+        })
+    );
+
+/**
+ * TODO
+ */
+export const deriveKey = (
+    tspDomain: string,
+    apiKey: string,
+    salts: string[],
+    secretPath: string,
+    metadata: DocumentMetadata
+): Future<TenantSecurityException, DeriveKeyResponse> =>
+    makeJsonRequest(
+        tspDomain,
+        apiKey,
+        DERIVE_ENDPOINT,
+        JSON.stringify({
+            ...metadata.toJsonStructure(),
+            salts,
+            derivationType: DerivationType.Sha256,
+            searchType: SecretType.DeterministicEncryption,
+            secretPath,
         })
     );

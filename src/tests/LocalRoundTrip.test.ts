@@ -26,6 +26,12 @@ describe("LOCAL Integration Tests", () => {
         });
     });
 
+    describe("roundtrip encrypt and decrypt", () => {
+        conditionalTest("roundtrips a collection of fields", async () => {
+            await TestUtils.runSingleDetDocumentRoundTripForTenant(client, LOCAL_TENANT_ID);
+        });
+    });
+
     describe("roundtrip batch encrypt and batch decrypt", () => {
         conditionalTest("should roundtrip batch documents", async () => {
             await TestUtils.runBatchDocumentRoundtripForTenant(client, LOCAL_TENANT_ID);

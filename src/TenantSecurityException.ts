@@ -1,8 +1,8 @@
 /**
- * 0 - 199   TspServiceException
- * 200 - 299 KmsException
- * 300 - 399 SecurityEventException
- * 900 - 999 TscException
+ ** 0 - 199   TspServiceException
+ ** 200 - 299 KmsException
+ ** 300 - 399 SecurityEventException
+ ** 900 - 999 TscException
  */
 export enum TenantSecurityErrorCode {
     // map to TspServiceException
@@ -30,6 +30,8 @@ export enum TenantSecurityErrorCode {
     INVALID_ENCRYPTED_DOCUMENT = 900,
     DOCUMENT_ENCRYPT_FAILED = 901,
     DOCUMENT_DECRYPT_FAILED = 902,
+    DETERMINISTIC_DOCUMENT_ENCRYPT_FAILED = 903,
+    DETERMINISTIC_DOCUMENT_DECRYPT_FAILED = 904,
 }
 
 /**

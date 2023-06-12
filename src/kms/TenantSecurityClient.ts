@@ -5,6 +5,7 @@ import {TenantSecurityException} from "../TenantSecurityException";
 import {
     Base64String,
     BatchResult,
+    DeterministicEncryptedDocument,
     EncryptedDocumentWithEdek,
     EncryptedDocumentWithEdekCollection,
     PlaintextDocument,
@@ -215,4 +216,32 @@ export class TenantSecurityClient {
      */
     logSecurityEvent = (event: SecurityEvent, metadata: EventMetadata): Promise<void> =>
         SecurityEventApi.logSecurityEvent(this.tspDomain, this.apiKey, event, metadata).toPromise();
+
+    /**
+     * TODO
+     */
+    deterministicEncryptDocument = (
+        document: PlaintextDocument,
+        derivationPath: string,
+        secretPath: string,
+        metadata: DocumentMetadata
+    ): Promise<DeterministicEncryptedDocument> =>
+        KmsApi.deriveKey(this.tspDomain, this.apiKey, [derivationPath], secretPath, metadata)
+            .flatMap((deriveResponse) =>
+                Crypto.deterministicEncryptDocument(document, Object.values(deriveResponse.derivedKeys)[0], secretPath, metadata.tenantId)
+            )
+            .toPromise();
+
+    /**
+     * TODO
+     */
+    deterministicDecryptDocument = (
+        encryptedDoc: DeterministicEncryptedDocument,
+        derivationPath: string,
+        secretPath: string,
+        metadata: DocumentMetadata
+    ): Promise<PlaintextDocument> =>
+        KmsApi.deriveKey(this.tspDomain, this.apiKey, [derivationPath], secretPath, metadata)
+            .flatMap((deriveResponse) => Crypto.deterministicDecryptDocument(encryptedDoc, Object.values(deriveResponse.derivedKeys)[0]))
+            .toPromise();
 }

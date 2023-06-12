@@ -1,7 +1,7 @@
 import "jest-extended";
 import {TenantSecurityClient} from "../index";
 import {DocumentMetadata} from "../kms/DocumentMetadata";
-import {PlaintextDocument, PlaintextDocumentCollection, PlaintextDocumentWithEdekCollection} from "../Util";
+import {DeterministicEncryptedDocument, PlaintextDocument, PlaintextDocumentCollection, PlaintextDocumentWithEdekCollection} from "../Util";
 
 export const getDataToEncrypt = (): PlaintextDocument => ({
     field1: Buffer.from("Cras sit amet neque vel eros fermentum molestie.", "utf8"),
@@ -35,6 +35,25 @@ export const assertEncryptedData = (client: TenantSecurityClient, encryptedDocum
     expect(client.isCiphertext(encryptedDocument.field3)).toBeTrue();
 };
 
+export const assertDetEncryptedData = (client: TenantSecurityClient, encryptedDocument: DeterministicEncryptedDocument, secretPath: string) => {
+    const data = getDataToEncrypt();
+    expect(encryptedDocument.field1.data).toBeInstanceOf(Buffer);
+    expect(encryptedDocument.field1.data.length).toBeGreaterThan(data.field1.length);
+    expect(encryptedDocument.field1.secretPath).toBe(secretPath);
+    expect(typeof encryptedDocument.field1.secretId).toBe("number");
+    expect(client.isCiphertext(encryptedDocument.field1.data)).toBeTrue();
+    expect(encryptedDocument.field2.data).toBeInstanceOf(Buffer);
+    expect(encryptedDocument.field2.data.length).toBeGreaterThan(data.field2.length);
+    expect(encryptedDocument.field2.secretPath).toBe(secretPath);
+    expect(typeof encryptedDocument.field2.secretId).toBe("number");
+    expect(client.isCiphertext(encryptedDocument.field2.data)).toBeTrue();
+    expect(encryptedDocument.field3.data).toBeInstanceOf(Buffer);
+    expect(encryptedDocument.field3.data.length).toBeGreaterThan(data.field3.length);
+    expect(encryptedDocument.field3.secretPath).toBe(secretPath);
+    expect(typeof encryptedDocument.field3.secretId).toBe("number");
+    expect(client.isCiphertext(encryptedDocument.field3.data)).toBeTrue();
+};
+
 export const runSingleDocumentRoundTripForTenant = async (client: TenantSecurityClient, tenant: string) => {
     const metadata = getMetadata(tenant);
     const data = getDataToEncrypt();
@@ -47,6 +66,23 @@ export const runSingleDocumentRoundTripForTenant = async (client: TenantSecurity
 
     expect(decryptResult.edek).toEqual(edek);
     expect(decryptResult.plaintextDocument.field1).toEqual(data.field1);
+};
+
+export const runSingleDetDocumentRoundTripForTenant = async (client: TenantSecurityClient, tenant: string) => {
+    const metadata = getMetadata(tenant);
+    const data = getDataToEncrypt();
+
+    const encryptedDocument = await client.deterministicEncryptDocument(data, "deriv", "secret", metadata);
+    const secondEncryptedDocument = await client.deterministicEncryptDocument(data, "deriv", "secret", metadata);
+    expect(encryptedDocument).not.toBeEmpty();
+    assertDetEncryptedData(client, encryptedDocument, "secret");
+    expect(encryptedDocument.field1.secretId).toBe(secondEncryptedDocument.field1.secretId);
+    expect(encryptedDocument.field1.secretPath).toBe(secondEncryptedDocument.field1.secretPath);
+    // expect(encryptedDocument.field1.data).toBe(secondEncryptedDocument.field1.data);
+
+    const decryptResult = await client.deterministicDecryptDocument(secondEncryptedDocument, "deriv", "secret2", metadata);
+
+    expect(decryptResult.field1).toEqual(data.field1);
 };
 
 export const runSingleExistingDocumentRoundTripForTenant = async (client: TenantSecurityClient, tenant: string) => {
