@@ -218,7 +218,7 @@ export class TenantSecurityClient {
         SecurityEventApi.logSecurityEvent(this.tspDomain, this.apiKey, event, metadata).toPromise();
 
     /**
-     * TODO
+     * Deterministically encrypt the provided document of 1-N fields using the tenants primary KMS.
      */
     deterministicEncryptDocument = (
         document: PlaintextDocument,
@@ -227,13 +227,11 @@ export class TenantSecurityClient {
         metadata: DocumentMetadata
     ): Promise<DeterministicEncryptedDocument> =>
         KmsApi.deriveKey(this.tspDomain, this.apiKey, [derivationPath], secretPath, metadata)
-            .flatMap((deriveResponse) =>
-                Crypto.deterministicEncryptDocument(document, Object.values(deriveResponse.derivedKeys)[0], secretPath, metadata.tenantId)
-            )
+            .flatMap((deriveResponse) => Crypto.deterministicEncryptDocument(document, Object.values(deriveResponse.derivedKeys)[0], secretPath))
             .toPromise();
 
     /**
-     * TODO
+     * Decrypt the provided deterministically encrypted document.
      */
     deterministicDecryptDocument = (
         encryptedDoc: DeterministicEncryptedDocument,
