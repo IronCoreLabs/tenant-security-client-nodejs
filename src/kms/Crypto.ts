@@ -9,8 +9,8 @@ import {TscException} from "../TscException";
 import * as miscreant from "miscreant";
 import {
     Base64String,
-    DeterministicData,
     DeterministicEncryptedDocument,
+    DeterministicPlaintextDocument,
     EncryptedDocument,
     EncryptedDocumentWithEdek,
     EncryptedDocumentWithEdekCollection,
@@ -209,29 +209,23 @@ export const encryptDocument = (document: PlaintextDocument, dek: Base64String, 
  * Deterministically encrypt the provided document with the primary key from `derivedKeys`.
  */
 export const deterministicEncryptDocument = (
-    document: PlaintextDocument,
-    derivedKeys: DerivedKey[] | undefined,
-    secretPath: string
+    document: DeterministicPlaintextDocument,
+    derivedKeys: DerivedKey[] | undefined
 ): Future<TenantSecurityException, DeterministicEncryptedDocument> => {
-    const futuresMap = Object.entries(document).reduce((currentMap, [fieldId, fieldBytes]) => {
-        const primary = derivedKeys?.find((key) => key.primary);
-        if (primary === undefined) {
-            currentMap[fieldId] = Future.reject(
-                new TscException(TenantSecurityErrorCode.DETERMINISTIC_DOCUMENT_ENCRYPT_FAILED, "Failed deterministic encryption.")
-            );
-            return currentMap;
-        } else {
-            const dekBytes = Buffer.from(primary.derivedKey, "base64");
-            currentMap[fieldId] = deterministicEncryptField(fieldBytes, dekBytes, primary.tenantSecretNumericId).map((data) => ({
-                data,
-                secretId: primary.tenantSecretNumericId,
-                secretPath,
-            }));
-            return currentMap;
-        }
-    }, {} as Record<string, Future<TenantSecurityException, DeterministicData>>);
-
-    return Future.all(futuresMap);
+    const primary = derivedKeys?.find((key) => key.primary);
+    if (primary === undefined) {
+        return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_DOCUMENT_ENCRYPT_FAILED, "Failed deterministic encryption."));
+    }
+    const futuresMap = Object.entries(document.document).reduce((currentMap, [fieldId, fieldBytes]) => {
+        const dekBytes = Buffer.from(primary.derivedKey, "base64");
+        currentMap[fieldId] = deterministicEncryptField(fieldBytes, dekBytes, primary.tenantSecretNumericId);
+        return currentMap;
+    }, {} as Record<string, Future<TenantSecurityException, Buffer>>);
+    return Future.all(futuresMap).map((encrypted) => ({
+        encryptedDocument: encrypted,
+        derivationPath: document.derivationPath,
+        secretPath: document.secretPath,
+    }));
 };
 
 /**
@@ -320,16 +314,23 @@ export const decryptDocument = (encryptedDocument: EncryptedDocument, dek: Base6
 
 /**
  * Decrypt all of the deterministically encrypted document fields using the associated tenant secrets contained in `derivedKeys`.
+ * If `reencrypt` is true, return a failure if the document was already encrypted to the current tenant secret.
  */
 export const deterministicDecryptDocument = (
     encryptedDocument: DeterministicEncryptedDocument,
-    derivedKeys: DerivedKey[] | undefined
-): Future<TenantSecurityException, PlaintextDocument> => {
-    const futuresMap = Object.entries(encryptedDocument).reduce((currentMap, [fieldId, fieldData]) => {
-        currentMap[fieldId] = decomposeDeterministicField(fieldData.data).flatMap((parts) => {
+    derivedKeys: DerivedKey[] | undefined,
+    reencrypt = false
+): Future<TenantSecurityException, DeterministicPlaintextDocument> => {
+    const futuresMap = Object.entries(encryptedDocument.encryptedDocument).reduce((currentMap, [fieldId, fieldData]) => {
+        currentMap[fieldId] = decomposeDeterministicField(fieldData).flatMap((parts) => {
             const key = derivedKeys?.find((id) => id.tenantSecretNumericId === parts.tenantSecretId);
+            const primaryKey = derivedKeys?.find((key) => key.primary);
             if (key === undefined) {
                 return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_DOCUMENT_DECRYPT_FAILED, "Failed deterministic decryption."));
+            } else if (reencrypt && key === primaryKey) {
+                return Future.reject(
+                    new TscException(TenantSecurityErrorCode.DETERMINISTIC_REENCRYPT_SAME_SECRET, "Document is already encrypted to current tenant secret.")
+                );
             } else {
                 return deterministicDecryptField(parts.encryptedBytes, Buffer.from(key.derivedKey, "base64"));
             }
@@ -337,7 +338,11 @@ export const deterministicDecryptDocument = (
         return currentMap;
     }, {} as Record<string, Future<TenantSecurityException, Buffer>>);
 
-    return Future.all(futuresMap);
+    return Future.all(futuresMap).map((decrypted) => ({
+        document: decrypted,
+        derivationPath: encryptedDocument.derivationPath,
+        secretPath: encryptedDocument.secretPath,
+    }));
 };
 
 /**

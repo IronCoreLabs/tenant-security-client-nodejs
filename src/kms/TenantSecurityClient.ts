@@ -6,6 +6,7 @@ import {
     Base64String,
     BatchResult,
     DeterministicEncryptedDocument,
+    DeterministicPlaintextDocument,
     EncryptedDocumentWithEdek,
     EncryptedDocumentWithEdekCollection,
     PlaintextDocument,
@@ -220,26 +221,29 @@ export class TenantSecurityClient {
     /**
      * Deterministically encrypt the provided document of 1-N fields using the tenants primary KMS.
      */
-    deterministicEncryptDocument = (
-        document: PlaintextDocument,
-        derivationPath: string,
-        secretPath: string,
-        metadata: DocumentMetadata
-    ): Promise<DeterministicEncryptedDocument> =>
-        KmsApi.deriveKey(this.tspDomain, this.apiKey, [derivationPath], secretPath, metadata)
-            .flatMap((deriveResponse) => Crypto.deterministicEncryptDocument(document, Object.values(deriveResponse.derivedKeys)[0], secretPath))
+    deterministicEncryptDocument = (document: DeterministicPlaintextDocument, metadata: DocumentMetadata): Promise<DeterministicEncryptedDocument> =>
+        KmsApi.deriveKey(this.tspDomain, this.apiKey, [document.derivationPath], document.secretPath, metadata)
+            .flatMap((deriveResponse) => Crypto.deterministicEncryptDocument(document, deriveResponse.derivedKeys[document.derivationPath]))
             .toPromise();
 
     /**
      * Decrypt the provided deterministically encrypted document.
      */
-    deterministicDecryptDocument = (
-        encryptedDoc: DeterministicEncryptedDocument,
-        derivationPath: string,
-        secretPath: string,
-        metadata: DocumentMetadata
-    ): Promise<PlaintextDocument> =>
-        KmsApi.deriveKey(this.tspDomain, this.apiKey, [derivationPath], secretPath, metadata)
-            .flatMap((deriveResponse) => Crypto.deterministicDecryptDocument(encryptedDoc, Object.values(deriveResponse.derivedKeys)[0]))
+    deterministicDecryptDocument = (encryptedDoc: DeterministicEncryptedDocument, metadata: DocumentMetadata): Promise<DeterministicPlaintextDocument> =>
+        KmsApi.deriveKey(this.tspDomain, this.apiKey, [encryptedDoc.derivationPath], encryptedDoc.secretPath, metadata)
+            .flatMap((deriveResponse) => Crypto.deterministicDecryptDocument(encryptedDoc, deriveResponse.derivedKeys[encryptedDoc.derivationPath]))
+            .toPromise();
+
+    /**
+     * Decrypt the provided determinally encrypted document and re-encrypt it with the current tenant secret.
+     */
+    deterministicReencryptDocument = (encryptedDoc: DeterministicEncryptedDocument, metadata: DocumentMetadata): Promise<DeterministicEncryptedDocument> =>
+        KmsApi.deriveKey(this.tspDomain, this.apiKey, [encryptedDoc.derivationPath], encryptedDoc.secretPath, metadata)
+            .flatMap((deriveResponse) => {
+                const derivedKeys = deriveResponse.derivedKeys[encryptedDoc.derivationPath];
+                return Crypto.deterministicDecryptDocument(encryptedDoc, derivedKeys, true).flatMap((decryptedDoc) =>
+                    Crypto.deterministicEncryptDocument(decryptedDoc, derivedKeys)
+                );
+            })
             .toPromise();
 }

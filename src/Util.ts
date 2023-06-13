@@ -57,16 +57,14 @@ export type Base64String = string;
  */
 type Document = Record<string, Buffer>;
 
-export interface DeterministicData {
-    data: Buffer;
-    secretId: number;
-    secretPath: string;
-}
-
-type DeterministicDocument = Record<string, DeterministicData>;
-
 //Input type for single encrypt operation
 export type PlaintextDocument = Document;
+
+export interface DeterministicPlaintextDocument {
+    document: Document;
+    derivationPath: string;
+    secretPath: string;
+}
 
 //Result of single encrypt operation
 export interface EncryptedDocumentWithEdek {
@@ -81,7 +79,11 @@ export interface StreamingResponse {
 //Input type for single decrypt operation
 export type EncryptedDocument = Document;
 
-export type DeterministicEncryptedDocument = DeterministicDocument;
+export interface DeterministicEncryptedDocument {
+    encryptedDocument: EncryptedDocument;
+    derivationPath: string;
+    secretPath: string;
+}
 
 //Result of single decrypt operation
 export interface PlaintextDocumentWithEdek {

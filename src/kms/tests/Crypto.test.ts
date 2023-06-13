@@ -1,6 +1,8 @@
 import * as Crypto from "../Crypto";
 
 describe("UNIT deterministicEncryptDocument", () => {
+    const doc = {document: {field: Buffer.from("aaaaaa")}, derivationPath: "path1", secretPath: "path2"};
+
     const derivedKey = [
         {
             derivedKey: "XEECPt9kGfeATh95LuV3k+UO63CXxLnk0dPXgGK6FVY=",
@@ -11,21 +13,18 @@ describe("UNIT deterministicEncryptDocument", () => {
     ];
 
     test("roundtrips when given valid key", async () => {
-        const doc = {field: Buffer.from("aaaaaa")};
-        const encrypted = await Crypto.deterministicEncryptDocument(doc, derivedKey, "");
+        const encrypted = await Crypto.deterministicEncryptDocument(doc, derivedKey);
         const decrypted = await Crypto.deterministicDecryptDocument(encrypted, derivedKey);
-        expect(decrypted.field).toEqual(doc.field);
+        expect(decrypted.document.field).toEqual(doc.document.field);
     });
 
     test("is stable for a given key/plaintext", async () => {
-        const doc = {field: Buffer.from("aaaaaa")};
-        const encrypted1 = await Crypto.deterministicEncryptDocument(doc, derivedKey, "");
-        const encrypted2 = await Crypto.deterministicEncryptDocument(doc, derivedKey, "");
-        expect(encrypted1.field.data).toEqual(encrypted2.field.data);
+        const encrypted1 = await Crypto.deterministicEncryptDocument(doc, derivedKey);
+        const encrypted2 = await Crypto.deterministicEncryptDocument(doc, derivedKey);
+        expect(encrypted1.encryptedDocument.field).toEqual(encrypted2.encryptedDocument.field);
     });
 
     test("errors when no primary key found", async () => {
-        const doc = {field: Buffer.from("aaaaaa")};
         const key = [
             {
                 derivedKey: "XEECPt9kGfeATh95LuV3k+UO63CXxLnk0dPXgGK6FVY=",
@@ -34,7 +33,7 @@ describe("UNIT deterministicEncryptDocument", () => {
                 primary: false,
             },
         ];
-        await expect(Crypto.deterministicEncryptDocument(doc, key, "")).rejects.toThrow("Failed deterministic encryption");
+        await expect(Crypto.deterministicEncryptDocument(doc, key)).rejects.toThrow("Failed deterministic encryption");
     });
 });
 
