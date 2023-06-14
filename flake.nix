@@ -14,7 +14,6 @@
             version = "0.1.0";
             src = ./.;
             buildInputs = with pkgs.nodePackages; [
-              pkgs.openssl.dev
               pkgs.nodejs-18_x
               pkgs.protobuf
               (pkgs.yarn.override { nodejs = nodejs-18_x; })
@@ -27,7 +26,6 @@
 
         devShell = pkgs.mkShell {
           buildInputs = with pkgs.nodePackages; [
-            pkgs.openssl.dev
             pkgs.nodejs-18_x
             pkgs.protobuf
             (pkgs.yarn.override { nodejs = pkgs.nodejs-18_x; })
