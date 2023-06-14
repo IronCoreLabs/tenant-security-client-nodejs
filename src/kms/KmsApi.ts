@@ -36,7 +36,7 @@ export type DerivedKeys = Record<string, DerivedKey[]>;
 
 export interface DerivedKey {
     derivedKey: Base64String;
-    tenantSecretId: string; // TODO: worth using uuid type?
+    tenantSecretId: string; // TODO: worth using uuid type? worth using at all?
     tenantSecretNumericId: number;
     primary: boolean;
 }

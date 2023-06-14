@@ -4,6 +4,7 @@ import {ApiErrorResponse} from "./kms/KmsApi";
 import {TenantSecurityErrorCode, TenantSecurityException} from "./TenantSecurityException";
 import {TenantSecurityExceptionUtils} from "./TenantSecurityExceptionUtils";
 import {TspServiceException} from "./TspServiceException";
+import {DocumentMetadata} from "./kms/DocumentMetadata";
 
 /**
  * Try to JSON parse error responses from the TSP to extract error codes and messages.
@@ -60,12 +61,6 @@ type Document = Record<string, Buffer>;
 //Input type for single encrypt operation
 export type PlaintextDocument = Document;
 
-export interface DeterministicPlaintextDocument {
-    document: Document;
-    derivationPath: string;
-    secretPath: string;
-}
-
 //Result of single encrypt operation
 export interface EncryptedDocumentWithEdek {
     encryptedDocument: EncryptedDocument;
@@ -78,12 +73,6 @@ export interface StreamingResponse {
 
 //Input type for single decrypt operation
 export type EncryptedDocument = Document;
-
-export interface DeterministicEncryptedDocument {
-    encryptedDocument: EncryptedDocument;
-    derivationPath: string;
-    secretPath: string;
-}
 
 //Result of single decrypt operation
 export interface PlaintextDocumentWithEdek {
@@ -106,3 +95,46 @@ export interface BatchResult<T> {
     hasSuccesses: boolean;
     hasFailures: boolean;
 }
+
+/**
+ * Data to deterministically encrypt via the customer's KMS
+ */
+export type Field = Buffer;
+
+/**
+ * Data that has been deterministically encrypted via the customer's KMS
+ */
+export type EncryptedField = Buffer;
+
+/**
+ * Input type for deterministic encryption
+ */
+export interface DeterministicPlaintextField {
+    plaintextField: Buffer;
+    derivationPath: string;
+    secretPath: string;
+}
+
+/**
+ * Input type for batch deterministic encrypt of new fields
+ */
+export type DeterministicPlaintextFieldCollection = Record<string, DeterministicPlaintextField>;
+
+/**
+ * Input type for deterministic decryption
+ */
+export interface DeterministicEncryptedField {
+    encryptedField: EncryptedField;
+    derivationPath: string;
+    secretPath: string;
+}
+
+/**
+ * Input type for batch deterministic decrypt of new fields
+ */
+export type DeterministicEncryptedFieldCollection = Record<string, DeterministicEncryptedField>;
+
+/**
+ * Metadata needed for all deterministic function calls
+ */
+export type FieldMetadata = DocumentMetadata;

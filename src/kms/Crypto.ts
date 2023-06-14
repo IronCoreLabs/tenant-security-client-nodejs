@@ -9,8 +9,8 @@ import {TscException} from "../TscException";
 import * as miscreant from "miscreant";
 import {
     Base64String,
-    DeterministicEncryptedDocument,
-    DeterministicPlaintextDocument,
+    DeterministicEncryptedField,
+    DeterministicPlaintextField,
     EncryptedDocument,
     EncryptedDocumentWithEdek,
     EncryptedDocumentWithEdekCollection,
@@ -42,7 +42,7 @@ interface EncryptedDocumentParts {
     gcmTag: Buffer;
 }
 
-interface DeterministicEncryptedDocumentParts {
+interface DeterministicEncryptedFieldParts {
     tenantSecretId: number;
     encryptedBytes: Buffer;
 }
@@ -61,22 +61,6 @@ const encryptBytes = (bytes: Buffer, key: Buffer, iv?: Buffer): Future<TenantSec
     }).errorMap((e) => new TscException(TenantSecurityErrorCode.DOCUMENT_ENCRYPT_FAILED, e.message));
 
 /**
- * Encrypt the provided bytes with the provided key using AES-256-SIV.
- */
-const deterministicEncryptBytes = (bytes: Buffer, key: Buffer): Future<TenantSecurityException, Buffer> => {
-    // const cipher = crypto.createCipheriv("AES-256-SIV", key, null);
-    // const encrypted = Buffer.concat([cipher.update(bytes), cipher.final()]);
-    // return Future.of(encrypted);
-    return Future.tryP(() => miscreant.SIV.importKey(key, "AES-SIV", cryptoProvider))
-        .flatMap((siv) =>
-            Future.tryP(async () => {
-                const encrypted = await siv.seal(bytes, []);
-                return Buffer.from(encrypted);
-            })
-        )
-        .errorMap((e) => new TscException(TenantSecurityErrorCode.DETERMINISTIC_DOCUMENT_ENCRYPT_FAILED, e.message));
-};
-/**
  * Take an AES-GCM encrypted value and break it apart into the IV/encrypted value/auth tag.
  */
 const decomposeEncryptedValue = (encryptedValue: Buffer): EncryptedDocumentParts => ({
@@ -93,20 +77,6 @@ const decomposeField = (encryptedBytesWithHeader: Buffer): Future<TenantSecurity
     Util.extractDocumentHeaderFromBytes(encryptedBytesWithHeader).map(({encryptedDoc}) => decomposeEncryptedValue(encryptedDoc));
 
 /**
- * Deconstruct the provided encrypted document into its component parts. Separates the tenant secret ID, padding, and encrypted bytes.
- */
-export const decomposeDeterministicField = (encryptedBytesWithHeader: Buffer): Future<TenantSecurityException, DeterministicEncryptedDocumentParts> => {
-    const tenantSecretIdBytes = encryptedBytesWithHeader.slice(0, 4);
-    const padding = encryptedBytesWithHeader.slice(4, 6);
-    const encryptedBytes = encryptedBytesWithHeader.slice(6);
-    if (Buffer.compare(padding, DETERMINISTIC_HEADER_PADDING) != 0) {
-        return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_HEADER_ERROR, "Failed to parse document header."));
-    }
-    const tenantSecretId = tenantSecretIdBytes.readUInt32BE();
-    return Future.of({encryptedBytes, tenantSecretId});
-};
-
-/**
  * Take the provided document DEK and protobuf header and calculate the full header that goes on the front of the document.
  */
 const generateEncryptedDocumentHeader = (dek: Buffer, headerData: ironcorelabs.proto.ISaaSShieldHeader): Future<TenantSecurityException, Buffer> => {
@@ -121,32 +91,11 @@ const generateEncryptedDocumentHeader = (dek: Buffer, headerData: ironcorelabs.p
 };
 
 /**
- * Encode the tenant secret ID as 4 bytes, then attach two bytes of 0s. Fails if the tenant secret ID can't fit into 4 bytes.
- */
-export const generateDeterministicEncryptedDocumentHeader = (tenantSecretId: number): Future<TenantSecurityException, Buffer> => {
-    if (tenantSecretId < 0 || tenantSecretId > Math.pow(2, 32) - 1) {
-        return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_HEADER_ERROR, "Failed to generate header."));
-    }
-    const arr = new ArrayBuffer(4);
-    const view = new DataView(arr);
-    view.setUint32(0, tenantSecretId, false); // byteOffset = 0; litteEndian = false
-    return Future.of(Buffer.concat([Buffer.from(view.buffer), DETERMINISTIC_HEADER_PADDING]));
-};
-
-/**
  * Take the provided plaintext bytes, generate a new random IV, and encrypt the data with the provided key.
  */
 const encryptField = (plaintextFieldBytes: Buffer, dek: Buffer, headerData: ironcorelabs.proto.ISaaSShieldHeader): Future<TenantSecurityException, Buffer> =>
     Future.gather2(generateEncryptedDocumentHeader(dek, headerData), encryptBytes(plaintextFieldBytes, dek)).map(([docHeader, encryptedDoc]) =>
         Buffer.concat([docHeader, encryptedDoc])
-    );
-
-/**
- * Take the provided plaintext bytes, generate a new random IV, and encrypt the data with the provided key.
- */
-const deterministicEncryptField = (plaintextFieldBytes: Buffer, dek: Buffer, tenantSecretId: number): Future<TenantSecurityException, Buffer> =>
-    Future.gather2(generateDeterministicEncryptedDocumentHeader(tenantSecretId), deterministicEncryptBytes(plaintextFieldBytes, dek)).map(
-        ([header, encryptedDoc]) => Buffer.concat([header, encryptedDoc])
     );
 
 /**
@@ -158,18 +107,6 @@ const decryptField = ({iv, encryptedBytes, gcmTag}: EncryptedDocumentParts, dek:
         cipher.setAuthTag(gcmTag);
         return Buffer.concat([cipher.update(encryptedBytes), cipher.final()]);
     }).errorMap((e) => new TscException(TenantSecurityErrorCode.DOCUMENT_DECRYPT_FAILED, e.message));
-
-/**
- * Attempt to AES-SIV decrypt the provided bytes using the provided key
- */
-const deterministicDecryptField = (encryptedBytes: Buffer, key: Buffer): Future<TenantSecurityException, Buffer> => {
-    // const decipher = crypto.createDecipheriv("aes-256-siv", key, null);
-    // const decrypted = Buffer.concat([decipher.update(encryptedBytes), decipher.final()]);
-    // return Future.of(decrypted);
-    return Future.tryP(() => miscreant.SIV.importKey(key, "AES-SIV", cryptoProvider))
-        .flatMap((siv) => Future.tryP(() => siv.open(encryptedBytes, [])).map((decrypted) => Buffer.from(decrypted)))
-        .errorMap((e) => new TscException(TenantSecurityErrorCode.DETERMINISTIC_DOCUMENT_DECRYPT_FAILED, e.message));
-};
 
 /**
  * Check if the provided header content can be verified against the provided signature using the provided DEK. Takes the existing IV from
@@ -203,29 +140,6 @@ export const encryptDocument = (document: PlaintextDocument, dek: Base64String, 
     }, {} as Record<string, Future<TenantSecurityException, Buffer>>);
 
     return Future.all(futuresMap);
-};
-
-/**
- * Deterministically encrypt the provided document with the primary key from `derivedKeys`.
- */
-export const deterministicEncryptDocument = (
-    document: DeterministicPlaintextDocument,
-    derivedKeys: DerivedKey[] | undefined
-): Future<TenantSecurityException, DeterministicEncryptedDocument> => {
-    const primary = derivedKeys?.find((key) => key.primary);
-    if (primary === undefined) {
-        return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_DOCUMENT_ENCRYPT_FAILED, "Failed deterministic encryption."));
-    }
-    const futuresMap = Object.entries(document.document).reduce((currentMap, [fieldId, fieldBytes]) => {
-        const dekBytes = Buffer.from(primary.derivedKey, "base64");
-        currentMap[fieldId] = deterministicEncryptField(fieldBytes, dekBytes, primary.tenantSecretNumericId);
-        return currentMap;
-    }, {} as Record<string, Future<TenantSecurityException, Buffer>>);
-    return Future.all(futuresMap).map((encrypted) => ({
-        encryptedDocument: encrypted,
-        derivationPath: document.derivationPath,
-        secretPath: document.secretPath,
-    }));
 };
 
 /**
@@ -313,39 +227,6 @@ export const decryptDocument = (encryptedDocument: EncryptedDocument, dek: Base6
 };
 
 /**
- * Decrypt all of the deterministically encrypted document fields using the associated tenant secrets contained in `derivedKeys`.
- * If `reencrypt` is true, return a failure if the document was already encrypted to the current tenant secret.
- */
-export const deterministicDecryptDocument = (
-    encryptedDocument: DeterministicEncryptedDocument,
-    derivedKeys: DerivedKey[] | undefined,
-    reencrypt = false
-): Future<TenantSecurityException, DeterministicPlaintextDocument> => {
-    const futuresMap = Object.entries(encryptedDocument.encryptedDocument).reduce((currentMap, [fieldId, fieldData]) => {
-        currentMap[fieldId] = decomposeDeterministicField(fieldData).flatMap((parts) => {
-            const key = derivedKeys?.find((id) => id.tenantSecretNumericId === parts.tenantSecretId);
-            const primaryKey = derivedKeys?.find((key) => key.primary);
-            if (key === undefined) {
-                return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_DOCUMENT_DECRYPT_FAILED, "Failed deterministic decryption."));
-            } else if (reencrypt && key === primaryKey) {
-                return Future.reject(
-                    new TscException(TenantSecurityErrorCode.DETERMINISTIC_REENCRYPT_SAME_SECRET, "Document is already encrypted to current tenant secret.")
-                );
-            } else {
-                return deterministicDecryptField(parts.encryptedBytes, Buffer.from(key.derivedKey, "base64"));
-            }
-        });
-        return currentMap;
-    }, {} as Record<string, Future<TenantSecurityException, Buffer>>);
-
-    return Future.all(futuresMap).map((decrypted) => ({
-        document: decrypted,
-        derivationPath: encryptedDocument.derivationPath,
-        secretPath: encryptedDocument.secretPath,
-    }));
-};
-
-/**
  * Decrypt the bytes in the provided inputStream and write the result to the provided outfile path if successful.
  */
 export const decryptStream = (
@@ -388,4 +269,132 @@ export const decryptBatchDocuments = (
     }, reduceResult);
 
     return Future.all(futuresMap);
+};
+
+/**
+ * Deterministically encrypt the provided field with the primary key from `derivedKeys`.
+ */
+export const deterministicEncryptField = (
+    field: DeterministicPlaintextField,
+    derivedKeys: DerivedKey[] | undefined
+): Future<TenantSecurityException, DeterministicEncryptedField> => {
+    const primary = derivedKeys?.find((key) => key.primary);
+    if (primary === undefined) {
+        return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_FIELD_ENCRYPT_FAILED, "Failed deterministic encryption."));
+    }
+    const dekBytes = Buffer.from(primary.derivedKey, "base64");
+    const encryptedFuture = Future.gather2(
+        generateDeterministicEncryptedFieldHeader(primary.tenantSecretNumericId),
+        deterministicEncryptBytes(field.plaintextField, dekBytes)
+    ).map(([header, encryptedDoc]) => Buffer.concat([header, encryptedDoc]));
+    return encryptedFuture.map((encrypted) => ({
+        encryptedField: encrypted,
+        derivationPath: field.derivationPath,
+        secretPath: field.secretPath,
+    }));
+};
+
+/**
+ * Encode the tenant secret ID as 4 bytes, then attach two bytes of 0s. Fails if the tenant secret ID can't fit into 4 bytes.
+ */
+export const generateDeterministicEncryptedFieldHeader = (tenantSecretId: number): Future<TenantSecurityException, Buffer> => {
+    if (tenantSecretId < 0 || tenantSecretId > Math.pow(2, 32) - 1) {
+        return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_HEADER_ERROR, "Failed to generate header."));
+    }
+    const arr = new ArrayBuffer(4);
+    const view = new DataView(arr);
+    view.setUint32(0, tenantSecretId, false); // byteOffset = 0; litteEndian = false
+    return Future.of(Buffer.concat([Buffer.from(view.buffer), DETERMINISTIC_HEADER_PADDING]));
+};
+
+/**
+ * Encrypt the provided bytes with the provided key using AES-256-SIV.
+ */
+const deterministicEncryptBytes = (bytes: Buffer, key: Buffer): Future<TenantSecurityException, Buffer> => {
+    return Future.tryP(() => miscreant.SIV.importKey(key, "AES-SIV", cryptoProvider))
+        .flatMap((siv) =>
+            Future.tryP(async () => {
+                const encrypted = await siv.seal(bytes, []);
+                return Buffer.from(encrypted);
+            })
+        )
+        .errorMap((e) => new TscException(TenantSecurityErrorCode.DETERMINISTIC_FIELD_ENCRYPT_FAILED, e.message));
+};
+
+/**
+ * Decrypt the deterministically encrypted field using the associated tenant secrets contained in `derivedKeys`.
+ * If `reencrypt` is true, return a failure if the field was already encrypted to the current tenant secret.
+ */
+export const deterministicDecryptField = (
+    encryptedField: DeterministicEncryptedField,
+    derivedKeys: DerivedKey[] | undefined,
+    reencrypt = false
+): Future<TenantSecurityException, DeterministicPlaintextField> => {
+    const decryptedFuture = decomposeDeterministicField(encryptedField.encryptedField).flatMap((parts) => {
+        const key = derivedKeys?.find((id) => id.tenantSecretNumericId === parts.tenantSecretId);
+        const primaryKey = derivedKeys?.find((key) => key.primary);
+        if (key === undefined) {
+            return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_FIELD_DECRYPT_FAILED, "Failed deterministic decryption."));
+        } else if (reencrypt && key === primaryKey) {
+            return Future.reject(
+                new TscException(TenantSecurityErrorCode.DETERMINISTIC_REENCRYPT_SAME_SECRET, "Field is already encrypted to current tenant secret.")
+            );
+        } else {
+            return deterministicDecryptBytes(parts.encryptedBytes, Buffer.from(key.derivedKey, "base64"));
+        }
+    });
+    return decryptedFuture.map((decrypted) => ({
+        plaintextField: decrypted,
+        derivationPath: encryptedField.derivationPath,
+        secretPath: encryptedField.secretPath,
+    }));
+};
+
+/**
+ * Deconstruct the provided encrypted field into its component parts. Separates the tenant secret ID, padding, and encrypted bytes.
+ */
+export const decomposeDeterministicField = (encryptedBytesWithHeader: Buffer): Future<TenantSecurityException, DeterministicEncryptedFieldParts> => {
+    const tenantSecretIdBytes = encryptedBytesWithHeader.slice(0, 4);
+    const padding = encryptedBytesWithHeader.slice(4, 6);
+    const encryptedBytes = encryptedBytesWithHeader.slice(6);
+    if (Buffer.compare(padding, DETERMINISTIC_HEADER_PADDING) != 0) {
+        return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_HEADER_ERROR, "Failed to parse field header."));
+    }
+    const tenantSecretId = tenantSecretIdBytes.readUInt32BE();
+    return Future.of({encryptedBytes, tenantSecretId});
+};
+
+/**
+ * Attempt to AES-SIV decrypt the provided bytes using the provided key
+ */
+const deterministicDecryptBytes = (encryptedBytes: Buffer, key: Buffer): Future<TenantSecurityException, Buffer> => {
+    return Future.tryP(() => miscreant.SIV.importKey(key, "AES-SIV", cryptoProvider))
+        .flatMap((siv) => Future.tryP(() => siv.open(encryptedBytes, [])).map((decrypted) => Buffer.from(decrypted)))
+        .errorMap((e) => new TscException(TenantSecurityErrorCode.DETERMINISTIC_FIELD_DECRYPT_FAILED, e.message));
+};
+
+/**
+ * Deterministically encrypt the provided field with all current and in-rotation tenant secrets.
+ */
+export const deterministicSearch = (
+    field: DeterministicPlaintextField,
+    derivedKeys: DerivedKey[] | undefined
+): Future<TenantSecurityException, DeterministicEncryptedField[]> => {
+    if (derivedKeys === undefined) {
+        return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_SEARCH_FAILED, "Failed deterministic search."));
+    }
+    const futures = derivedKeys.map((key) => {
+        const dekBytes = Buffer.from(key.derivedKey, "base64");
+        return Future.gather2(
+            generateDeterministicEncryptedFieldHeader(key.tenantSecretNumericId),
+            deterministicEncryptBytes(field.plaintextField, dekBytes)
+        ).map(([header, encryptedDoc]) => Buffer.concat([header, encryptedDoc]));
+    });
+    return Future.all(futures).map((buffers) =>
+        buffers.map((encrypted) => ({
+            encryptedField: encrypted,
+            derivationPath: field.derivationPath,
+            secretPath: field.secretPath,
+        }))
+    );
 };
