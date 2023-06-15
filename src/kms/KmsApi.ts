@@ -144,7 +144,8 @@ export const rekeyKey = (
     );
 
 /**
- * TODO
+ * Make a request to the TSP to derive keys for all of the requesting tenant's secrets using
+ * the provided salts (derivation path) and secret path.
  */
 export const deriveKey = (
     tspDomain: string,
