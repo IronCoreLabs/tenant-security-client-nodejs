@@ -22,7 +22,7 @@
         "protobuild": "pbjs -t static-module -w commonjs -o proto/ts/DocumentHeader.js proto/document_header.proto && pbts -o proto/ts/DocumentHeader.d.ts proto/ts/DocumentHeader.js"
     },
     "dependencies": {
-        "futurejs": "2.1.1",
+        "futurejs": "2.2.0",
         "miscreant": "^0.3.2",
         "node-fetch": "2.6.7",
         "protobufjs": "^6.10.1"
