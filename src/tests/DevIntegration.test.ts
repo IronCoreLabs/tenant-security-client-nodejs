@@ -217,7 +217,7 @@ describe("INTEGRATION dev environment tests", () => {
 
     describe("test tenant with multiple configs", () => {
         it("fails to encrypt new data with no primary config", async () => {
-            const data = TestUtils.getDataToEncrypt();
+            const data = TestUtils.getDocumentToEncrypt();
             const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
 
             try {
@@ -230,7 +230,7 @@ describe("INTEGRATION dev environment tests", () => {
         });
 
         it("fails when batch encrypt with no primary config", async () => {
-            const data = TestUtils.getDataToEncrypt();
+            const data = TestUtils.getDocumentToEncrypt();
             const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
 
             try {
@@ -266,7 +266,7 @@ describe("INTEGRATION dev environment tests", () => {
         });
 
         it("successfuly re-encrypts with EDEK from active config", async () => {
-            const data = TestUtils.getDataToEncrypt();
+            const data = TestUtils.getDocumentToEncrypt();
             const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
 
             const reEncryptResult = await client.encryptDocumentWithExistingKey({edek: existingEdekForEnabledConfig, plaintextDocument: data}, meta);
@@ -279,11 +279,11 @@ describe("INTEGRATION dev environment tests", () => {
             const data = {
                 good: {
                     edek: existingEdekForEnabledConfig,
-                    plaintextDocument: TestUtils.getDataToEncrypt(),
+                    plaintextDocument: TestUtils.getDocumentToEncrypt(),
                 },
                 bad: {
                     edek: existingEdekForDisabledConfig,
-                    plaintextDocument: TestUtils.getDataToEncrypt(),
+                    plaintextDocument: TestUtils.getDocumentToEncrypt(),
                 },
             };
             const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
@@ -300,7 +300,7 @@ describe("INTEGRATION dev environment tests", () => {
         });
 
         it("fails to decrypt data from an unknown tenant", async () => {
-            const data = TestUtils.getDataToEncrypt();
+            const data = TestUtils.getDocumentToEncrypt();
             const meta = TestUtils.getMetadata("unknownTenant");
 
             try {
