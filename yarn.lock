@@ -1844,10 +1844,10 @@ functional-red-black-tree@^1.0.1:
   resolved "https://registry.npmjs.org/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz"
   integrity sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=
 
-futurejs@2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/futurejs/-/futurejs-2.2.0.tgz#d267fd8cabef653899aa1413e27e3563b2441012"
-  integrity sha512-JgWDGfaDquVmSNvWAKulJXb/cMvxTAcPw2kW9UI2GsVw8iXuvaGh6hZHp08BkzPh2xFMYgvcwF4lK7qpbDP2HQ==
+futurejs@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/futurejs/-/futurejs-2.1.1.tgz#11d4503634b050a7c891ccbbe824c5ffa1bf1de3"
+  integrity sha512-5rSRikHpVNWY55pbQFPF3zUpvAkuVHdIAonwCJ6JRn0jIjxgN6KrMs9e59bH2YiSNCKn+PyIFfMEbVWrha2i0g==
 
 gensync@^1.0.0-beta.1:
   version "1.0.0-beta.1"

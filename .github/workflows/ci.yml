@@ -12,7 +12,7 @@ jobs:
     needs: get_refs
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           # our minimum supported node version is 10 according to `npx ls-engines`, so we'd like to keep testing on it
           # if ci fails due to a needed new feature or we are forced to update the MSNV for any other reason, make sure
