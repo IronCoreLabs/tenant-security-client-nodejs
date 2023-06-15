@@ -110,7 +110,7 @@ export type EncryptedField = Buffer;
  * Input type for deterministic encryption
  */
 export interface DeterministicPlaintextField {
-    plaintextField: Buffer;
+    plaintextField: Field;
     derivationPath: string;
     secretPath: string;
 }
