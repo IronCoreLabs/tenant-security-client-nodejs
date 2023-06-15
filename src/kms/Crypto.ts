@@ -321,24 +321,32 @@ const deterministicEncryptBytes = (bytes: Buffer, key: Buffer): Future<TenantSec
         .errorMap((e) => new TscException(TenantSecurityErrorCode.DETERMINISTIC_FIELD_ENCRYPT_FAILED, e.message));
 };
 
+export const checkReencryptNoOp = (
+    encryptedField: DeterministicEncryptedField,
+    derivedKeys: DerivedKey[] | undefined
+): Future<TenantSecurityException, boolean> =>
+    decomposeDeterministicField(encryptedField.encryptedField).flatMap((parts) => {
+        const primaryKeyId = derivedKeys?.find((key) => key.primary)?.tenantSecretNumericId;
+        const previousKeyId = derivedKeys?.find((id) => id.tenantSecretNumericId === parts.tenantSecretId)?.tenantSecretNumericId;
+        if (primaryKeyId === undefined || previousKeyId === undefined) {
+            return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_REKEY_FAILED, "Failed deterministic rekey."));
+        } else {
+            return Future.of(previousKeyId === primaryKeyId);
+        }
+    });
+
 /**
  * Decrypt the deterministically encrypted field using the associated tenant secrets contained in `derivedKeys`.
  * If `reencrypt` is true, return a failure if the field was already encrypted to the current tenant secret.
  */
 export const deterministicDecryptField = (
     encryptedField: DeterministicEncryptedField,
-    derivedKeys: DerivedKey[] | undefined,
-    reencrypt = false
+    derivedKeys: DerivedKey[] | undefined
 ): Future<TenantSecurityException, DeterministicPlaintextField> => {
     const decryptedFuture = decomposeDeterministicField(encryptedField.encryptedField).flatMap((parts) => {
         const key = derivedKeys?.find((id) => id.tenantSecretNumericId === parts.tenantSecretId);
-        const primaryKey = derivedKeys?.find((key) => key.primary);
         if (key === undefined) {
             return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_FIELD_DECRYPT_FAILED, "Failed deterministic decryption."));
-        } else if (reencrypt && key === primaryKey) {
-            return Future.reject(
-                new TscException(TenantSecurityErrorCode.DETERMINISTIC_REENCRYPT_SAME_SECRET, "Field is already encrypted to current tenant secret.")
-            );
         } else {
             return deterministicDecryptBytes(parts.encryptedBytes, Buffer.from(key.derivedKey, "base64"));
         }

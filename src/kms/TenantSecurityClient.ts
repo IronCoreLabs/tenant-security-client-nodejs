@@ -20,6 +20,7 @@ import * as Crypto from "./Crypto";
 import {DocumentMetadata} from "./DocumentMetadata";
 import * as KmsApi from "./KmsApi";
 import * as Util from "./Util";
+import Future from "futurejs";
 export {KmsException} from "./KmsException";
 
 /**
@@ -242,9 +243,15 @@ export class TenantSecurityClient {
         KmsApi.deriveKey(this.tspDomain, this.apiKey, [encryptedDoc.derivationPath], encryptedDoc.secretPath, metadata)
             .flatMap((deriveResponse) => {
                 const derivedKeys = deriveResponse.derivedKeys[encryptedDoc.derivationPath];
-                return Crypto.deterministicDecryptField(encryptedDoc, derivedKeys, true).flatMap((decryptedDoc) =>
-                    Crypto.deterministicEncryptField(decryptedDoc, derivedKeys)
-                );
+                return Crypto.checkReencryptNoOp(encryptedDoc, derivedKeys).flatMap((noOp) => {
+                    if (noOp) {
+                        return Future.of(encryptedDoc);
+                    } else {
+                        return Crypto.deterministicDecryptField(encryptedDoc, derivedKeys).flatMap((decryptedDoc) =>
+                            Crypto.deterministicEncryptField(decryptedDoc, derivedKeys)
+                        );
+                    }
+                });
             })
             .toPromise();
 

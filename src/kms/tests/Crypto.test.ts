@@ -56,6 +56,45 @@ describe("UNIT generateDeterministicEncryptedFieldHeader", () => {
     });
 });
 
+describe("UNIT checkReencryptNoOp", () => {
+    // switched primary compared to `derivedKeys`
+    const newDerivedKeys = [
+        {
+            derivedKey: "XEECPt9kGfeATh95LuV3k+UO63CXxLnk0dPXgGK6FVY=",
+            tenantSecretId: "aaa",
+            tenantSecretNumericId: 5,
+            primary: false,
+        },
+        {
+            derivedKey: "drd++bJKeHJW04sLiz3S0YOLI+oZUyYccIrMvZwPDPw=",
+            tenantSecretId: "bbb",
+            tenantSecretNumericId: 6,
+            primary: true,
+        },
+    ];
+    test("works for noop case", async () => {
+        const encrypted = await Crypto.deterministicEncryptField(plaintextField, derivedKeys);
+        const noop = await Crypto.checkReencryptNoOp(encrypted, derivedKeys);
+        expect(noop).toBeTrue();
+    });
+
+    test("works for non-noop case", async () => {
+        const encrypted = await Crypto.deterministicEncryptField(plaintextField, derivedKeys);
+        const noop = await Crypto.checkReencryptNoOp(encrypted, newDerivedKeys);
+        expect(noop).toBeFalse();
+    });
+
+    test("fails if primary can't be found", async () => {
+        const encrypted = await Crypto.deterministicEncryptField(plaintextField, derivedKeys);
+        await expect(Crypto.checkReencryptNoOp(encrypted, newDerivedKeys.slice(0, 1))).rejects.toThrow("rekey");
+    });
+
+    test("fails if old key can't be found", async () => {
+        const encrypted = await Crypto.deterministicEncryptField(plaintextField, derivedKeys);
+        await expect(Crypto.checkReencryptNoOp(encrypted, newDerivedKeys.slice(1))).rejects.toThrow("rekey");
+    });
+});
+
 describe("UNIT generateDeterministicEncryptedFieldHeader", () => {
     test("generates a stable header for a given secret ID", async () => {
         const tenantSecretId = 420;
