@@ -11,3 +11,6 @@ export const HEADER_META_LENGTH_LENGTH = 2;
 //might be empty.
 export const HEADER_FIXED_SIZE_CONTENT_LENGTH = CURRENT_DOCUMENT_HEADER_VERSION.length + DOCUMENT_MAGIC.length + HEADER_META_LENGTH_LENGTH;
 export const DETERMINISTIC_HEADER_PADDING = Buffer.from([0, 0]);
+// The number of bytes we encode the tenant secret ID into at the start of the encrypted field.
+export const DETERMINISTIC_SECRET_ID_LENGTH = 4;
+export const DETERMINISTIC_HEADER_FIXED_SIZE_CONTENT_LENGTH = DETERMINISTIC_SECRET_ID_LENGTH + DETERMINISTIC_HEADER_PADDING.length;

@@ -28,17 +28,36 @@ interface UnwrapKeyResponse {
 
 export type BatchUnwrapKeyResponse = BatchResponse<UnwrapKeyResponse>;
 
-interface DeriveKeyResponse {
-    derivedKeys: DerivedKeys;
+export type DerivationPath = string;
+export type SecretPath = string;
+
+export interface DeriveKeyResponse {
+    hasPrimaryConfig: boolean;
+    derivedKeys: Record<SecretPath, DerivedKeys>;
 }
 
-export type DerivedKeys = Record<string, DerivedKey[]>;
+export const getDerivedKeys = (deriveKeyResponse: DeriveKeyResponse, secretPath: SecretPath, derivationPath: DerivationPath): DerivedKey[] | undefined =>
+    deriveKeyResponse.derivedKeys[secretPath] === undefined ? undefined : deriveKeyResponse.derivedKeys[secretPath][derivationPath];
+
+export const deterministicCollectionToPathMap = (
+    fields: Record<string, {derivationPath: DerivationPath; secretPath: SecretPath}>
+): Record<SecretPath, DerivationPath[]> => {
+    return Object.values(fields).reduce((currentMap, {derivationPath, secretPath}) => {
+        if (currentMap[secretPath] === undefined) {
+            currentMap[secretPath] = [derivationPath];
+        } else {
+            currentMap[secretPath].push(derivationPath);
+        }
+        return currentMap;
+    }, {} as Record<SecretPath, DerivationPath[]>);
+};
+
+export type DerivedKeys = Record<DerivationPath, DerivedKey[]>;
 
 export interface DerivedKey {
     derivedKey: Base64String;
-    tenantSecretId: string; // TODO: worth using uuid type? worth using at all?
-    tenantSecretNumericId: number;
-    primary: boolean;
+    tenantSecretId: number;
+    current: boolean;
 }
 
 enum DerivationType {
@@ -56,7 +75,7 @@ const UNWRAP_ENDPOINT = "document/unwrap";
 const BATCH_WRAP_ENDPOINT = "document/batch-wrap";
 const BATCH_UNWRAP_ENDPOINT = "document/batch-unwrap";
 const REKEY_ENDPOINT = "document/rekey";
-const DERIVE_ENDPOINT = "key/derive";
+const DERIVE_ENDPOINT = "key/derive_with_secret_path";
 
 /**
  * Generate and wrap a new key via the tenant's KMS.
@@ -150,19 +169,18 @@ export const rekeyKey = (
 export const deriveKey = (
     tspDomain: string,
     apiKey: string,
-    salts: string[],
-    secretPath: string,
+    paths: Record<SecretPath, DerivationPath[]>,
     metadata: DocumentMetadata
-): Future<TenantSecurityException, DeriveKeyResponse> =>
-    makeJsonRequest(
+): Future<TenantSecurityException, DeriveKeyResponse> => {
+    return makeJsonRequest(
         tspDomain,
         apiKey,
         DERIVE_ENDPOINT,
         JSON.stringify({
             ...metadata.toJsonStructure(),
-            salts,
-            derivationType: DerivationType.Sha256,
-            searchType: SecretType.DeterministicEncryption,
-            secretPath,
+            paths,
+            type: DerivationType.Sha256,
+            secretType: SecretType.DeterministicEncryption,
         })
     );
+};

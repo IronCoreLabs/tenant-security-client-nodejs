@@ -1,55 +1,27 @@
 import {EventMetadata} from "../logdriver/EventMetadata";
 import {SecurityEvent} from "../logdriver/SecurityEvent";
 import * as SecurityEventApi from "../logdriver/SecurityEventApi";
-import {TenantSecurityException} from "../TenantSecurityException";
 import {
     Base64String,
     BatchResult,
-    DeterministicEncryptedField,
-    DeterministicPlaintextField,
     EncryptedDocumentWithEdek,
     EncryptedDocumentWithEdekCollection,
-    FieldMetadata,
     PlaintextDocument,
     PlaintextDocumentCollection,
     PlaintextDocumentWithEdek,
     PlaintextDocumentWithEdekCollection,
     StreamingResponse,
+    mapBatchOperationToResult,
 } from "../Util";
 import * as Crypto from "./Crypto";
 import {DocumentMetadata} from "./DocumentMetadata";
 import * as KmsApi from "./KmsApi";
 import * as Util from "./Util";
-import Future from "futurejs";
+import {DeterministicTenantSecurityClient} from "./DeterministicTenantSecurityClient";
 export {KmsException} from "./KmsException";
 
-/**
- * Take a batch result of encrypt/decrypt operations and convert it into the return structure from the SDK, calculating
- * some convenience fields on the response for successes and failures.
- */
-const mapBatchOperationToResult = <T>(
-    successesAndFailures: Record<string, Crypto.BatchEncryptResult> | Record<string, Crypto.BatchDecryptResult>
-): BatchResult<T> => {
-    const resultStructure: BatchResult<T> = {
-        successes: {} as Record<string, T>,
-        failures: {},
-        hasSuccesses: false,
-        hasFailures: false,
-    };
-    //Iterate over the successes and failures and add them to the final result shape
-    return Object.entries(successesAndFailures).reduce((currentMap, [documentId, batchResult]) => {
-        if (batchResult instanceof TenantSecurityException) {
-            currentMap.failures[documentId] = batchResult;
-            currentMap.hasFailures = true;
-        } else {
-            currentMap.successes[documentId] = batchResult;
-            currentMap.hasSuccesses = true;
-        }
-        return currentMap;
-    }, resultStructure);
-};
-
 export class TenantSecurityClient {
+    public deterministicClient: DeterministicTenantSecurityClient;
     private tspDomain: string;
     private apiKey: string;
 
@@ -69,6 +41,7 @@ export class TenantSecurityClient {
         }
         this.tspDomain = tspDomain;
         this.apiKey = apiKey;
+        this.deterministicClient = new DeterministicTenantSecurityClient(tspDomain, apiKey);
     }
 
     /**
@@ -100,7 +73,7 @@ export class TenantSecurityClient {
             .toPromise();
 
     /**
-     * Re-encrypt the provided document of 1-N fields that was previously encrypted with the tenants KMS. Takes the EDEK that was returned on
+     * Re-encrypt the provided document of 1-N fields that was previously encrypted with the tenant's KMS. Takes the EDEK that was returned on
      * encrypt, unwraps that via the KMS, and encrypts the document fields with it.
      */
     encryptDocumentWithExistingKey = (document: PlaintextDocumentWithEdek, metadata: DocumentMetadata): Promise<EncryptedDocumentWithEdek> =>
@@ -144,7 +117,7 @@ export class TenantSecurityClient {
 
     /**
      * Decrypt the provided encrypted document. Takes the document and EDEK returned on encrypt and unwraps the EDEK via
-     * the tenants KMS and uses the resulting DEK to decrypt the fields of the document.
+     * the tenant's KMS and uses the resulting DEK to decrypt the fields of the document.
      */
     decryptDocument = (encryptedDoc: EncryptedDocumentWithEdek, metadata: DocumentMetadata): Promise<PlaintextDocumentWithEdek> =>
         KmsApi.unwrapKey(this.tspDomain, this.apiKey, encryptedDoc.edek, metadata)
@@ -157,7 +130,7 @@ export class TenantSecurityClient {
             .toPromise();
 
     /**
-     * Take the provided EDEK and unwrap it with the tenants KMS to a DEK. Then read the provided input stream, decrypt it with the DEK,
+     * Take the provided EDEK and unwrap it with the tenant's KMS to a DEK. Then read the provided input stream, decrypt it with the DEK,
      * and write the results to the provided output stream. This method will reject without writing any bytes to the output stream if the
      * DEK being used is not valid for the encrypted bytes in the inputStream.
      */
@@ -172,7 +145,7 @@ export class TenantSecurityClient {
             .toPromise();
 
     /**
-     * Decrypt a batch of documents using the tenants KMS that was used to encrypt each document. Supports partial failure and will return both
+     * Decrypt a batch of documents using the tenant's KMS that was used to encrypt each document. Supports partial failure and will return both
      * successfully decrypted documents as well as documents that failed to be decrypted.
      */
     decryptDocumentBatch = (documentList: EncryptedDocumentWithEdekCollection, metadata: DocumentMetadata): Promise<BatchResult<PlaintextDocumentWithEdek>> => {
@@ -219,48 +192,4 @@ export class TenantSecurityClient {
      */
     logSecurityEvent = (event: SecurityEvent, metadata: EventMetadata): Promise<void> =>
         SecurityEventApi.logSecurityEvent(this.tspDomain, this.apiKey, event, metadata).toPromise();
-
-    /**
-     * Deterministically encrypt the provided field using the tenant's current secret.
-     */
-    deterministicEncryptField = (field: DeterministicPlaintextField, metadata: FieldMetadata): Promise<DeterministicEncryptedField> =>
-        KmsApi.deriveKey(this.tspDomain, this.apiKey, [field.derivationPath], field.secretPath, metadata)
-            .flatMap((deriveResponse) => Crypto.deterministicEncryptField(field, deriveResponse.derivedKeys[field.derivationPath]))
-            .toPromise();
-
-    /**
-     * Decrypt the provided deterministically encrypted field.
-     */
-    deterministicDecryptField = (encryptedDoc: DeterministicEncryptedField, metadata: FieldMetadata): Promise<DeterministicPlaintextField> =>
-        KmsApi.deriveKey(this.tspDomain, this.apiKey, [encryptedDoc.derivationPath], encryptedDoc.secretPath, metadata)
-            .flatMap((deriveResponse) => Crypto.deterministicDecryptField(encryptedDoc, deriveResponse.derivedKeys[encryptedDoc.derivationPath]))
-            .toPromise();
-
-    /**
-     * Decrypt the provided deterministically encrypted field and re-encrypt it with the current tenant secret.
-     */
-    deterministicReencryptField = (encryptedDoc: DeterministicEncryptedField, metadata: FieldMetadata): Promise<DeterministicEncryptedField> =>
-        KmsApi.deriveKey(this.tspDomain, this.apiKey, [encryptedDoc.derivationPath], encryptedDoc.secretPath, metadata)
-            .flatMap((deriveResponse) => {
-                const derivedKeys = deriveResponse.derivedKeys[encryptedDoc.derivationPath];
-                return Crypto.checkReencryptNoOp(encryptedDoc, derivedKeys).flatMap((noOp) => {
-                    if (noOp) {
-                        return Future.of(encryptedDoc);
-                    } else {
-                        return Crypto.deterministicDecryptField(encryptedDoc, derivedKeys).flatMap((decryptedDoc) =>
-                            Crypto.deterministicEncryptField(decryptedDoc, derivedKeys)
-                        );
-                    }
-                });
-            })
-            .toPromise();
-
-    /**
-     * Deterministically encrypt the provided field with all current and in-rotation secrets for the tenant.
-     * All of the resulting `encryptedField`s are valid and should be used in combination when searching for the field.
-     */
-    deterministicSearch = (field: DeterministicPlaintextField, metadata: FieldMetadata): Promise<DeterministicEncryptedField[]> =>
-        KmsApi.deriveKey(this.tspDomain, this.apiKey, [field.derivationPath], field.secretPath, metadata)
-            .flatMap((deriveResponse) => Crypto.deterministicSearch(field, deriveResponse.derivedKeys[field.derivationPath]))
-            .toPromise();
 }
