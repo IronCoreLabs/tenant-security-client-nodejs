@@ -204,12 +204,12 @@ describe("UNIT checkRotationFieldNoOp", () => {
 
     test("fails if current can't be found", async () => {
         const encrypted = await DetCrypto.encryptField(plaintextField, derivedKeys);
-        await expect(DetCrypto.checkRotationFieldNoOp(encrypted, newDerivedKeys.slice(0, 1))).rejects.toThrow("rekey");
+        await expect(DetCrypto.checkRotationFieldNoOp(encrypted, newDerivedKeys.slice(0, 1))).rejects.toThrow("rotation");
     });
 
     test("fails if old key can't be found", async () => {
         const encrypted = await DetCrypto.encryptField(plaintextField, derivedKeys);
-        await expect(DetCrypto.checkRotationFieldNoOp(encrypted, newDerivedKeys.slice(1))).rejects.toThrow("rekey");
+        await expect(DetCrypto.checkRotationFieldNoOp(encrypted, newDerivedKeys.slice(1))).rejects.toThrow("rotation");
     });
 });
 
