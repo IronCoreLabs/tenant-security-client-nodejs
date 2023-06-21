@@ -83,7 +83,7 @@ export const checkRotationFieldNoOp = (
         const currentKeyId = derivedKeys?.find((key) => key.current)?.tenantSecretId;
         const previousKeyId = derivedKeys?.find((id) => id.tenantSecretId === parts.tenantSecretId)?.tenantSecretId;
         if (currentKeyId === undefined || previousKeyId === undefined) {
-            return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_REKEY_FAILED, "Failed deterministic rekey."));
+            return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_ROTATE_FAILED, "Failed deterministic rotation of field."));
         } else {
             return Future.of(previousKeyId === currentKeyId);
         }
@@ -159,7 +159,9 @@ export const generateSearchTerms = (
     derivedKeys: DerivedKey[] | undefined
 ): Future<TenantSecurityException, DeterministicEncryptedField[]> => {
     if (derivedKeys === undefined) {
-        return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_SEARCH_FAILED, "Failed deterministic search."));
+        return Future.reject(
+            new TscException(TenantSecurityErrorCode.DETERMINISTIC_GENERATE_SEARCH_TERMS_FAILED, "Failed to generate deterministic search terms.")
+        );
     }
     const futures = derivedKeys.map((key) => {
         const dekBytes = Buffer.from(key.derivedKey, "base64");
