@@ -179,7 +179,7 @@ export const deriveKey = (
         JSON.stringify({
             ...metadata.toJsonStructure(),
             paths,
-            type: DerivationType.Sha256,
+            derivationType: DerivationType.Sha256,
             secretType: SecretType.DeterministicEncryption,
         })
     );
