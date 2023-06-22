@@ -39,6 +39,17 @@ describe("UNIT encryptField", () => {
         ];
         await expect(DetCrypto.encryptField(plaintextField, key)).rejects.toThrow("Failed deterministic encryption");
     });
+
+    test("errors if derivedKey isn't valid base64", async () => {
+        const derivedKeys = [
+            {
+                derivedKey: "!!!!!",
+                tenantSecretId: 5,
+                current: true,
+            },
+        ];
+        await expect(DetCrypto.encryptField(plaintextField, derivedKeys)).rejects.toThrow("got 0");
+    });
 });
 
 describe("UNIT encryptBytes", () => {

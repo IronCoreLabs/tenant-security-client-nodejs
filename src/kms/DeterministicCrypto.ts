@@ -37,9 +37,6 @@ export const encryptField = (
         return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_FIELD_ENCRYPT_FAILED, "Failed deterministic encryption."));
     }
     const dekBytes = Buffer.from(current.derivedKey, "base64");
-    if (dekBytes.length === 0) {
-        return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_FIELD_DECRYPT_FAILED, "TODO error code/message"));
-    }
     const encryptedFuture = Future.gather2(generateEncryptedFieldHeader(current.tenantSecretId), encryptBytes(field.plaintextField, dekBytes)).map(
         ([header, encryptedDoc]) => Buffer.concat([header, encryptedDoc])
     );
