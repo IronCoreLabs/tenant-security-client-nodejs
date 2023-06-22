@@ -5,12 +5,12 @@ const plaintextField = {plaintextField: Buffer.from("aaaaaa"), derivationPath: "
 
 const derivedKeys = [
     {
-        derivedKey: "XEECPt9kGfeATh95LuV3k+UO63CXxLnk0dPXgGK6FVY=",
+        derivedKey: "g2K8P7zoxO+yi4oDcR5Bk4grNuHFUBgqJ2Jgbh2bJzDk2Z/z8ji5WvF8aO2n/iUBl8tbKiaIs2n7R9vIBrXGmg==",
         tenantSecretId: 5,
         current: true,
     },
     {
-        derivedKey: "drd++bJKeHJW04sLiz3S0YOLI+oZUyYccIrMvZwPDPw=",
+        derivedKey: "AUvYQZVvGpqalGZyO7Sy5WSsJ9KqOkwP/jlQnvORy/hZVU1pTCLefEPKJ4mShUfdKOKbECMpuf7YpR9+CNwuEQ==",
         tenantSecretId: 6,
         current: false,
     },
@@ -32,7 +32,7 @@ describe("UNIT encryptField", () => {
     test("errors when no current key found", async () => {
         const key = [
             {
-                derivedKey: "XEECPt9kGfeATh95LuV3k+UO63CXxLnk0dPXgGK6FVY=",
+                derivedKey: "g2K8P7zoxO+yi4oDcR5Bk4grNuHFUBgqJ2Jgbh2bJzDk2Z/z8ji5WvF8aO2n/iUBl8tbKiaIs2n7R9vIBrXGmg==",
                 tenantSecretId: 5,
                 current: false,
             },
@@ -141,12 +141,12 @@ describe("UNIT batch", () => {
         const collection = {fieldId: encrypted};
         const newDerivedKeys = [
             {
-                derivedKey: "XEECPt9kGfeATh95LuV3k+UO63CXxLnk0dPXgGK6FVY=",
+                derivedKey: "g2K8P7zoxO+yi4oDcR5Bk4grNuHFUBgqJ2Jgbh2bJzDk2Z/z8ji5WvF8aO2n/iUBl8tbKiaIs2n7R9vIBrXGmg==",
                 tenantSecretId: 5,
                 current: false,
             },
             {
-                derivedKey: "drd++bJKeHJW04sLiz3S0YOLI+oZUyYccIrMvZwPDPw=",
+                derivedKey: "AUvYQZVvGpqalGZyO7Sy5WSsJ9KqOkwP/jlQnvORy/hZVU1pTCLefEPKJ4mShUfdKOKbECMpuf7YpR9+CNwuEQ==",
                 tenantSecretId: 6,
                 current: true, // different current
             },
@@ -180,12 +180,12 @@ describe("UNIT checkRotationFieldNoOp", () => {
     // switched current compared to `derivedKeys`
     const newDerivedKeys = [
         {
-            derivedKey: "XEECPt9kGfeATh95LuV3k+UO63CXxLnk0dPXgGK6FVY=",
+            derivedKey: "g2K8P7zoxO+yi4oDcR5Bk4grNuHFUBgqJ2Jgbh2bJzDk2Z/z8ji5WvF8aO2n/iUBl8tbKiaIs2n7R9vIBrXGmg==",
             tenantSecretId: 5,
             current: false,
         },
         {
-            derivedKey: "drd++bJKeHJW04sLiz3S0YOLI+oZUyYccIrMvZwPDPw=",
+            derivedKey: "AUvYQZVvGpqalGZyO7Sy5WSsJ9KqOkwP/jlQnvORy/hZVU1pTCLefEPKJ4mShUfdKOKbECMpuf7YpR9+CNwuEQ==",
             tenantSecretId: 6,
             current: true,
         },

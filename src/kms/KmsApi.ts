@@ -63,11 +63,12 @@ export interface DerivedKey {
 enum DerivationType {
     Argon2,
     Sha256,
+    Sha512,
 }
 
 enum SecretType {
-    CloakedSearch = 1,
-    DeterministicEncryption = 2,
+    Search,
+    Deterministic,
 }
 
 const WRAP_ENDPOINT = "document/wrap";
@@ -75,7 +76,7 @@ const UNWRAP_ENDPOINT = "document/unwrap";
 const BATCH_WRAP_ENDPOINT = "document/batch-wrap";
 const BATCH_UNWRAP_ENDPOINT = "document/batch-unwrap";
 const REKEY_ENDPOINT = "document/rekey";
-const DERIVE_ENDPOINT = "key/derive_with_secret_path";
+const DERIVE_ENDPOINT = "key/derive-with-secret-path";
 
 /**
  * Generate and wrap a new key via the tenant's KMS.
@@ -179,8 +180,8 @@ export const deriveKey = (
         JSON.stringify({
             ...metadata.toJsonStructure(),
             paths,
-            derivationType: DerivationType.Sha256,
-            secretType: SecretType.DeterministicEncryption,
+            derivationType: DerivationType.Sha512,
+            secretType: SecretType.Deterministic,
         })
     );
 };
