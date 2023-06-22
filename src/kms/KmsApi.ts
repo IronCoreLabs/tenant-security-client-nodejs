@@ -61,14 +61,14 @@ export interface DerivedKey {
 }
 
 enum DerivationType {
-    Argon2,
-    Sha256,
-    Sha512,
+    Argon2 = "argon2",
+    Sha256 = "sha256",
+    Sha512 = "sha512",
 }
 
 enum SecretType {
-    Search,
-    Deterministic,
+    Search = "search",
+    Deterministic = "deterministic",
 }
 
 const WRAP_ENDPOINT = "document/wrap";

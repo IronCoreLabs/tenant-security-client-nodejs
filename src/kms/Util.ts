@@ -9,6 +9,7 @@ import {
     DETERMINISTIC_HEADER_FIXED_SIZE_CONTENT_LENGTH,
     DETERMINISTIC_HEADER_PADDING,
 } from "./Constants";
+import {DeriveKeyResponse} from "./KmsApi";
 const v3DocumentHeader = ironcorelabs.proto.v3DocumentHeader;
 
 /**
@@ -108,3 +109,17 @@ export const extractDocumentHeaderFromStream = (
         };
         inputStream.on("readable", onRead);
     }).flatMap((maybeHeader) => (maybeHeader ? verifyAndCreateDocHeaderPb(maybeHeader) : Future.of(undefined)));
+
+/**
+ * Ensure that the deriveKeyResponse indicates that the tenant has a primary KMS config, otherwise error.
+ */
+export const verifyHasPrimaryConfig = (
+    deriveKeyResponse: DeriveKeyResponse,
+    errorCode: TenantSecurityErrorCode
+): Future<TenantSecurityException, DeriveKeyResponse> => {
+    if (deriveKeyResponse.hasPrimaryConfig) {
+        return Future.of(deriveKeyResponse);
+    } else {
+        return Future.reject(new TscException(errorCode, "The provided tenant has no primary KMS configuration"));
+    }
+};

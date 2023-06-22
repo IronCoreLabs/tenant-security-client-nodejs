@@ -11,6 +11,7 @@ import * as KmsApi from "./KmsApi";
 import {deterministicCollectionToPathMap, getDerivedKeys} from "./KmsApi";
 export {KmsException} from "./KmsException";
 import * as Util from "./Util";
+import {TenantSecurityErrorCode} from "../TenantSecurityException";
 
 export class DeterministicTenantSecurityClient {
     private tspDomain: string;
@@ -44,6 +45,7 @@ export class DeterministicTenantSecurityClient {
      */
     encryptField = (field: DeterministicPlaintextField, metadata: FieldMetadata): Promise<DeterministicEncryptedField> =>
         KmsApi.deriveKey(this.tspDomain, this.apiKey, {[field.secretPath]: [field.derivationPath]}, metadata)
+            .flatMap((deriveResponse) => Util.verifyHasPrimaryConfig(deriveResponse, TenantSecurityErrorCode.DETERMINISTIC_FIELD_ENCRYPT_FAILED))
             .flatMap((deriveResponse) => DetCrypto.encryptField(field, getDerivedKeys(deriveResponse, field.secretPath, field.derivationPath)))
             .toPromise();
 
@@ -53,6 +55,7 @@ export class DeterministicTenantSecurityClient {
      */
     encryptFieldBatch = (fields: DeterministicPlaintextFieldCollection, metadata: FieldMetadata): Promise<BatchResult<DeterministicEncryptedField>> =>
         KmsApi.deriveKey(this.tspDomain, this.apiKey, deterministicCollectionToPathMap(fields), metadata)
+            .flatMap((deriveResponse) => Util.verifyHasPrimaryConfig(deriveResponse, TenantSecurityErrorCode.DETERMINISTIC_FIELD_ENCRYPT_FAILED))
             .flatMap((deriveResponse) => DetCrypto.batchEncryptField(fields, deriveResponse))
             .toPromise();
 
@@ -81,6 +84,7 @@ export class DeterministicTenantSecurityClient {
      */
     rotateField = (encryptedDoc: DeterministicEncryptedField, metadata: FieldMetadata): Promise<DeterministicEncryptedField> =>
         KmsApi.deriveKey(this.tspDomain, this.apiKey, {[encryptedDoc.secretPath]: [encryptedDoc.derivationPath]}, metadata)
+            .flatMap((deriveResponse) => Util.verifyHasPrimaryConfig(deriveResponse, TenantSecurityErrorCode.DETERMINISTIC_ROTATE_FAILED))
             .flatMap((deriveResponse) => {
                 const derivedKeys = getDerivedKeys(deriveResponse, encryptedDoc.secretPath, encryptedDoc.derivationPath);
                 return DetCrypto.rotateField(encryptedDoc, derivedKeys);
@@ -93,6 +97,7 @@ export class DeterministicTenantSecurityClient {
      */
     rotateFieldBatch = (fields: DeterministicEncryptedFieldCollection, metadata: FieldMetadata): Promise<BatchResult<DeterministicEncryptedField>> =>
         KmsApi.deriveKey(this.tspDomain, this.apiKey, deterministicCollectionToPathMap(fields), metadata)
+            .flatMap((deriveResponse) => Util.verifyHasPrimaryConfig(deriveResponse, TenantSecurityErrorCode.DETERMINISTIC_ROTATE_FAILED))
             .flatMap((deriveResponse) => DetCrypto.batchRotateField(fields, deriveResponse))
             .toPromise();
 
