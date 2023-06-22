@@ -77,7 +77,7 @@ export class DeterministicTenantSecurityClient {
 
     /**
      * Decrypt the provided deterministically encrypted field and re-encrypt it with the current tenant secret.
-     * This should be called when rotating from one KMS configuration to another.
+     * This should be called when rotating from one tenant secret to another.
      */
     rotateField = (encryptedDoc: DeterministicEncryptedField, metadata: FieldMetadata): Promise<DeterministicEncryptedField> =>
         KmsApi.deriveKey(this.tspDomain, this.apiKey, {[encryptedDoc.secretPath]: [encryptedDoc.derivationPath]}, metadata)
@@ -98,7 +98,7 @@ export class DeterministicTenantSecurityClient {
 
     /**
      * Deterministically encrypt the provided field with all current and in-rotation secrets for the tenant.
-     * All of the resulting search terms should be used in combination when searching over the column.
+     * All of the resulting search terms should be used in combination when searching for the field.
      */
     generateSearchTerms = (field: DeterministicPlaintextField, metadata: FieldMetadata): Promise<DeterministicEncryptedField[]> =>
         KmsApi.deriveKey(this.tspDomain, this.apiKey, {[field.secretPath]: [field.derivationPath]}, metadata)

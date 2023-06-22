@@ -136,7 +136,7 @@ describe("UNIT batch", () => {
         expect(batchDecryptResult.failures.fieldId.message).toContain("parse field header");
     });
 
-    test("batch reencrypt roundtrips with regular decrypt", async () => {
+    test("batch rotate field roundtrips with regular decrypt", async () => {
         const encrypted = await DetCrypto.encryptField(plaintextField, derivedKeys);
         const collection = {fieldId: encrypted};
         const newDerivedKeys = [
@@ -255,6 +255,11 @@ describe("UNIT decomposeField", () => {
 
     test("fails for incorrect padding bytes", async () => {
         const encrypted = Buffer.from([0, 0, 0, 4, 1, 0, 1, 1, 1]);
+        await expect(DetCrypto.decomposeField(encrypted)).rejects.toThrow("Failed to parse");
+    });
+
+    test("fails for too few bytes", async () => {
+        const encrypted = Buffer.from([0, 0]);
         await expect(DetCrypto.decomposeField(encrypted)).rejects.toThrow("Failed to parse");
     });
 });

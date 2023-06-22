@@ -14,3 +14,5 @@ export const DETERMINISTIC_HEADER_PADDING = Buffer.from([0, 0]);
 // The number of bytes we encode the tenant secret ID into at the start of the encrypted field.
 export const DETERMINISTIC_SECRET_ID_LENGTH = 4;
 export const DETERMINISTIC_HEADER_FIXED_SIZE_CONTENT_LENGTH = DETERMINISTIC_SECRET_ID_LENGTH + DETERMINISTIC_HEADER_PADDING.length;
+// We encode the tenant secret ID into 4 bytes
+export const MAX_TENANT_SECRET_ID = 4294967295;

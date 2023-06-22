@@ -11,7 +11,7 @@ import {
     DeterministicPlaintextFieldCollection,
     mapBatchOperationToResult,
 } from "../Util";
-import {DETERMINISTIC_HEADER_PADDING} from "./Constants";
+import {DETERMINISTIC_HEADER_PADDING, MAX_TENANT_SECRET_ID} from "./Constants";
 import {DerivedKey, DeriveKeyResponse, getDerivedKeys} from "./KmsApi";
 
 const cryptoProvider = new miscreant.PolyfillCryptoProvider();
@@ -37,6 +37,9 @@ export const encryptField = (
         return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_FIELD_ENCRYPT_FAILED, "Failed deterministic encryption."));
     }
     const dekBytes = Buffer.from(current.derivedKey, "base64");
+    if (dekBytes.length === 0) {
+        return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_FIELD_DECRYPT_FAILED, "TODO error code/message"));
+    }
     const encryptedFuture = Future.gather2(generateEncryptedFieldHeader(current.tenantSecretId), encryptBytes(field.plaintextField, dekBytes)).map(
         ([header, encryptedDoc]) => Buffer.concat([header, encryptedDoc])
     );
@@ -51,7 +54,7 @@ export const encryptField = (
  * Encode the tenant secret ID as 4 bytes, then attach two bytes of 0s. Fails if the tenant secret ID can't fit into 4 bytes.
  */
 export const generateEncryptedFieldHeader = (tenantSecretId: number): Future<TenantSecurityException, Buffer> => {
-    if (tenantSecretId < 0 || tenantSecretId > Math.pow(2, 32) - 1) {
+    if (tenantSecretId < 0 || tenantSecretId > MAX_TENANT_SECRET_ID) {
         return Future.reject(new TscException(TenantSecurityErrorCode.DETERMINISTIC_HEADER_ERROR, "Failed to generate header."));
     }
     const arr = new ArrayBuffer(4);
@@ -75,6 +78,10 @@ export const encryptBytes = (bytes: Buffer, key: Buffer, associatedData: Uint8Ar
         .errorMap((e) => new TscException(TenantSecurityErrorCode.DETERMINISTIC_FIELD_ENCRYPT_FAILED, e.message));
 };
 
+/**
+ * Check if the encrypted field was deterministically encrypted with the current primary. If it is,
+ * we can skip the decryption/encryption because it is guaranteed to be equal to its current value.
+ */
 export const checkRotationFieldNoOp = (
     encryptedField: DeterministicEncryptedField,
     derivedKeys: DerivedKey[] | undefined
@@ -91,7 +98,6 @@ export const checkRotationFieldNoOp = (
 
 /**
  * Decrypt the deterministically encrypted field using the associated tenant secrets contained in `derivedKeys`.
- * If `reencrypt` is true, return a failure if the field was already encrypted to the current tenant secret.
  */
 export const decryptField = (
     encryptedField: DeterministicEncryptedField,
