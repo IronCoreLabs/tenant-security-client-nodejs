@@ -9,17 +9,18 @@ import {TscException} from "../TscException";
 import {
     Base64String,
     EncryptedDocument,
-    EncryptedDocumentWithEdek,
     EncryptedDocumentWithEdekCollection,
     PlaintextDocument,
     PlaintextDocumentCollection,
-    PlaintextDocumentWithEdek,
     PlaintextDocumentWithEdekCollection,
+    EncryptedDocumentWithEdek,
+    PlaintextDocumentWithEdek,
 } from "../Util";
 import {AES_ALGORITHM, AES_GCM_TAG_LENGTH, CURRENT_DOCUMENT_HEADER_VERSION, DOCUMENT_MAGIC, HEADER_META_LENGTH_LENGTH, IV_BYTE_LENGTH} from "./Constants";
 import {BatchUnwrapKeyResponse, BatchWrapKeyResponse} from "./KmsApi";
 import {StreamingDecryption, StreamingEncryption} from "./StreamingAes";
 import * as Util from "./Util";
+
 const pPipeline = promisify(pipeline);
 const {v3DocumentHeader, SaaSShieldHeader} = ironcorelabs.proto;
 
@@ -92,7 +93,7 @@ const decryptField = ({iv, encryptedBytes, gcmTag}: EncryptedDocumentParts, dek:
 
 /**
  * Check if the provided header content can be verified against the provided signature using the provided DEK. Takes the existing IV from
- * the front of the signature and uses it plus the DEK to encrypt the probotuf encoded header. Then verifies that the resulting GCM auth
+ * the front of the signature and uses it plus the DEK to encrypt the protobuf encoded header. Then verifies that the resulting GCM auth
  * tag matches. If the provided header is empty, verification will succeed.
  */
 const verifyHeaderSignature = (header: ironcorelabs.proto.Iv3DocumentHeader | undefined, dek: Buffer): Future<TenantSecurityException, void> => {

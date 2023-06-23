@@ -3,10 +3,11 @@ import {TenantSecurityClient} from "../index";
 import {EventMetadata} from "../logdriver/EventMetadata";
 import {UserEvent} from "../logdriver/UserEvent";
 import * as TestUtils from "./TestUtils";
+import {env} from "process";
 
-//Placeholders to be filled in by devs running tests
-const LOCAL_TENANT_ID = "";
-const LOCAL_API_KEY = "";
+// Placeholders to be filled in by devs running tests, or set the TENANT_ID and API_KEY environment variables
+const LOCAL_TENANT_ID = env.TENANT_ID ? env.TENANT_ID : "";
+const LOCAL_API_KEY = env.API_KEY ? env.API_KEY : "";
 
 //These tests are meant to be used by developers to test things locally. If someone runs `yarn test` and hasn't set these up, we don't want
 //these tests to fail because they didn't modify things. So if they haven't been set, skip these tests.
@@ -26,10 +27,22 @@ describe("LOCAL Integration Tests", () => {
         });
     });
 
+    describe("roundtrip deterministic encrypt and decrypt", () => {
+        conditionalTest("roundtrips a collection of fields", async () => {
+            await TestUtils.runSingleDeterministicFieldRoundTripForTenant(client.deterministicClient, LOCAL_TENANT_ID);
+        });
+    });
+
     describe("roundtrip batch encrypt and batch decrypt", () => {
         conditionalTest("should roundtrip batch documents", async () => {
             await TestUtils.runBatchDocumentRoundtripForTenant(client, LOCAL_TENANT_ID);
             await TestUtils.runReusedBatchDocumentRoundtripForTenant(client, LOCAL_TENANT_ID);
+        });
+    });
+
+    describe("roundtrip deterministic batch encrypt and batch decrypt", () => {
+        conditionalTest("should roundtrip batch fields", async () => {
+            await TestUtils.runDeterministicBatchFieldRoundtripForTenant(client.deterministicClient, LOCAL_TENANT_ID);
         });
     });
 

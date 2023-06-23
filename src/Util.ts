@@ -4,6 +4,9 @@ import {ApiErrorResponse} from "./kms/KmsApi";
 import {TenantSecurityErrorCode, TenantSecurityException} from "./TenantSecurityException";
 import {TenantSecurityExceptionUtils} from "./TenantSecurityExceptionUtils";
 import {TspServiceException} from "./TspServiceException";
+import {DocumentMetadata} from "./kms/DocumentMetadata";
+import * as Crypto from "./kms/Crypto";
+import * as DetCrypto from "./kms/DeterministicCrypto";
 
 /**
  * Try to JSON parse error responses from the TSP to extract error codes and messages.
@@ -47,6 +50,37 @@ export const clearUndefinedProperties = (obj: {[key: string]: any}): {[key: stri
     return local;
 };
 /* eslint-enable @typescript-eslint/no-explicit-any */
+
+/**
+ * Take a batch result of encrypt/decrypt operations and convert it into the return structure from the SDK, calculating
+ * some convenience fields on the response for successes and failures.
+ */
+export const mapBatchOperationToResult = <T>(
+    successesAndFailures:
+        | Record<string, Crypto.BatchEncryptResult>
+        | Record<string, Crypto.BatchDecryptResult>
+        | Record<string, DetCrypto.BatchDeterministicEncryptResult>
+        | Record<string, DetCrypto.BatchDeterministicDecryptResult>
+        | Record<string, DetCrypto.BatchDeterministicSearchResult>
+): BatchResult<T> => {
+    const resultStructure: BatchResult<T> = {
+        successes: {} as Record<string, T>,
+        failures: {},
+        hasSuccesses: false,
+        hasFailures: false,
+    };
+    //Iterate over the successes and failures and add them to the final result shape
+    return Object.entries(successesAndFailures).reduce((currentMap, [documentId, batchResult]) => {
+        if (batchResult instanceof TenantSecurityException) {
+            currentMap.failures[documentId] = batchResult;
+            currentMap.hasFailures = true;
+        } else {
+            currentMap.successes[documentId] = batchResult;
+            currentMap.hasSuccesses = true;
+        }
+        return currentMap;
+    }, resultStructure);
+};
 
 export type Base64String = string;
 
@@ -94,3 +128,46 @@ export interface BatchResult<T> {
     hasSuccesses: boolean;
     hasFailures: boolean;
 }
+
+/**
+ * Data to deterministically encrypt via the customer's KMS
+ */
+export type Field = Buffer;
+
+/**
+ * Data that has been deterministically encrypted via the customer's KMS
+ */
+export type EncryptedField = Buffer;
+
+/**
+ * Input type for deterministic encryption
+ */
+export interface DeterministicPlaintextField {
+    plaintextField: Field;
+    derivationPath: string;
+    secretPath: string;
+}
+
+/**
+ * Input type for batch deterministic encrypt of new fields
+ */
+export type DeterministicPlaintextFieldCollection = Record<string, DeterministicPlaintextField>;
+
+/**
+ * Input type for deterministic decryption
+ */
+export interface DeterministicEncryptedField {
+    encryptedField: EncryptedField;
+    derivationPath: string;
+    secretPath: string;
+}
+
+/**
+ * Input type for batch deterministic decrypt of new fields
+ */
+export type DeterministicEncryptedFieldCollection = Record<string, DeterministicEncryptedField>;
+
+/**
+ * Metadata needed for all deterministic function calls
+ */
+export type FieldMetadata = DocumentMetadata;
