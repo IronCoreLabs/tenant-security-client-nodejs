@@ -31,7 +31,7 @@ const existingEncryptedDataForDisabledConfig = Buffer.from(
 //prettier-ignore
 const existingEdekForDisabledConfig = "CqsCCqUCCoACNPQp9pKbmS+QmQhUfsBE9HKkXMA+cREXiuDrgD/B/hI8zn7rU5Sk4a6trDSr7DoUsG3y6dtBpcoeVIMzgztVr0xo2jzmC1BkyS1CcopUDV7WOq+giZ6NMUTXCQV1fd4sX+yFYQPJrsJ7zHlL72QScxDb66qOjkYu+jLSXj77JHBbFMYPBLRL2rMzZLJ1UIvhmZ1kFpxg5UFQOvitOIT/qSwAZXrqP7yJ1WoFMPg9PypPbMErHLv/ScoNFpMFFbM/X2c/HJXMwL7XSE4uJMRQeXooJ/waXe9nZ1NP/VFQnt9waMn0jYAdnQEbZOd6qp/Ib0HUDyAu2G0ymTGJmooBCRIgOWY5NWZkMjk0NjRhNDA0YzhjNzI1N2U3Njc5Y2MyZWYQoAQ=";
 
-describe.skip("INTEGRATION dev environment tests", () => {
+describe("INTEGRATION dev environment tests", () => {
     let client: TenantSecurityClient;
 
     beforeEach(() => {
