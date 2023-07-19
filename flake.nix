@@ -14,9 +14,9 @@
             version = "0.1.0";
             src = ./.;
             buildInputs = with pkgs.nodePackages; [
-              pkgs.nodejs-16_x
+              pkgs.nodejs-18_x
               pkgs.protobuf
-              (pkgs.yarn.override { nodejs = nodejs-16_x; })
+              (pkgs.yarn.override { nodejs = nodejs-18_x; })
             ];
             nativeBuildInputs = [ ]
               ++ lib.optionals (pkgs.stdenv.isDarwin) [ pkgs.darwin.cctools ];
@@ -26,9 +26,9 @@
 
         devShell = pkgs.mkShell {
           buildInputs = with pkgs.nodePackages; [
-            pkgs.nodejs-16_x
+            pkgs.nodejs-18_x
             pkgs.protobuf
-            (pkgs.yarn.override { nodejs = pkgs.nodejs-16_x; })
+            (pkgs.yarn.override { nodejs = pkgs.nodejs-18_x; })
           ];
         };
       });

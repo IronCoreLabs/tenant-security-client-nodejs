@@ -1,9 +1,17 @@
 import "jest-extended";
 import {TenantSecurityClient} from "../index";
 import {DocumentMetadata} from "../kms/DocumentMetadata";
-import {PlaintextDocument, PlaintextDocumentCollection, PlaintextDocumentWithEdekCollection} from "../Util";
+import {
+    DeterministicEncryptedField,
+    DeterministicPlaintextField,
+    PlaintextDocument,
+    PlaintextDocumentCollection,
+    PlaintextDocumentWithEdekCollection,
+    DeterministicPlaintextFieldCollection,
+} from "../Util";
+import {DeterministicTenantSecurityClient} from "../kms/DeterministicTenantSecurityClient";
 
-export const getDataToEncrypt = (): PlaintextDocument => ({
+export const getDocumentToEncrypt = (): PlaintextDocument => ({
     field1: Buffer.from("Cras sit amet neque vel eros fermentum molestie.", "utf8"),
     field2: Buffer.from("Donec pretium, ipsum molestie rhoncus aliquet, odio libero ultrices ipsum, ac blandit elit purus tristique massa."),
     field3: Buffer.from(
@@ -11,19 +19,33 @@ export const getDataToEncrypt = (): PlaintextDocument => ({
     ),
 });
 
-export const getBatchDataToEncrypt = (): PlaintextDocumentCollection => ({
-    batch1: getDataToEncrypt(),
-    batch2: getDataToEncrypt(),
-    batch3: getDataToEncrypt(),
-    batch4: getDataToEncrypt(),
-    batch5: getDataToEncrypt(),
+export const getFieldToEncrypt = (): DeterministicPlaintextField => ({
+    plaintextField: Buffer.from("Cras sit amet neque vel eros fermentum molestie.", "utf8"),
+    derivationPath: "path1",
+    secretPath: "path2",
+});
+
+export const getBatchDocumentToEncrypt = (): PlaintextDocumentCollection => ({
+    batch1: getDocumentToEncrypt(),
+    batch2: getDocumentToEncrypt(),
+    batch3: getDocumentToEncrypt(),
+    batch4: getDocumentToEncrypt(),
+    batch5: getDocumentToEncrypt(),
+});
+
+export const getBatchFieldToEncrypt = (): DeterministicPlaintextFieldCollection => ({
+    batch1: getFieldToEncrypt(),
+    batch2: getFieldToEncrypt(),
+    batch3: getFieldToEncrypt(),
+    batch4: getFieldToEncrypt(),
+    batch5: getFieldToEncrypt(),
 });
 
 export const getMetadata = (tenant: string) =>
     new DocumentMetadata(tenant, "nodejs-dev-integration-test", "lipsum", "integration-test-ray-id", undefined, undefined, {thingOne: "thingTwo"});
 
 export const assertEncryptedData = (client: TenantSecurityClient, encryptedDocument: Record<string, Buffer>) => {
-    const data = getDataToEncrypt();
+    const data = getDocumentToEncrypt();
     expect(encryptedDocument.field1).toBeInstanceOf(Buffer);
     expect(encryptedDocument.field1.length).toBeGreaterThan(data.field1.length);
     expect(client.isCiphertext(encryptedDocument.field1)).toBeTrue();
@@ -35,9 +57,22 @@ export const assertEncryptedData = (client: TenantSecurityClient, encryptedDocum
     expect(client.isCiphertext(encryptedDocument.field3)).toBeTrue();
 };
 
+export const assertDetEncryptedData = (
+    client: DeterministicTenantSecurityClient,
+    encryptedField: DeterministicEncryptedField,
+    plaintextField: DeterministicPlaintextField
+) => {
+    const data = getDocumentToEncrypt();
+    expect(encryptedField.encryptedField).toBeInstanceOf(Buffer);
+    expect(encryptedField.encryptedField.length).toBeGreaterThan(data.field1.length);
+    expect(encryptedField.derivationPath).toBe(plaintextField.derivationPath);
+    expect(encryptedField.secretPath).toBe(plaintextField.secretPath);
+    expect(client.isCiphertext(encryptedField.encryptedField)).toBeTrue();
+};
+
 export const runSingleDocumentRoundTripForTenant = async (client: TenantSecurityClient, tenant: string) => {
     const metadata = getMetadata(tenant);
-    const data = getDataToEncrypt();
+    const data = getDocumentToEncrypt();
 
     const {edek, encryptedDocument} = await client.encryptDocument(data, metadata);
     expect(edek).not.toBeEmpty();
@@ -49,9 +84,25 @@ export const runSingleDocumentRoundTripForTenant = async (client: TenantSecurity
     expect(decryptResult.plaintextDocument.field1).toEqual(data.field1);
 };
 
+export const runSingleDeterministicFieldRoundTripForTenant = async (client: DeterministicTenantSecurityClient, tenant: string) => {
+    const metadata = getMetadata(tenant);
+    const data = getFieldToEncrypt();
+
+    const encryptedDocument = await client.encryptField(data, metadata);
+    const secondEncryptedDocument = await client.encryptField(data, metadata);
+    expect(encryptedDocument).not.toBeEmpty();
+    assertDetEncryptedData(client, encryptedDocument, data);
+    expect(encryptedDocument.derivationPath).toBe(secondEncryptedDocument.derivationPath);
+    expect(encryptedDocument.secretPath).toBe(secondEncryptedDocument.secretPath);
+
+    const decryptResult = await client.decryptField(secondEncryptedDocument, metadata);
+
+    expect(decryptResult.plaintextField).toEqual(data.plaintextField);
+};
+
 export const runSingleExistingDocumentRoundTripForTenant = async (client: TenantSecurityClient, tenant: string) => {
     const metadata = getMetadata(tenant);
-    const data = getDataToEncrypt();
+    const data = getDocumentToEncrypt();
 
     const firstEncrypt = await client.encryptDocument(data, metadata);
     const {edek, encryptedDocument} = await client.encryptDocumentWithExistingKey({edek: firstEncrypt.edek, plaintextDocument: data}, metadata);
@@ -70,7 +121,7 @@ export const runSingleExistingDocumentRoundTripForTenant = async (client: Tenant
 
 export const runBatchDocumentRoundtripForTenant = async (client: TenantSecurityClient, tenant: string) => {
     const metadata = getMetadata(tenant);
-    const data = getBatchDataToEncrypt();
+    const data = getBatchDocumentToEncrypt();
 
     const encryptResult = await client.encryptDocumentBatch(data, metadata);
 
@@ -104,7 +155,7 @@ export const runBatchDocumentRoundtripForTenant = async (client: TenantSecurityC
 
 export const runReusedBatchDocumentRoundtripForTenant = async (client: TenantSecurityClient, tenant: string) => {
     const metadata = getMetadata(tenant);
-    const data = getBatchDataToEncrypt();
+    const data = getBatchDocumentToEncrypt();
 
     const firstEncrypt = await client.encryptDocumentBatch(data, metadata);
     expect(firstEncrypt.hasFailures).toBeFalse();
@@ -148,22 +199,50 @@ export const runReusedBatchDocumentRoundtripForTenant = async (client: TenantSec
     expect(decryptResult.successes.batch5.plaintextDocument).toEqual(data.batch5);
 };
 
+export const runDeterministicBatchFieldRoundtripForTenant = async (client: DeterministicTenantSecurityClient, tenant: string) => {
+    const metadata = getMetadata(tenant);
+    const data = getBatchFieldToEncrypt();
+
+    const encryptResult = await client.encryptFieldBatch(data, metadata);
+
+    expect(encryptResult.hasFailures).toBeFalse();
+    expect(encryptResult.failures).toBeEmpty();
+    expect(encryptResult.hasSuccesses).toBeTrue();
+
+    assertDetEncryptedData(client, encryptResult.successes.batch1, data.batch1);
+    assertDetEncryptedData(client, encryptResult.successes.batch2, data.batch2);
+    assertDetEncryptedData(client, encryptResult.successes.batch3, data.batch3);
+    assertDetEncryptedData(client, encryptResult.successes.batch4, data.batch4);
+    assertDetEncryptedData(client, encryptResult.successes.batch5, data.batch5);
+
+    const decryptResult = await client.decryptFieldBatch(encryptResult.successes, metadata);
+
+    expect(decryptResult.hasFailures).toBeFalse();
+    expect(decryptResult.failures).toBeEmpty();
+    expect(decryptResult.hasSuccesses).toBeTrue();
+
+    expect(decryptResult.successes.batch1.plaintextField).toEqual(data.batch1.plaintextField);
+    expect(decryptResult.successes.batch2.plaintextField).toEqual(data.batch2.plaintextField);
+    expect(decryptResult.successes.batch3.plaintextField).toEqual(data.batch3.plaintextField);
+    expect(decryptResult.successes.batch4.plaintextField).toEqual(data.batch4.plaintextField);
+    expect(decryptResult.successes.batch5.plaintextField).toEqual(data.batch5.plaintextField);
+};
+
 export const runSingleDocumentRekeyRoundTripForTenants = async (client: TenantSecurityClient, tenant1: string, tenant2: string) => {
     const metadata = getMetadata(tenant1);
-    const data = getDataToEncrypt();
+    const data = getDocumentToEncrypt();
 
     const encryptResult = await client.encryptDocument(data, metadata);
     expect(encryptResult.edek).not.toBeEmpty();
     assertEncryptedData(client, encryptResult.encryptedDocument);
 
-    const rekeyResult = await client.rekeyDocument(encryptResult, tenant2, metadata);
-    expect(rekeyResult.edek).not.toBeEmpty();
-    assertEncryptedData(client, rekeyResult.encryptedDocument);
-    expect(rekeyResult.encryptedDocument).toEqual(encryptResult.encryptedDocument);
+    const rekeyResult = await client.rekeyEdek(encryptResult.edek, tenant2, metadata);
+    expect(rekeyResult).not.toBeEmpty();
+    const newDocument = {encryptedDocument: encryptResult.encryptedDocument, edek: rekeyResult};
 
     const newMetadata = getMetadata(tenant2);
-    const decryptResult = await client.decryptDocument(rekeyResult, newMetadata);
+    const decryptResult = await client.decryptDocument(newDocument, newMetadata);
 
-    expect(decryptResult.edek).toEqual(rekeyResult.edek);
+    expect(decryptResult.edek).toEqual(rekeyResult);
     expect(decryptResult.plaintextDocument.field1).toEqual(data.field1);
 };
