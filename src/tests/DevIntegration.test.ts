@@ -35,7 +35,7 @@ describe("INTEGRATION dev environment tests", () => {
     let client: TenantSecurityClient;
 
     beforeEach(() => {
-        client = new TenantSecurityClient("http://localhost:7777", INTEGRATION_API_KEY);
+        client = new TenantSecurityClient("http://127.0.0.1:7777", INTEGRATION_API_KEY);
     });
 
     describe("verify encrypted bytes", () => {

@@ -10,18 +10,20 @@ jobs:
   build_and_test:
     runs-on: ubuntu-22.04
     needs: get_refs
+    strategy:
+      fail-fast: false
+      matrix:
+        # our minimum supported node version is 14 according to `npx ls-engines`, so we'd like to keep testing on it.
+        # If ci fails due to a needed new feature or we are forced to update the MSNV for any other reason, make sure
+        # to major version bump the library
+        version: [14, 16, 18, 20]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          # our minimum supported node version is 10 according to `npx ls-engines`, so we'd like to keep testing on it
-          # if ci fails due to a needed new feature or we are forced to update the MSNV for any other reason, make sure
-          # to major version bump the library
-          node-version: 10
+          node-version: ${{ matrix.version }}
       - name: build and unit test
-        run: |
-          yarn
-          yarn build
+        run: yarn && yarn build
       - name: clone the tsp
         uses: actions/checkout@v3
         with:
@@ -135,7 +137,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 10.x
+          node-version: 14
       - name: compilation check
         run: |
           yarn

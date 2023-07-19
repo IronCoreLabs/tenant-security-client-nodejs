@@ -17,7 +17,7 @@ describe("LOCAL Integration Tests", () => {
     let client: TenantSecurityClient;
 
     beforeEach(() => {
-        client = new TenantSecurityClient("http://localhost:7777", LOCAL_API_KEY);
+        client = new TenantSecurityClient("http://127.0.0.1:7777", LOCAL_API_KEY);
     });
 
     describe("roundtrip encrypt and decrypt", () => {

@@ -236,14 +236,13 @@ export const runSingleDocumentRekeyRoundTripForTenants = async (client: TenantSe
     expect(encryptResult.edek).not.toBeEmpty();
     assertEncryptedData(client, encryptResult.encryptedDocument);
 
-    const rekeyResult = await client.rekeyDocument(encryptResult, tenant2, metadata);
-    expect(rekeyResult.edek).not.toBeEmpty();
-    assertEncryptedData(client, rekeyResult.encryptedDocument);
-    expect(rekeyResult.encryptedDocument).toEqual(encryptResult.encryptedDocument);
+    const rekeyResult = await client.rekeyEdek(encryptResult.edek, tenant2, metadata);
+    expect(rekeyResult).not.toBeEmpty();
+    const newDocument = {encryptedDocument: encryptResult.encryptedDocument, edek: rekeyResult};
 
     const newMetadata = getMetadata(tenant2);
-    const decryptResult = await client.decryptDocument(rekeyResult, newMetadata);
+    const decryptResult = await client.decryptDocument(newDocument, newMetadata);
 
-    expect(decryptResult.edek).toEqual(rekeyResult.edek);
+    expect(decryptResult.edek).toEqual(rekeyResult);
     expect(decryptResult.plaintextDocument.field1).toEqual(data.field1);
 };
