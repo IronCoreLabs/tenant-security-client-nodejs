@@ -1,3 +1,10 @@
+## 3.0.0
+
+-   Added deterministic encryption client and methods.
+    -   `DeterministicTenantSecurityClient` must be created to access these methods.
+-   Removed deprecated `TenantSecurityClient.rekeyDocument` method.
+-   Changed minimum supported node version to 14.
+
 ## 2.3.0
 
 -   Added `KmsException` for `KmsThrottled`.
@@ -5,6 +12,7 @@
 ### Compatibility
 
 This new error code will only be returned by TSP 4.4.1+.
+
 ## 2.2.1
 
 -   Added `TenantSecurityClient.rekeyEdek` method
