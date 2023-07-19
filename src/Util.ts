@@ -18,6 +18,9 @@ const parseErrorFromFailedResponse = (failureResponse: Response) =>
         .errorMap(() => new TspServiceException(TenantSecurityErrorCode.UNKNOWN_ERROR, "Unknown response from Tenant Security Proxy", failureResponse.status))
         .flatMap((errorResp: ApiErrorResponse) => Future.reject(TenantSecurityExceptionUtils.from(errorResp.code, errorResp.message, failureResponse.status)));
 
+// The following is a workaround necessary for Node 19 and 20
+// taken from https://github.com/node-fetch/node-fetch/issues/1735.
+// CI tests 20, so we can occasionally remove this and test if it passes.
 const httpAgent = new http.Agent({keepAlive: true});
 const httpsAgent = new https.Agent({keepAlive: true});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
