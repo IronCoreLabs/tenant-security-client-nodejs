@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: get_refs
     strategy:
+      fail-fast: false
       matrix:
         # our minimum supported node version is 14 according to `npx ls-engines`, so we'd like to keep testing on it.
         # If ci fails due to a needed new feature or we are forced to update the MSNV for any other reason, make sure
