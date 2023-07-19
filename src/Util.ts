@@ -7,6 +7,8 @@ import {TspServiceException} from "./TspServiceException";
 import {DocumentMetadata} from "./kms/DocumentMetadata";
 import * as Crypto from "./kms/Crypto";
 import * as DetCrypto from "./kms/DeterministicCrypto";
+import * as http from "http";
+import * as https from "https";
 
 /**
  * Try to JSON parse error responses from the TSP to extract error codes and messages.
@@ -15,6 +17,17 @@ const parseErrorFromFailedResponse = (failureResponse: Response) =>
     Future.tryP(() => failureResponse.json())
         .errorMap(() => new TspServiceException(TenantSecurityErrorCode.UNKNOWN_ERROR, "Unknown response from Tenant Security Proxy", failureResponse.status))
         .flatMap((errorResp: ApiErrorResponse) => Future.reject(TenantSecurityExceptionUtils.from(errorResp.code, errorResp.message, failureResponse.status)));
+
+const httpAgent = new http.Agent({keepAlive: true});
+const httpsAgent = new https.Agent({keepAlive: true});
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const agentSelector = function (_parsedURL: any) {
+    if (_parsedURL.protocol == "http:") {
+        return httpAgent;
+    } else {
+        return httpsAgent;
+    }
+};
 
 /**
  * Request the provided API endpoint with the provided POST data. All requests to the TSP today are in POST. On failure,
@@ -29,6 +42,7 @@ export const makeJsonRequest = <T>(tspDomain: string, apiKey: string, route: str
                 "Content-Type": "application/json",
                 Authorization: `cmk ${apiKey}`,
             },
+            agent: agentSelector,
         })
     )
         .errorMap((e) => new TspServiceException(TenantSecurityErrorCode.UNABLE_TO_MAKE_REQUEST, e.message))
