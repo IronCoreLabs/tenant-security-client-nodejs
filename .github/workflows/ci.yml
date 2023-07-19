@@ -8,33 +8,38 @@ on:
 
 jobs:
   build_and_test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: get_refs
+    strategy:
+      fail-fast: false
+      matrix:
+        # our minimum supported node version is 14 according to `npx ls-engines`, so we'd like to keep testing on it.
+        # If ci fails due to a needed new feature or we are forced to update the MSNV for any other reason, make sure
+        # to major version bump the library
+        version: [14, 16, 18, 20]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          version: 18.x
+          node-version: ${{ matrix.version }}
       - name: build and unit test
-        run: |
-          yarn
-          yarn build
+        run: yarn && yarn build
       - name: clone the tsp
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: IronCoreLabs/tenant-security-proxy
           ref: ${{ needs.get_refs.outputs.tenant-security-proxy }}
           path: tenant-security-proxy
           token: ${{ secrets.WORKFLOW_PAT }}
       - name: cache cargo
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
           path: |
             ~/.cargo/git
             tenant-security-proxy/target
       - name: Decrypt TSP integration keys
-        uses: IronCoreLabs/ironhide-actions/decrypt@v1
+        uses: IronCoreLabs/ironhide-actions/decrypt@v3
         with:
           keys: ${{ secrets.IRONHIDE_KEYS }}
           input: tenant-security-proxy/.env.integration.iron
@@ -53,7 +58,7 @@ jobs:
   get_refs:
     # Only run if it's on a PR.
     if: github.base_ref != ''
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       tenant-security-proxy: ${{ steps.get_refs.outputs.tenant-security-proxy }}
     steps:
@@ -69,7 +74,7 @@ jobs:
           test "${PR}" -ge 0
           echo "pr=${PR}" >> "$GITHUB_OUTPUT"
       - name: Find Comment
-        uses: peter-evans/find-comment@v1
+        uses: peter-evans/find-comment@v2
         id: find_comment
         with:
           issue-number: ${{ steps.get_pr.outputs.pr }}
@@ -109,30 +114,30 @@ jobs:
           done
       - name: Post a reaction (parsed your comment)
         if: steps.get_refs.outcome == 'success'
-        uses: peter-evans/create-or-update-comment@v1
+        uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ steps.get_pr.outputs.pr }}
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
           reactions: eyes
       - name: Post a reaction (unparsed comment)
         if: steps.get_refs.outcome == 'failure'
-        uses: peter-evans/create-or-update-comment@v1
+        uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ steps.get_pr.outputs.pr }}
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
           reactions: confused
 
   build_examples:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         example-dir: [large-documents, logging-example, rekey-example, simple-roundtrip]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          version: 18.x
+          node-version: 14
       - name: compilation check
         run: |
           yarn

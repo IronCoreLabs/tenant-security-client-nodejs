@@ -28,11 +28,55 @@ interface UnwrapKeyResponse {
 
 export type BatchUnwrapKeyResponse = BatchResponse<UnwrapKeyResponse>;
 
+export type DerivationPath = string;
+export type SecretPath = string;
+
+export interface DeriveKeyResponse {
+    hasPrimaryConfig: boolean;
+    derivedKeys: Record<SecretPath, DerivedKeys>;
+}
+
+export const getDerivedKeys = (deriveKeyResponse: DeriveKeyResponse, secretPath: SecretPath, derivationPath: DerivationPath): DerivedKey[] | undefined =>
+    deriveKeyResponse.derivedKeys[secretPath] === undefined ? undefined : deriveKeyResponse.derivedKeys[secretPath][derivationPath];
+
+export const deterministicCollectionToPathMap = (
+    fields: Record<string, {derivationPath: DerivationPath; secretPath: SecretPath}>
+): Record<SecretPath, DerivationPath[]> => {
+    return Object.values(fields).reduce((currentMap, {derivationPath, secretPath}) => {
+        if (currentMap[secretPath] === undefined) {
+            currentMap[secretPath] = [derivationPath];
+        } else {
+            currentMap[secretPath].push(derivationPath);
+        }
+        return currentMap;
+    }, {} as Record<SecretPath, DerivationPath[]>);
+};
+
+export type DerivedKeys = Record<DerivationPath, DerivedKey[]>;
+
+export interface DerivedKey {
+    derivedKey: Base64String;
+    tenantSecretId: number;
+    current: boolean;
+}
+
+enum DerivationType {
+    Argon2 = "argon2",
+    Sha256 = "sha256",
+    Sha512 = "sha512",
+}
+
+enum SecretType {
+    Search = "search",
+    Deterministic = "deterministic",
+}
+
 const WRAP_ENDPOINT = "document/wrap";
 const UNWRAP_ENDPOINT = "document/unwrap";
 const BATCH_WRAP_ENDPOINT = "document/batch-wrap";
 const BATCH_UNWRAP_ENDPOINT = "document/batch-unwrap";
 const REKEY_ENDPOINT = "document/rekey";
+const DERIVE_ENDPOINT = "key/derive-with-secret-path";
 
 /**
  * Generate and wrap a new key via the tenant's KMS.
@@ -118,3 +162,26 @@ export const rekeyKey = (
             newTenantId,
         })
     );
+
+/**
+ * Make a request to the TSP to derive keys for all of the requesting tenant's secrets using
+ * the provided salts (derivation path) and secret path.
+ */
+export const deriveKey = (
+    tspDomain: string,
+    apiKey: string,
+    paths: Record<SecretPath, DerivationPath[]>,
+    metadata: DocumentMetadata
+): Future<TenantSecurityException, DeriveKeyResponse> => {
+    return makeJsonRequest(
+        tspDomain,
+        apiKey,
+        DERIVE_ENDPOINT,
+        JSON.stringify({
+            ...metadata.toJsonStructure(),
+            paths,
+            derivationType: DerivationType.Sha512,
+            secretType: SecretType.Deterministic,
+        })
+    );
+};

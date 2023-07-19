@@ -1,6 +1,6 @@
 {
     "name": "@ironcorelabs/tenant-security-nodejs",
-    "version": "2.3.0",
+    "version": "3.0.0",
     "description": "NodeJS client library for the IronCore Labs Tenant Security Proxy.",
     "homepage": "https://ironcorelabs.com/docs",
     "main": "src/index.js",
@@ -9,7 +9,7 @@
     "license": "AGPL-3.0-only",
     "types": "src/index.d.ts",
     "engines": {
-        "node": ">=18.0.0"
+        "node": ">=14.0.0"
     },
     "scripts": {
         "build": "./build.js",
@@ -22,8 +22,9 @@
         "protobuild": "pbjs -t static-module -w commonjs -o proto/ts/DocumentHeader.js proto/document_header.proto && pbts -o proto/ts/DocumentHeader.d.ts proto/ts/DocumentHeader.js"
     },
     "dependencies": {
-        "futurejs": "2.1.1",
-        "node-fetch": "2.6.7",
+        "futurejs": "2.2.0",
+        "miscreant": "^0.3.2",
+        "node-fetch": "2.6.12",
         "protobufjs": "^7.2.4"
     },
     "devDependencies": {

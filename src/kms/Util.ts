@@ -2,7 +2,14 @@ import Future from "futurejs";
 import {ironcorelabs} from "../../proto/ts/DocumentHeader";
 import {TenantSecurityErrorCode, TenantSecurityException} from "../TenantSecurityException";
 import {TscException} from "../TscException";
-import {CURRENT_DOCUMENT_HEADER_VERSION, DOCUMENT_MAGIC, HEADER_FIXED_SIZE_CONTENT_LENGTH} from "./Constants";
+import {
+    CURRENT_DOCUMENT_HEADER_VERSION,
+    DOCUMENT_MAGIC,
+    HEADER_FIXED_SIZE_CONTENT_LENGTH,
+    DETERMINISTIC_HEADER_FIXED_SIZE_CONTENT_LENGTH,
+    DETERMINISTIC_HEADER_PADDING,
+} from "./Constants";
+import {TenantSecurityExceptionUtils} from "../TenantSecurityExceptionUtils";
 const v3DocumentHeader = ironcorelabs.proto.v3DocumentHeader;
 
 /**
@@ -36,6 +43,13 @@ export const isCmkEncryptedDocument = (bytes: Buffer): boolean =>
     bytes.length > HEADER_FIXED_SIZE_CONTENT_LENGTH && bytes[0] === CURRENT_DOCUMENT_HEADER_VERSION[0] && containsIroncoreMagic(bytes);
 
 /**
+ * Returns true if the provided document is an IronCore deterministic encrypted field. Checks that we have the expected header on the front
+ * of the field.
+ */
+export const isDeterministicEncryptedField = (bytes: Buffer): boolean =>
+    bytes.length > DETERMINISTIC_HEADER_FIXED_SIZE_CONTENT_LENGTH && Buffer.compare(bytes.slice(4, 6), DETERMINISTIC_HEADER_PADDING) === 0;
+
+/**
  * Take the provided encrypted document, verify that it's a CMK document, and split out the optional protobuf header from the encrypted data. Returns
  * an object with an optional header and the remaining encrypted bytes.
  */
@@ -60,7 +74,7 @@ export const extractDocumentHeaderFromBytes = (
 
 /**
  * Attempt to read out the header of the provided stream without flowing the data. Reads out the fixed size header first, then reads out the
- * dynamic protobuf header content and attempts to convert it to our expected Probobuf header.
+ * dynamic protobuf header content and attempts to convert it to our expected Protobuf header.
  */
 export const extractDocumentHeaderFromStream = (
     inputStream: NodeJS.ReadableStream
@@ -95,3 +109,17 @@ export const extractDocumentHeaderFromStream = (
         };
         inputStream.on("readable", onRead);
     }).flatMap((maybeHeader) => (maybeHeader ? verifyAndCreateDocHeaderPb(maybeHeader) : Future.of(undefined)));
+
+/**
+ * Ensure that the object indicates that the tenant has a primary KMS config, otherwise error.
+ */
+export const verifyHasPrimaryConfig = <T extends {hasPrimaryConfig: boolean}>(
+    obj: T,
+    errorCode: TenantSecurityErrorCode
+): Future<TenantSecurityException, T> => {
+    if (obj.hasPrimaryConfig) {
+        return Future.of(obj);
+    } else {
+        return Future.reject(TenantSecurityExceptionUtils.from(errorCode, "The provided tenant has no primary KMS configuration"));
+    }
+};
