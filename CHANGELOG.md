@@ -5,6 +5,10 @@
 -   Removed deprecated `TenantSecurityClient.rekeyDocument` method.
 -   Changed minimum supported node version to 14.
 
+### Compatibility
+
+Deterministic encryption functionality requires TSP 4.11.1+.
+
 ## 2.3.0
 
 -   Added `KmsException` for `KmsThrottled`.
