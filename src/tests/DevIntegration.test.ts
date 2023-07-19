@@ -432,7 +432,7 @@ describe("INTEGRATION dev environment deterministic tests", () => {
     let client: DeterministicTenantSecurityClient;
 
     beforeEach(() => {
-        client = new TenantSecurityClient("http://localhost:7777", INTEGRATION_API_KEY).deterministicClient;
+        client = new TenantSecurityClient("http://127.0.0.1:7777", INTEGRATION_API_KEY).deterministicClient;
     });
 
     describe("roundtrip encrypt and decrypt", () => {
@@ -524,6 +524,18 @@ describe("INTEGRATION dev environment deterministic tests", () => {
         };
         const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
         await expect(client.rotateFieldBatch({fail: data}, meta)).rejects.toThrow("no primary KMS config");
+    });
+
+    it("search returns both Current and InRotation, but not Archived", async () => {
+        const plaintextData = {
+            plaintextField: Buffer.from([1, 2, 3]),
+            secretPath: "foo",
+            derivationPath: "bar",
+        };
+        // Tenant has 3 secrets for this data path - one of each rotationStatus
+        const meta = TestUtils.getMetadata(GCP_TENANT_ID);
+        const searchTerms = await client.generateSearchTerms(plaintextData, meta);
+        expect(searchTerms.length).toBe(2);
     });
 
     it("succeeds when generating search terms with no primary config", async () => {
