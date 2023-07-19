@@ -130,12 +130,14 @@ $root.ironcorelabs = (function() {
                 while (reader.pos < end) {
                     var tag = reader.uint32();
                     switch (tag >>> 3) {
-                    case 1:
-                        message.documentId = reader.string();
-                        break;
-                    case 2:
-                        message.segmentId = reader.uint64();
-                        break;
+                    case 1: {
+                            message.documentId = reader.string();
+                            break;
+                        }
+                    case 2: {
+                            message.segmentId = reader.uint64();
+                            break;
+                        }
                     default:
                         reader.skipType(tag & 7);
                         break;
@@ -248,6 +250,21 @@ $root.ironcorelabs = (function() {
                 return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
             };
 
+            /**
+             * Gets the default type url for DataControlPlatformHeader
+             * @function getTypeUrl
+             * @memberof ironcorelabs.proto.DataControlPlatformHeader
+             * @static
+             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns {string} The default type url
+             */
+            DataControlPlatformHeader.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                if (typeUrlPrefix === undefined) {
+                    typeUrlPrefix = "type.googleapis.com";
+                }
+                return typeUrlPrefix + "/ironcorelabs.proto.DataControlPlatformHeader";
+            };
+
             return DataControlPlatformHeader;
         })();
 
@@ -343,9 +360,10 @@ $root.ironcorelabs = (function() {
                 while (reader.pos < end) {
                     var tag = reader.uint32();
                     switch (tag >>> 3) {
-                    case 1:
-                        message.tenantId = reader.string();
-                        break;
+                    case 1: {
+                            message.tenantId = reader.string();
+                            break;
+                        }
                     default:
                         reader.skipType(tag & 7);
                         break;
@@ -433,6 +451,21 @@ $root.ironcorelabs = (function() {
              */
             SaaSShieldHeader.prototype.toJSON = function toJSON() {
                 return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+
+            /**
+             * Gets the default type url for SaaSShieldHeader
+             * @function getTypeUrl
+             * @memberof ironcorelabs.proto.SaaSShieldHeader
+             * @static
+             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns {string} The default type url
+             */
+            SaaSShieldHeader.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                if (typeUrlPrefix === undefined) {
+                    typeUrlPrefix = "type.googleapis.com";
+                }
+                return typeUrlPrefix + "/ironcorelabs.proto.SaaSShieldHeader";
             };
 
             return SaaSShieldHeader;
@@ -566,15 +599,18 @@ $root.ironcorelabs = (function() {
                 while (reader.pos < end) {
                     var tag = reader.uint32();
                     switch (tag >>> 3) {
-                    case 1:
-                        message.sig = reader.bytes();
-                        break;
-                    case 2:
-                        message.dataControl = $root.ironcorelabs.proto.DataControlPlatformHeader.decode(reader, reader.uint32());
-                        break;
-                    case 3:
-                        message.saasShield = $root.ironcorelabs.proto.SaaSShieldHeader.decode(reader, reader.uint32());
-                        break;
+                    case 1: {
+                            message.sig = reader.bytes();
+                            break;
+                        }
+                    case 2: {
+                            message.dataControl = $root.ironcorelabs.proto.DataControlPlatformHeader.decode(reader, reader.uint32());
+                            break;
+                        }
+                    case 3: {
+                            message.saasShield = $root.ironcorelabs.proto.SaaSShieldHeader.decode(reader, reader.uint32());
+                            break;
+                        }
                     default:
                         reader.skipType(tag & 7);
                         break;
@@ -650,7 +686,7 @@ $root.ironcorelabs = (function() {
                 if (object.sig != null)
                     if (typeof object.sig === "string")
                         $util.base64.decode(object.sig, message.sig = $util.newBuffer($util.base64.length(object.sig)), 0);
-                    else if (object.sig.length)
+                    else if (object.sig.length >= 0)
                         message.sig = object.sig;
                 if (object.dataControl != null) {
                     if (typeof object.dataControl !== "object")
@@ -710,6 +746,21 @@ $root.ironcorelabs = (function() {
              */
             v3DocumentHeader.prototype.toJSON = function toJSON() {
                 return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+
+            /**
+             * Gets the default type url for v3DocumentHeader
+             * @function getTypeUrl
+             * @memberof ironcorelabs.proto.v3DocumentHeader
+             * @static
+             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns {string} The default type url
+             */
+            v3DocumentHeader.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                if (typeUrlPrefix === undefined) {
+                    typeUrlPrefix = "type.googleapis.com";
+                }
+                return typeUrlPrefix + "/ironcorelabs.proto.v3DocumentHeader";
             };
 
             return v3DocumentHeader;
