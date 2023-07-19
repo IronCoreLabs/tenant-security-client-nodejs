@@ -23,9 +23,7 @@ jobs:
         with:
           node-version: ${{ matrix.version }}
       - name: build and unit test
-        run: |
-          yarn
-          yarn build
+        run: yarn && yarn build
       - name: clone the tsp
         uses: actions/checkout@v3
         with:
