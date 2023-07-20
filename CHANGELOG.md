@@ -1,3 +1,7 @@
+## 3.0.1
+
+-   Fixed issue with constructing `FieldMetadata`.
+
 ## 3.0.0
 
 -   Added deterministic encryption client and methods.

@@ -2,7 +2,6 @@ import {
     BatchResult,
     DeterministicEncryptedField,
     DeterministicPlaintextField,
-    FieldMetadata,
     DeterministicPlaintextFieldCollection,
     DeterministicEncryptedFieldCollection,
 } from "../Util";
@@ -12,6 +11,7 @@ import {deterministicCollectionToPathMap, getDerivedKeys} from "./KmsApi";
 export {KmsException} from "./KmsException";
 import * as Util from "./Util";
 import {TenantSecurityErrorCode} from "../TenantSecurityException";
+import {FieldMetadata} from "./Metadata";
 
 export class DeterministicTenantSecurityClient {
     private tspDomain: string;

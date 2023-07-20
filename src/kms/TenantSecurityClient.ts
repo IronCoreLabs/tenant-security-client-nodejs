@@ -14,7 +14,7 @@ import {
     mapBatchOperationToResult,
 } from "../Util";
 import * as Crypto from "./Crypto";
-import {DocumentMetadata} from "./DocumentMetadata";
+import {DocumentMetadata} from "./Metadata";
 import * as KmsApi from "./KmsApi";
 import * as Util from "./Util";
 import {DeterministicTenantSecurityClient} from "./DeterministicTenantSecurityClient";
