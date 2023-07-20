@@ -1,7 +1,7 @@
 import Future from "futurejs";
 import {TenantSecurityException} from "../TenantSecurityException";
 import {Base64String, makeJsonRequest} from "../Util";
-import {DocumentMetadata} from "./DocumentMetadata";
+import {DocumentMetadata} from "./Metadata";
 
 export interface ApiErrorResponse {
     code: number;

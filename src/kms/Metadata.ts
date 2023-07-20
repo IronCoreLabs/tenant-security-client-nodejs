@@ -1,6 +1,6 @@
 import {clearUndefinedProperties} from "../Util";
 
-export interface DocumentMetadataJson {
+interface MetadataJson {
     tenantId: string;
     iclFields: {
         requestId?: string;
@@ -13,13 +13,7 @@ export interface DocumentMetadataJson {
     customFields: Record<string, string>;
 }
 
-/**
- * Holds metadata fields as part of an encrypted document. Each encrypted document will have
- * metadata that associates it to a tenant ID, which service is accessing the data, its
- * classification label, as well as optional fields for other arbitrary key/value pairs and a request ID
- * to send to the Tenant Security Proxy.
- */
-export class DocumentMetadata {
+class Metadata {
     tenantId: string;
     requestingUserOrServiceId: string;
     dataLabel?: string;
@@ -29,13 +23,13 @@ export class DocumentMetadata {
     otherData: Record<string, string>;
 
     /**
-     * Constructor for DocumentMetadata class which contains arbitrary key/value pairs and a unique
+     * Constructor for Metadata class which contains arbitrary key/value pairs and a unique
      * request ID to send to the Tenant Security Proxy.
      * @param tenantId                  Unique ID of tenant that is performing the operation.
      * @param requestingUserOrServiceId Unique ID of user/service that is processing data.
      * @param dataLabel                 Classification of data being processed.
-     * @param sourceIp                  IP address of the initiator of this document request.
-     * @param objectId                  ID of the object/document being acted on in the host system.
+     * @param sourceIp                  IP address of the initiator of this request.
+     * @param objectId                  ID of the object being acted on in the host system.
      * @param requestId                 Unique ID that ties host application request ID to Tenant
      *                                  Security Proxy logs.
      * @param otherData                 Additional String key/value pairs to add to metadata.
@@ -67,7 +61,7 @@ export class DocumentMetadata {
 
     /* eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types*/
     toJsonStructure = () => {
-        const json: DocumentMetadataJson = {
+        const json: MetadataJson = {
             tenantId: this.tenantId,
             iclFields: {
                 sourceIp: this.sourceIp,
@@ -81,3 +75,19 @@ export class DocumentMetadata {
         return clearUndefinedProperties(json);
     };
 }
+
+/**
+ * Holds metadata fields as part of encrypted data. Each encrypted document will have
+ * metadata that associates it to a tenant ID, which service is accessing the data, its
+ * classification label, as well as optional fields for other arbitrary key/value pairs and a request ID
+ * to send to the Tenant Security Proxy.
+ */
+export class DocumentMetadata extends Metadata {}
+
+/**
+ * Holds metadata fields as part of encrypted data. Each encrypted field will have
+ * metadata that associates it to a tenant ID, which service is accessing the data, its
+ * classification label, as well as optional fields for other arbitrary key/value pairs and a request ID
+ * to send to the Tenant Security Proxy.
+ */
+export class FieldMetadata extends Metadata {}
