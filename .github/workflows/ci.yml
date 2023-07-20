@@ -132,7 +132,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        example-dir: [large-documents, logging-example, rekey-example, simple-roundtrip]
+        example-dir: [large-documents, logging-example, rekey-example, simple-roundtrip, deterministic-roundtrip]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3

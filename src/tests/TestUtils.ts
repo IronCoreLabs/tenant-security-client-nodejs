@@ -21,8 +21,8 @@ export const getDocumentToEncrypt = (): PlaintextDocument => ({
 
 export const getFieldToEncrypt = (): DeterministicPlaintextField => ({
     plaintextField: Buffer.from("Cras sit amet neque vel eros fermentum molestie.", "utf8"),
-    derivationPath: "path1",
     secretPath: "path2",
+    derivationPath: "path1",
 });
 
 export const getBatchDocumentToEncrypt = (): PlaintextDocumentCollection => ({
