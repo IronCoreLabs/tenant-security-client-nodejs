@@ -1,4 +1,4 @@
-import {DocumentMetadata} from "@ironcorelabs/tenant-security-nodejs";
+import {FieldMetadata} from "@ironcorelabs/tenant-security-nodejs";
 import {DeterministicTenantSecurityClient} from "@ironcorelabs/tenant-security-nodejs/src/kms/DeterministicTenantSecurityClient";
 
 // In order to communicate with the TSP, you need a matching API_KEY. Find the right value from
@@ -23,7 +23,7 @@ const client = new DeterministicTenantSecurityClient("http://localhost:32804", A
 
 // Create metadata used to associate this field to a tenant, name the field, and
 // identify the service or user making the call
-const metadata = new DocumentMetadata(TENANT_ID, "serviceOrUserId", "PII");
+const metadata = new FieldMetadata(TENANT_ID, "serviceOrUserId", "PII");
 
 // Create a plaintext field containing your data
 const fieldBytes = Buffer.from("Jim Bridger", "utf-8");
@@ -33,7 +33,7 @@ const field = {
     secretPath: "secretPath",
 };
 
-// Request secret derived by the KMS and use it to encrypt the document
+// Request secret derived by the KMS and use it to encrypt the field
 client
     .encryptField(field, metadata)
     .then((encryptResult) => {

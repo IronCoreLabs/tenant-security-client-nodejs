@@ -7,7 +7,7 @@
         "typescript": "^4.0.2"
     },
     "dependencies": {
-        "@ironcorelabs/tenant-security-nodejs": "^3.0.0",
+        "@ironcorelabs/tenant-security-nodejs": "^3.0.1",
         "@types/node": "^14.6.0"
     },
     "scripts": {

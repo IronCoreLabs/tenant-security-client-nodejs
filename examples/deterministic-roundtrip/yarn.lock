@@ -2,15 +2,15 @@
 # yarn lockfile v1
 
 
-"@ironcorelabs/tenant-security-nodejs@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@ironcorelabs/tenant-security-nodejs/-/tenant-security-nodejs-3.0.0.tgz#cfc4fb29b124cd620635413105c29dfbbb665ee9"
-  integrity sha512-CNx+AWB+MTksJ7aCY0wjVGl60P1qFqX71jR2glI+bG+JT4ZH64GVW0NwILu0g+l1EQKKzPQvnu4TAYAKPZ1hJQ==
+"@ironcorelabs/tenant-security-nodejs@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@ironcorelabs/tenant-security-nodejs/-/tenant-security-nodejs-3.0.1.tgz#619b2b0b751ee24fd818c05a5fcfb8c0d0ba5af4"
+  integrity sha512-65Hr7Y1aM1EEgGnsxK0gGRusI3U2cDA7gkf6Mv/IjBt2r7wUOHpzOKTXruJLazrKvDoadEcZzzJl1f0+Ef2Q4Q==
   dependencies:
     futurejs "2.2.0"
     miscreant "^0.3.2"
     node-fetch "2.6.12"
-    protobufjs "^6.10.1"
+    protobufjs "^7.2.4"
 
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
   version "1.1.2"
@@ -65,11 +65,6 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==
 
-"@types/long@^4.0.1":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@types/long/-/long-4.0.2.tgz#b74129719fc8d11c01868010082d483b7545591a"
-  integrity sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==
-
 "@types/node@>=13.7.0":
   version "17.0.39"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.39.tgz#3652d82e2a16b4ea679d5ea3143b816c91b7e113"
@@ -85,10 +80,10 @@ futurejs@2.2.0:
   resolved "https://registry.yarnpkg.com/futurejs/-/futurejs-2.2.0.tgz#d267fd8cabef653899aa1413e27e3563b2441012"
   integrity sha512-JgWDGfaDquVmSNvWAKulJXb/cMvxTAcPw2kW9UI2GsVw8iXuvaGh6hZHp08BkzPh2xFMYgvcwF4lK7qpbDP2HQ==
 
-long@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
-  integrity sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==
+long@^5.0.0:
+  version "5.2.3"
+  resolved "https://registry.yarnpkg.com/long/-/long-5.2.3.tgz#a3ba97f3877cf1d778eccbcb048525ebb77499e1"
+  integrity sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==
 
 miscreant@^0.3.2:
   version "0.3.2"
@@ -102,10 +97,10 @@ node-fetch@2.6.12:
   dependencies:
     whatwg-url "^5.0.0"
 
-protobufjs@^6.10.1:
-  version "6.11.3"
-  resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-6.11.3.tgz#637a527205a35caa4f3e2a9a4a13ddffe0e7af74"
-  integrity sha512-xL96WDdCZYdU7Slin569tFX712BxsxslWwAfAhCYjQKGTq7dAU91Lomy6nLLhh/dyGhk/YH4TwTSRxTzhuHyZg==
+protobufjs@^7.2.4:
+  version "7.2.4"
+  resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-7.2.4.tgz#3fc1ec0cdc89dd91aef9ba6037ba07408485c3ae"
+  integrity sha512-AT+RJgD2sH8phPmCf7OUZR8xGdcJRga4+1cOaXJ64hvcSkVhNcRHOwIxUatPH15+nj59WAGTDv3LSGZPEQbJaQ==
   dependencies:
     "@protobufjs/aspromise" "^1.1.2"
     "@protobufjs/base64" "^1.1.2"
@@ -117,9 +112,8 @@ protobufjs@^6.10.1:
     "@protobufjs/path" "^1.1.2"
     "@protobufjs/pool" "^1.1.0"
     "@protobufjs/utf8" "^1.1.0"
-    "@types/long" "^4.0.1"
     "@types/node" ">=13.7.0"
-    long "^4.0.0"
+    long "^5.0.0"
 
 tr46@~0.0.3:
   version "0.0.3"
