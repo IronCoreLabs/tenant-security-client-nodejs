@@ -29,8 +29,8 @@ const metadata = new FieldMetadata(TENANT_ID, "serviceOrUserId", "PII");
 const fieldBytes = Buffer.from("Jim Bridger", "utf-8");
 const field = {
     plaintextField: fieldBytes,
-    derivationPath: "derivPath",
     secretPath: "secretPath",
+    derivationPath: "derivPath",
 };
 
 // Request secret derived by the KMS and use it to encrypt the field
@@ -42,7 +42,7 @@ client
         /* … retrieve the encrypted field from your persistence layer */
 
         // Recreate the encrypted field from persisted data
-        const recreated = {encryptedField, derivationPath: "derivPath", secretPath: "secretPath"};
+        const recreated = {encryptedField, secretPath: "secretPath", derivationPath: "derivPath"};
         // Decrypt the field back to plaintext
         return client.decryptField(recreated, metadata);
     })

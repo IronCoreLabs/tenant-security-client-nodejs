@@ -509,8 +509,8 @@ describe("INTEGRATION dev environment deterministic tests", () => {
     it("fails when rotate field with no primary config", async () => {
         const data = {
             encryptedField: Buffer.from([0, 0, 0, 1, 0, 0, 1]),
-            derivationPath: "path1",
-            secretPath: "path2",
+            secretPath: "path1",
+            derivationPath: "path2",
         };
         const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
         await expect(client.rotateField(data, meta)).rejects.toThrow("no primary KMS config");
@@ -519,8 +519,8 @@ describe("INTEGRATION dev environment deterministic tests", () => {
     it("fails when batch rotate field with no primary config", async () => {
         const data = {
             encryptedField: Buffer.from([0, 0, 0, 1, 0, 0, 1]),
-            derivationPath: "path1",
-            secretPath: "path2",
+            secretPath: "path1",
+            derivationPath: "path2",
         };
         const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
         await expect(client.rotateFieldBatch({fail: data}, meta)).rejects.toThrow("no primary KMS config");

@@ -1,7 +1,7 @@
 import * as DetCrypto from "../DeterministicCrypto";
 import {DeterministicEncryptedField} from "../../Util";
 
-const plaintextField = {plaintextField: Buffer.from("aaaaaa"), derivationPath: "path1", secretPath: "path2"};
+const plaintextField = {plaintextField: Buffer.from("aaaaaa"), secretPath: "path2", derivationPath: "path1"};
 
 const derivedKeys = [
     {

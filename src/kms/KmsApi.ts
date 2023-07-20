@@ -40,7 +40,7 @@ export const getDerivedKeys = (deriveKeyResponse: DeriveKeyResponse, secretPath:
     deriveKeyResponse.derivedKeys[secretPath] === undefined ? undefined : deriveKeyResponse.derivedKeys[secretPath][derivationPath];
 
 export const deterministicCollectionToPathMap = (
-    fields: Record<string, {derivationPath: DerivationPath; secretPath: SecretPath}>
+    fields: Record<string, {secretPath: SecretPath; derivationPath: DerivationPath}>
 ): Record<SecretPath, DerivationPath[]> => {
     return Object.values(fields).reduce((currentMap, {derivationPath, secretPath}) => {
         if (currentMap[secretPath] === undefined) {

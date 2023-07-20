@@ -42,8 +42,8 @@ export const encryptField = (
     );
     return encryptedFuture.map((encrypted) => ({
         encryptedField: encrypted,
-        derivationPath: field.derivationPath,
         secretPath: field.secretPath,
+        derivationPath: field.derivationPath,
     }));
 };
 
@@ -110,8 +110,8 @@ export const decryptField = (
     });
     return decryptedFuture.map((decrypted) => ({
         plaintextField: decrypted,
-        derivationPath: encryptedField.derivationPath,
         secretPath: encryptedField.secretPath,
+        derivationPath: encryptedField.derivationPath,
     }));
 };
 
@@ -175,8 +175,8 @@ export const generateSearchTerms = (
     return Future.all(futures).map((buffers) =>
         buffers.map((encrypted) => ({
             encryptedField: encrypted,
-            derivationPath: field.derivationPath,
             secretPath: field.secretPath,
+            derivationPath: field.derivationPath,
         }))
     );
 };

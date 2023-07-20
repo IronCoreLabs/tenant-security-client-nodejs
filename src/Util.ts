@@ -160,8 +160,8 @@ export type EncryptedField = Buffer;
  */
 export interface DeterministicPlaintextField {
     plaintextField: Field;
-    derivationPath: string;
     secretPath: string;
+    derivationPath: string;
 }
 
 /**
@@ -174,8 +174,8 @@ export type DeterministicPlaintextFieldCollection = Record<string, Deterministic
  */
 export interface DeterministicEncryptedField {
     encryptedField: EncryptedField;
-    derivationPath: string;
     secretPath: string;
+    derivationPath: string;
 }
 
 /**
