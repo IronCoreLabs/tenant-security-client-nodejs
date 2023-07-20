@@ -4,7 +4,6 @@ import {ApiErrorResponse} from "./kms/KmsApi";
 import {TenantSecurityErrorCode, TenantSecurityException} from "./TenantSecurityException";
 import {TenantSecurityExceptionUtils} from "./TenantSecurityExceptionUtils";
 import {TspServiceException} from "./TspServiceException";
-import {DocumentMetadata} from "./kms/DocumentMetadata";
 import * as Crypto from "./kms/Crypto";
 import * as DetCrypto from "./kms/DeterministicCrypto";
 import * as http from "http";
@@ -183,8 +182,3 @@ export interface DeterministicEncryptedField {
  * Input type for batch deterministic decrypt of new fields
  */
 export type DeterministicEncryptedFieldCollection = Record<string, DeterministicEncryptedField>;
-
-/**
- * Metadata needed for all deterministic function calls
- */
-export type FieldMetadata = DocumentMetadata;

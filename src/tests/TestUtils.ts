@@ -1,6 +1,6 @@
 import "jest-extended";
 import {TenantSecurityClient} from "../index";
-import {DocumentMetadata} from "../kms/DocumentMetadata";
+import {DocumentMetadata} from "../kms/Metadata";
 import {
     DeterministicEncryptedField,
     DeterministicPlaintextField,

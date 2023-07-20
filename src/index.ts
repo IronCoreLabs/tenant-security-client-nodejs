@@ -1,4 +1,4 @@
-export * from "./kms/DocumentMetadata";
+export * from "./kms/Metadata";
 export * from "./kms/TenantSecurityClient";
 export * from "./logdriver/EventMetadata";
 export * from "./logdriver/SecurityEvent";
