@@ -463,92 +463,126 @@ describe("INTEGRATION dev environment deterministic tests", () => {
         });
     });
 
-    it("fails to encrypt data for an unknown tenant", async () => {
-        const data = TestUtils.getFieldToEncrypt();
-        const meta = TestUtils.getMetadata("unknownTenant");
-        await expect(client.encryptField(data, meta)).rejects.toThrow("No configurations available");
+    describe("encryptField", () => {
+        it("fails to encrypt data for an unknown tenant", async () => {
+            const data = TestUtils.getFieldToEncrypt();
+            const meta = TestUtils.getMetadata("unknownTenant");
+            await expect(client.encryptField(data, meta)).rejects.toThrow("No configurations available");
+        });
+
+        it("fails when encrypt with no primary config", async () => {
+            const data = TestUtils.getFieldToEncrypt();
+            const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
+            await expect(client.encryptField(data, meta)).rejects.toThrow("no primary KMS config");
+        });
     });
 
-    it("supports partial failure on batch decrypt", async () => {
-        const plaintextData = {
-            plaintextField: Buffer.from([1, 2, 3]),
-            secretPath: "foo",
-            derivationPath: "bar",
-        };
-        const meta = TestUtils.getMetadata(GCP_TENANT_ID);
-        const batchEncryptResult = await client.encryptField(plaintextData, meta);
-        const encryptedData = {
-            good: batchEncryptResult,
-            bad: {
-                // slice off the deterministic header, making these bytes invalid
-                encryptedField: batchEncryptResult.encryptedField.slice(6),
-                secretPath: batchEncryptResult.secretPath,
-                derivationPath: batchEncryptResult.derivationPath,
-            },
-        };
-        const batchDecryptResult = await client.decryptFieldBatch(encryptedData, meta);
-        expect(batchDecryptResult.hasFailures).toBeTrue();
-        expect(batchDecryptResult.hasSuccesses).toBeTrue();
-        expect(batchDecryptResult.successes.good.plaintextField).toEqual(plaintextData.plaintextField);
-        expect(batchDecryptResult.failures.bad).toBeInstanceOf(TscException);
-        expect(batchDecryptResult.failures.bad.errorCode).toEqual(TenantSecurityErrorCode.DETERMINISTIC_HEADER_ERROR);
+    describe("rotateField", () => {
+        it("fails when rotate field with no primary config", async () => {
+            const data = {
+                encryptedField: Buffer.from([0, 0, 0, 1, 0, 0, 1]),
+                secretPath: "path2",
+                derivationPath: "path1",
+            };
+            const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
+            await expect(client.rotateField(data, meta)).rejects.toThrow("no primary KMS config");
+        });
     });
 
-    it("fails when encrypt with no primary config", async () => {
-        const data = TestUtils.getFieldToEncrypt();
-        const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
-        await expect(client.encryptField(data, meta)).rejects.toThrow("no primary KMS config");
+    describe("generateSearchTerms", () => {
+        it("search returns both Current and InRotation, but not Archived", async () => {
+            const plaintextData = {
+                plaintextField: Buffer.from([1, 2, 3]),
+                secretPath: "foo",
+                derivationPath: "bar",
+            };
+            // Tenant has 3 secrets for this data path - one of each rotationStatus
+            const meta = TestUtils.getMetadata(GCP_TENANT_ID);
+            const searchTerms = await client.generateSearchTerms(plaintextData, meta);
+            expect(searchTerms.length).toBe(2);
+        });
+
+        it("succeeds when generating search terms with no primary config", async () => {
+            const data = TestUtils.getFieldToEncrypt();
+            const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
+            const searchTerms = await client.generateSearchTerms(data, meta);
+            expect(searchTerms.length).toBe(1);
+        });
+
+        it("matches encrypt when no rotation has occurred", async () => {
+            const data = {
+                plaintextField: Buffer.from("my-data", "utf8"),
+                secretPath: "not-rotated",
+                derivationPath: "path",
+            };
+            const meta = TestUtils.getMetadata(GCP_TENANT_ID);
+            const searchTerms = await client.generateSearchTerms(data, meta);
+            const encrypted = await client.encryptField(data, meta);
+            expect(searchTerms.length).toBe(1);
+            expect(searchTerms[0].encryptedField).toEqual(encrypted.encryptedField);
+        });
+
+        it("one value matches encrypt when rotation has occurred", async () => {
+            const data = {
+                plaintextField: Buffer.from("my-data", "utf8"),
+                secretPath: "rotation-started",
+                derivationPath: "path",
+            };
+            const meta = TestUtils.getMetadata(GCP_TENANT_ID);
+            const searchTerms = await client.generateSearchTerms(data, meta);
+            const encrypted = await client.encryptField(data, meta);
+            expect(searchTerms.length).toBe(2);
+            expect(searchTerms[0].encryptedField).toEqual(encrypted.encryptedField);
+        });
     });
 
-    it("fails when batch encrypt with no primary config", async () => {
-        const data = TestUtils.getFieldToEncrypt();
-        const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
-        await expect(client.encryptFieldBatch({fail: data}, meta)).rejects.toThrow("no primary KMS config");
-    });
+    describe("batch functions", () => {
+        it("supports partial failure on batch decrypt", async () => {
+            const plaintextData = {
+                plaintextField: Buffer.from([1, 2, 3]),
+                secretPath: "foo",
+                derivationPath: "bar",
+            };
+            const meta = TestUtils.getMetadata(GCP_TENANT_ID);
+            const batchEncryptResult = await client.encryptField(plaintextData, meta);
+            const encryptedData = {
+                good: batchEncryptResult,
+                bad: {
+                    // slice off the deterministic header, making these bytes invalid
+                    encryptedField: batchEncryptResult.encryptedField.slice(6),
+                    secretPath: batchEncryptResult.secretPath,
+                    derivationPath: batchEncryptResult.derivationPath,
+                },
+            };
+            const batchDecryptResult = await client.decryptFieldBatch(encryptedData, meta);
+            expect(batchDecryptResult.hasFailures).toBeTrue();
+            expect(batchDecryptResult.hasSuccesses).toBeTrue();
+            expect(batchDecryptResult.successes.good.plaintextField).toEqual(plaintextData.plaintextField);
+            expect(batchDecryptResult.failures.bad).toBeInstanceOf(TscException);
+            expect(batchDecryptResult.failures.bad.errorCode).toEqual(TenantSecurityErrorCode.DETERMINISTIC_HEADER_ERROR);
+        });
 
-    it("fails when rotate field with no primary config", async () => {
-        const data = {
-            encryptedField: Buffer.from([0, 0, 0, 1, 0, 0, 1]),
-            secretPath: "path1",
-            derivationPath: "path2",
-        };
-        const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
-        await expect(client.rotateField(data, meta)).rejects.toThrow("no primary KMS config");
-    });
+        it("fails when batch encrypt with no primary config", async () => {
+            const data = TestUtils.getFieldToEncrypt();
+            const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
+            await expect(client.encryptFieldBatch({fail: data}, meta)).rejects.toThrow("no primary KMS config");
+        });
 
-    it("fails when batch rotate field with no primary config", async () => {
-        const data = {
-            encryptedField: Buffer.from([0, 0, 0, 1, 0, 0, 1]),
-            secretPath: "path1",
-            derivationPath: "path2",
-        };
-        const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
-        await expect(client.rotateFieldBatch({fail: data}, meta)).rejects.toThrow("no primary KMS config");
-    });
+        it("fails when batch rotate field with no primary config", async () => {
+            const data = {
+                encryptedField: Buffer.from([0, 0, 0, 1, 0, 0, 1]),
+                secretPath: "path2",
+                derivationPath: "path1",
+            };
+            const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
+            await expect(client.rotateFieldBatch({fail: data}, meta)).rejects.toThrow("no primary KMS config");
+        });
 
-    it("search returns both Current and InRotation, but not Archived", async () => {
-        const plaintextData = {
-            plaintextField: Buffer.from([1, 2, 3]),
-            secretPath: "foo",
-            derivationPath: "bar",
-        };
-        // Tenant has 3 secrets for this data path - one of each rotationStatus
-        const meta = TestUtils.getMetadata(GCP_TENANT_ID);
-        const searchTerms = await client.generateSearchTerms(plaintextData, meta);
-        expect(searchTerms.length).toBe(2);
-    });
-
-    it("succeeds when generating search terms with no primary config", async () => {
-        const data = TestUtils.getFieldToEncrypt();
-        const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
-        const searchTerms = await client.generateSearchTerms(data, meta);
-        expect(searchTerms.length).toBe(1);
-    });
-
-    it("succeeds when batch generating search terms with no primary config", async () => {
-        const data = TestUtils.getFieldToEncrypt();
-        const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
-        const searchTerms = await client.generateSearchTermsBatch({good: data}, meta);
-        expect(Object.values(searchTerms.successes).length).toBe(1);
+        it("succeeds when batch generating search terms with no primary config", async () => {
+            const data = TestUtils.getFieldToEncrypt();
+            const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
+            const searchTerms = await client.generateSearchTermsBatch({good: data}, meta);
+            expect(Object.values(searchTerms.successes).length).toBe(1);
+        });
     });
 });
