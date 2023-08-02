@@ -1,3 +1,9 @@
+## 4.0.0
+
+-   Encryption now throws a `TscException` when trying to encrypt a document that has already been IronCore encrypted.
+    -   If you have a use case for double-encrypting a document, please open an issue explaining and we can work on accommodating you.
+    -   If you aren't double-encrypting documents there are no breaking changes affecting you in this version bump
+
 ## 3.0.1
 
 -   Fixed issue with constructing `FieldMetadata`.
