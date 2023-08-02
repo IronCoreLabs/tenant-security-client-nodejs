@@ -116,6 +116,16 @@ const verifyHeaderSignature = (header: ironcorelabs.proto.Iv3DocumentHeader | un
  * Encrypt the provided document with the provided DEK. Encrypts all fields within the document with the same key but with separate IVs per field.
  */
 export const encryptDocument = (document: PlaintextDocument, dek: Base64String, tenantId: string): Future<TenantSecurityException, EncryptedDocument> => {
+    const invalidDocuments = Object.entries(document).filter(([, value]) => Util.isCmkEncryptedDocument(value));
+    if (invalidDocuments.length > 0) {
+        const invalidKeys = invalidDocuments.map(([key]) => `\`${key}\``);
+        return Future.reject(
+            new TscException(
+                TenantSecurityErrorCode.DOCUMENT_ENCRYPT_FAILED,
+                `One or more provided documents is already IronCore encrypted. IDs: ${invalidKeys.join(", ")}`
+            )
+        );
+    }
     const dekBytes = Buffer.from(dek, "base64");
     const futuresMap = Object.entries(document).reduce((currentMap, [fieldId, fieldBytes]) => {
         currentMap[fieldId] = encryptField(fieldBytes, dekBytes, {tenantId});

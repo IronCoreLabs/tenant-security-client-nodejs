@@ -80,6 +80,21 @@ describe("INTEGRATION dev environment tests", () => {
             await TestUtils.runSingleDocumentRoundTripForTenant(client, AZURE_TENANT_ID);
             await TestUtils.runSingleExistingDocumentRoundTripForTenant(client, AZURE_TENANT_ID);
         });
+
+        it("fails to double encrypt data", async () => {
+            const data = TestUtils.getDocumentToEncrypt();
+            const meta = TestUtils.getMetadata(GCP_TENANT_ID);
+            const encrypted = await client.encryptDocument(data, meta);
+
+            try {
+                await client.encryptDocument(encrypted.encryptedDocument, meta);
+                fail("Should fail because documents are double encrypted");
+            } catch (e) {
+                expect(e).toBeInstanceOf(TenantSecurityException);
+                expect(e.errorCode).toEqual(TenantSecurityErrorCode.DOCUMENT_ENCRYPT_FAILED);
+                expect(e.message).toContain("`field1`, `field2`, `field3`");
+            }
+        });
     });
 
     describe("roundtrip streaming encrypt and decrypt", () => {
@@ -265,7 +280,7 @@ describe("INTEGRATION dev environment tests", () => {
             expect(decryptResult.plaintextDocument.doc.toString("utf-8")).toEqual("I'm Gumby dammit");
         });
 
-        it("successfuly re-encrypts with EDEK from active config", async () => {
+        it("successfully re-encrypts with EDEK from active config", async () => {
             const data = TestUtils.getDocumentToEncrypt();
             const meta = TestUtils.getMetadata(MULTIPLE_KMS_CONFIG_TENANT_ID);
 
