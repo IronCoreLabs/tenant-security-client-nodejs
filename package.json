@@ -1,64 +1,64 @@
 {
-    "name": "@ironcorelabs/tenant-security-nodejs",
-    "version": "4.0.0",
-    "description": "NodeJS client library for the IronCore Labs Tenant Security Proxy.",
-    "homepage": "https://ironcorelabs.com/docs",
-    "main": "src/index.js",
-    "repository": "git@github.com:IronCoreLabs/tenant-security-client-nodejs.git",
-    "author": "IronCore Labs",
-    "license": "AGPL-3.0-only",
-    "types": "src/index.d.ts",
-    "engines": {
-        "node": ">=14.0.0"
-    },
-    "scripts": {
-        "build": "./build.js",
-        "test": "yarn run lint && yarn run unit",
-        "unit": "jest -t UNIT",
-        "integration": "jest -t \"INTEGRATION|UNIT\"",
-        "local": "jest -t LOCAL",
-        "lint": "eslint . --ext .ts",
-        "testsingle": "jest",
-        "protobuild": "pbjs -t static-module -w commonjs -o proto/ts/DocumentHeader.js proto/document_header.proto && pbts -o proto/ts/DocumentHeader.d.ts proto/ts/DocumentHeader.js"
-    },
-    "dependencies": {
-        "futurejs": "2.2.0",
-        "miscreant": "^0.3.2",
-        "node-fetch": "2.6.12",
-        "protobufjs": "^7.2.4"
-    },
-    "devDependencies": {
-        "@types/jest": "^25.2.3",
-        "@types/node": "^13.13.15",
-        "@types/node-fetch": "^2.5.7",
-        "@typescript-eslint/eslint-plugin": "^3.9.1",
-        "@typescript-eslint/parser": "^3.9.1",
-        "eslint": "^6.8.0",
-        "jest": "^26.4.1",
-        "jest-extended": "^0.11.5",
-        "prompt": "^1.0.0",
-        "protobufjs-cli": "^1.1.1",
-        "shelljs": "^0.8.4",
-        "ts-jest": "^26.2.0",
-        "ts-node": "^8.10.2",
-        "typescript": "^3.9.7",
-        "typestrict": "^1.0.2",
-        "uglify-js": "^3.7.7"
-    },
-    "prettier": {
-        "printWidth": 160,
-        "tabWidth": 4,
-        "trailingComma": "es5",
-        "bracketSpacing": false,
-        "jsxBracketSameLine": true,
-        "arrowParens": "always",
-        "overrides": [
-            {
-                "files": "*.yml",
-                "options": {
-                    "tabWidth": 2
-                }
-            }
-        ]
-    }
+  "name": "@ironcorelabs/tenant-security-nodejs",
+  "version": "4.0.1",
+  "description": "NodeJS client library for the IronCore Labs Tenant Security Proxy.",
+  "homepage": "https://ironcorelabs.com/docs",
+  "main": "src/index.js",
+  "repository": "git@github.com:IronCoreLabs/tenant-security-client-nodejs.git",
+  "author": "IronCore Labs",
+  "license": "AGPL-3.0-only",
+  "types": "src/index.d.ts",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "scripts": {
+    "build": "./build.js",
+    "test": "yarn run lint && yarn run unit",
+    "unit": "jest -t UNIT",
+    "integration": "jest -t \"INTEGRATION|UNIT\"",
+    "local": "jest -t LOCAL",
+    "lint": "eslint . --ext .ts",
+    "testsingle": "jest",
+    "protobuild": "pbjs -t static-module -w commonjs -o proto/ts/DocumentHeader.js proto/document_header.proto && pbts -o proto/ts/DocumentHeader.d.ts proto/ts/DocumentHeader.js"
+  },
+  "dependencies": {
+    "futurejs": "2.2.0",
+    "miscreant": "^0.3.2",
+    "node-fetch": "2.6.12",
+    "protobufjs": "^7.2.4"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.2.3",
+    "@types/node": "^13.13.15",
+    "@types/node-fetch": "^2.5.7",
+    "@typescript-eslint/eslint-plugin": "^3.9.1",
+    "@typescript-eslint/parser": "^3.9.1",
+    "eslint": "^6.8.0",
+    "jest": "^26.4.1",
+    "jest-extended": "^0.11.5",
+    "prompt": "^1.0.0",
+    "protobufjs-cli": "^1.1.1",
+    "shelljs": "^0.8.4",
+    "ts-jest": "^26.2.0",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7",
+    "typestrict": "^1.0.2",
+    "uglify-js": "^3.7.7"
+  },
+  "prettier": {
+    "printWidth": 160,
+    "tabWidth": 4,
+    "trailingComma": "es5",
+    "bracketSpacing": false,
+    "jsxBracketSameLine": true,
+    "arrowParens": "always",
+    "overrides": [
+      {
+        "files": "*.yml",
+        "options": {
+          "tabWidth": 2
+        }
+      }
+    ]
+  }
 }

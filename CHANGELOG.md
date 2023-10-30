@@ -1,3 +1,7 @@
+## 4.0.1
+
+- Added header to TSP and Logdriver calls with the current TSC version and language. These can be consumed in TSP metrics and are useful to track migrations or find out of date TSC callers.
+
 ## 4.0.0
 
 -   Encryption now throws a `TscException` when trying to encrypt a document that has already been IronCore encrypted.

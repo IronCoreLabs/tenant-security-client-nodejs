@@ -4,6 +4,7 @@ import {ApiErrorResponse} from "./kms/KmsApi";
 import {TenantSecurityErrorCode, TenantSecurityException} from "./TenantSecurityException";
 import {TenantSecurityExceptionUtils} from "./TenantSecurityExceptionUtils";
 import {TspServiceException} from "./TspServiceException";
+import {version} from "../package.json";
 import * as Crypto from "./kms/Crypto";
 import * as DetCrypto from "./kms/DeterministicCrypto";
 import * as http from "http";
@@ -35,7 +36,7 @@ const agentSelector = function (_parsedURL: any) {
  * Request the provided API endpoint with the provided POST data. All requests to the TSP today are in POST. On failure,
  * attempt to parse the failed JSON to extract an error code and message.
  */
-export const makeJsonRequest = <T>(tspDomain: string, apiKey: string, route: string, postData: string): Future<TenantSecurityException, T> =>
+export const makeJsonRequest = <T,>(tspDomain: string, apiKey: string, route: string, postData: string): Future<TenantSecurityException, T> =>
     Future.tryP(() =>
         fetch(`${tspDomain}/api/1/${route}`, {
             method: "POST",
@@ -43,6 +44,8 @@ export const makeJsonRequest = <T>(tspDomain: string, apiKey: string, route: str
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `cmk ${apiKey}`,
+                "x-icl-tsc-language": "nodejs",
+                "x-icl-tsc-version": `${version}`,
             },
             agent: agentSelector,
         })
@@ -71,7 +74,7 @@ export const clearUndefinedProperties = (obj: {[key: string]: any}): {[key: stri
  * Take a batch result of encrypt/decrypt operations and convert it into the return structure from the SDK, calculating
  * some convenience fields on the response for successes and failures.
  */
-export const mapBatchOperationToResult = <T>(
+export const mapBatchOperationToResult = <T,>(
     successesAndFailures:
         | Record<string, Crypto.BatchEncryptResult>
         | Record<string, Crypto.BatchDecryptResult>
