@@ -44,7 +44,7 @@ export const makeJsonRequest = <T,>(tspDomain: string, apiKey: string, route: st
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `cmk ${apiKey}`,
-                "x-icl-tsc-language": "nodejs",
+                "x-icl-tsc-language": "node",
                 "x-icl-tsc-version": `${version}`,
             },
             agent: agentSelector,
