@@ -85,6 +85,9 @@ all known keypaths / creds and map out the associations.
 
 
 ## Example Run Output
+
+Code for this process is in `src/index.ts`. It can be run with `yarn && yarn start` if you have IronCore GCP credentials. This same code could be modified or expanded on to work for your real data or recovery process, but it is not itself production quality code.
+
 ```console
 Unleased Encrypted Document: {
   "ssn": "\u0003IRON\u0000,\n\u001c������\"_���k,�\bj@���S\u001f�b3g�M\u001a\f\n\ntenant-gcp\u001a \u0002 Zک�\u0001��q*�\n\u000eq�/\u0004\u00122(��؋@ʹ�F\u0007K\u0005���",
@@ -151,6 +154,8 @@ Once you have the tenant's decrypted secret for this piece of data, you can crea
 Use the deterministic key to `AES-SIV` decrypt the deterministic data. There is no `AES-SIV` associated data on IronCore deterministic values.
 
 ### Example Run Output
+
+Code for this process is in `src/deterministic.ts`. It can be run with `yarn && yarn deterministic` if you have IronCore GCP credentials. This same code could be modified or expanded on to work for your real data or recovery process, but it is not itself production quality code.
 
 ```console
 Deterministic Encrypted Value:
