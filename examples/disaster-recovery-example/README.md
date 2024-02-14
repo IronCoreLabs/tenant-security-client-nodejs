@@ -110,23 +110,23 @@ Leased Document: {
 
 ## Deterministic
 
-As mentioned in the [documentation on our website](https://ironcorelabs.com/docs/saas-shield/deterministic-encryption/#recovering-data) the recovery process for deterministically encrypted data requires a few extra steps. Deterministic data is encrypted with a key derived from a rotating tenant secret, which itself is wrapped by their KMS. To recover deterministic data then, we need to:
+As mentioned in the [documentation on our website](https://ironcorelabs.com/docs/saas-shield/deterministic-encryption/#recovering-data) the recovery process for deterministically encrypted data requires a few extra steps. Deterministic data is encrypted with a key derived from a rotating tenant secret, which itself is wrapped by their KMS. To recover deterministic data, we need to:
 
 1. Determine the ID of the secret used for our data.
-2. Retrieve that (previously backed up) encrypted secret.
+2. Retrieve that previously backed-up encrypted secret.
 3. Decrypt the secret (using the method described in [Recovery Process](#recovery-process)).
 4. Use the secret to hash a string incorporating the derivation path and tenant ID.
 5. Use that string as a key to decrypt the data. 
 
-Let's go over those steps in more detail. A concrete commented Typescript example of this process can be found in `examples/disaster-recovery-example/src/deterministic.ts`.
+Let's go over those steps in more detail. A concrete Typescript example of this process can be found in `examples/disaster-recovery-example/src/deterministic.ts`.
 
 ### Determine Secret ID
 
 We need to retrieve the ID of the secret that was used to encrypt our piece of data so the encrypted secret can be retrieved from backups.
 
-For deterministic data encrypted with the Tenant Security Clients (`tsc-java 6+`, `tsc-nodejs 3+`, not supported in `tsc-php` or `tsc-go`), the first 4 binary bytes contain the tenant secret ID and the next two bytes are padding.
+For deterministic data encrypted with the Tenant Security Clients (`tsc-java 6+`, `tsc-nodejs 3+`, not supported in `tsc-php` or `tsc-go`), the first 4 binary bytes contain the tenant secret ID, and the next two bytes are padding.
 
-For deterministic data encrypted with IronCore Alloy the first 4 binary bytes contain the tenant secret ID. See [ironcore-alloy](https://github.com/IronCoreLabs/ironcore-alloy/blob/main/src/deterministic.rs) and [ironcore-documents](https://github.com/IronCoreLabs/ironcore-documents) source for the most up to date information.
+For deterministic data encrypted with IronCore Alloy, the first 4 binary bytes contain the tenant secret ID. See the [ironcore-alloy](https://github.com/IronCoreLabs/ironcore-alloy/blob/main/src/deterministic.rs) and [ironcore-documents](https://github.com/IronCoreLabs/ironcore-documents) source code for the most up-to-date information.
 
 ### Retrieve Secret
 
@@ -134,21 +134,21 @@ Encrypted tenant secrets are available from the Configuration Broker and should 
 
 In the UI a `.zip` of encrypted tenant secrets can be downloaded from the [Tenant Secrets page](https://config.staging.ironcorelabs.com/app/kms/secrets) of the Configuration Broker. Look for a clickable download icon near the page title.
 
-In the Vendor API Bridge a request to the [List Tenant Secrets](https://ironcore-labs.stoplight.io/docs/vendor-bridge/8ee4d2ba0dd9c-list-tenant-secrets) endpoint will return a `JSON` list of encrypted tenant secrets.
+In the Vendor API Bridge, a request to the [List Tenant Secrets](https://ironcore-labs.stoplight.io/docs/vendor-bridge/8ee4d2ba0dd9c-list-tenant-secrets) endpoint will return a `JSON` list of encrypted tenant secrets.
 
-These encrypted secrets need to be backed up in a way that they can be retrieved by secret ID reliably in a disaster scenario.
+These encrypted secrets need to be backed up in a way that they can be reliably retrieved by secret ID in a disaster scenario.
 
 ### Decrypt Secret
 
-The secret is encrypted by the tenant's KMS, and the process described in [Recovery Process](#recovery-process) is used to decrypt it. Notably the secret will include a KMS config ID in its header (see [ironcore-documents](https://github.com/IronCoreLabs/ironcore-documents) for header formats), but without access to the Configuration Broker it won't be clear which of the tenants KMS key paths and credentials were referenced by that KMS config. In a true disaster scenario you'll need to work with the tenant to either provide them with these secrets and have them try decryption with all their KMS keys, or have them provide you or your recovery tool with credentials that can access all their possible KMS keys to try.
+The secret is encrypted by the tenant's KMS, and the process described in [Recovery Process](#recovery-process) is used to decrypt it. Notably, the secret will include a KMS config ID in its header (see [ironcore-documents](https://github.com/IronCoreLabs/ironcore-documents) for header formats), but without access to the Configuration Broker it won't be clear which of the tenants KMS key paths and credentials were referenced by that KMS config. In a true disaster scenario, you'll need to work with the tenant to either provide them with these secrets and have them try decryption with all their KMS keys, or have them provide you or your recovery tool with credentials that can access all their possible KMS keys to try.
 
 ### Create a Deterministic Key
 
-Once you have the tenant's decrypted secret for this piece of data you can create a deterministic key. Use the secret as a key to `HMAC-SHA512` sign over `"tenant_provided_id-derivation_path"`. The output of the hash is the deterministic key used to decrypt the actual data.
+Once you have the tenant's decrypted secret for this piece of data, you can create a deterministic key. Use the secret as a key to `HMAC-SHA512` sign over `"tenant_provided_id-derivation_path"`. The output of the hash is the deterministic key used to decrypt the actual data.
 
 ### Decrypt the Data
 
-Use the deterministic key to `AES-SIV` decrypt the deterministic data.
+Use the deterministic key to `AES-SIV` decrypt the deterministic data. There is no `AES-SIV` associated data on IronCore deterministic values.
 
 ### Example Run Output
 

@@ -74,7 +74,7 @@ if (require.main == module) {
         /*
         We can now use the recovered `deterministicKey` to AES-SIV decrypt the deterministic data. This part of the
         process will vary the most language to language as AES-SIV libraries all have slight differences in interface.
-        There is no AES-SIV associated data attached to IronCore deterministic documents.
+        There is no AES-SIV associated data attached to IronCore deterministic values.
         */
         console.log("AES-SIV Decrypting Deterministic Data...");
         const cryptoProvider = new miscreant.PolyfillCryptoProvider();
