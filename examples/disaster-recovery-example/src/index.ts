@@ -56,7 +56,7 @@ const leasedEncryptedDocumentMap = {
 };
 
 /**
- * An IronCore document has a specific shape:
+ * An IronCore v3 document (which these are) has a specific shape:
  *      VERSION_NUMBER (1 byte, fixed at 3)
  *      IRONCORE_MAGIC (4 bytes, IRON in ASCII)
  *      HEADER_LENGTH (2 bytes Uint16)
@@ -78,7 +78,7 @@ const HEADER_LENGTH_LENGTH = 2;
  * https://github.com/IronCoreLabs/tenant-security-client-nodejs/blob/main/src/kms/Crypto.ts as a starting point for more
  * complex logic related to this, as well as current versions to check for and what they may contain.
  */
-const removeHeader = (documentBuffer: Buffer): Buffer => {
+export const removeHeader = (documentBuffer: Buffer): Buffer => {
     const protobufHeaderLength = documentBuffer.readUInt16BE(VERSION_LENGTH + IRONCORE_MAGIC_LENGTH);
     return documentBuffer.slice(VERSION_LENGTH + IRONCORE_MAGIC_LENGTH + HEADER_LENGTH_LENGTH + protobufHeaderLength);
 };
@@ -86,7 +86,7 @@ const removeHeader = (documentBuffer: Buffer): Buffer => {
 /**
  * We can split apart the encrypted document bytes into the pieces we actually need to decrypt the encrypted bytes.
  */
-const decomposeEncryptedDocument = (documentBuffer: Buffer): {iv: Buffer; encryptedBytes: Buffer; gcmTag: Buffer} => ({
+export const decomposeEncryptedDocument = (documentBuffer: Buffer): {iv: Buffer; encryptedBytes: Buffer; gcmTag: Buffer} => ({
     iv: documentBuffer.slice(0, IV_LENGTH),
     encryptedBytes: documentBuffer.slice(IV_LENGTH, documentBuffer.length - GCM_TAG_LENGTH),
     gcmTag: documentBuffer.slice(documentBuffer.length - GCM_TAG_LENGTH),
@@ -109,7 +109,7 @@ const decomposeEncryptedDocument = (documentBuffer: Buffer): {iv: Buffer; encryp
  *  * one unleased, `tenant-gcp`
  *  * one leased, `tenant-gcp-l`
  */
-const retrieveDek = async (edekBase64: string): Promise<Uint8Array> => {
+export const retrieveDek = async (edekBase64: string): Promise<Uint8Array> => {
     const encryptedDeks = EncryptedDeks.decode(Uint8Array.from(Buffer.from(edekBase64, "base64"))).encryptedDeks;
     const encryptedDek = encryptedDeks[0];
     const client = new KeyManagementServiceClient();
@@ -169,36 +169,39 @@ const decryptDocument = async (documentMap: {[fieldName: string]: Buffer}, edek:
     return Object.fromEntries(decryptedDocumentEntries);
 };
 
-(async () => {
-    console.log(
-        `Unleased Encrypted Document: ${JSON.stringify(
-            Object.fromEntries(
-                Object.entries(unleasedEncryptedDocumentMap).map(([fieldName, encryptedFieldBytes]) => [fieldName, encryptedFieldBytes.toString("utf8")])
-            ),
-            null,
-            2
-        )}`
-    );
-    const decryptedUnleasedDocumentBytes = await decryptDocument(unleasedEncryptedDocumentMap, unleasedEdek);
-    const decryptedUnleasedDocumentText = Object.fromEntries(
-        Object.entries(decryptedUnleasedDocumentBytes).map(([fieldName, decryptedFieldBytes]) => [fieldName, decryptedFieldBytes.toString("utf8")])
-    );
-    console.log(`Unleased Document: ${JSON.stringify(decryptedUnleasedDocumentText, null, 2)}`);
+// Only run through the example if this module was executed (vs imported).
+if (require.main == module) {
+    (async () => {
+        console.log(
+            `Unleased Encrypted Document: ${JSON.stringify(
+                Object.fromEntries(
+                    Object.entries(unleasedEncryptedDocumentMap).map(([fieldName, encryptedFieldBytes]) => [fieldName, encryptedFieldBytes.toString("utf8")])
+                ),
+                null,
+                2
+            )}`
+        );
+        const decryptedUnleasedDocumentBytes = await decryptDocument(unleasedEncryptedDocumentMap, unleasedEdek);
+        const decryptedUnleasedDocumentText = Object.fromEntries(
+            Object.entries(decryptedUnleasedDocumentBytes).map(([fieldName, decryptedFieldBytes]) => [fieldName, decryptedFieldBytes.toString("utf8")])
+        );
+        console.log(`Unleased Document: ${JSON.stringify(decryptedUnleasedDocumentText, null, 2)}`);
 
-    console.log(
-        `Leased Encrypted Document: ${JSON.stringify(
-            Object.fromEntries(
-                Object.entries(leasedEncryptedDocumentMap).map(([fieldName, encryptedFieldBytes]) => [fieldName, encryptedFieldBytes.toString("utf8")])
-            ),
-            null,
-            2
-        )}`
-    );
-    const decryptedLeasedDocumentBytes = await decryptDocument(leasedEncryptedDocumentMap, leasedEdek);
-    const decryptedLeasedDocumentText = Object.fromEntries(
-        Object.entries(decryptedLeasedDocumentBytes).map(([fieldName, decryptedFieldBytes]) => [fieldName, decryptedFieldBytes.toString("utf8")])
-    );
-    console.log(`Leased Document: ${JSON.stringify(decryptedLeasedDocumentText, null, 2)}`);
-})().catch((e) => {
-    console.log(e);
-});
+        console.log(
+            `Leased Encrypted Document: ${JSON.stringify(
+                Object.fromEntries(
+                    Object.entries(leasedEncryptedDocumentMap).map(([fieldName, encryptedFieldBytes]) => [fieldName, encryptedFieldBytes.toString("utf8")])
+                ),
+                null,
+                2
+            )}`
+        );
+        const decryptedLeasedDocumentBytes = await decryptDocument(leasedEncryptedDocumentMap, leasedEdek);
+        const decryptedLeasedDocumentText = Object.fromEntries(
+            Object.entries(decryptedLeasedDocumentBytes).map(([fieldName, decryptedFieldBytes]) => [fieldName, decryptedFieldBytes.toString("utf8")])
+        );
+        console.log(`Leased Document: ${JSON.stringify(decryptedLeasedDocumentText, null, 2)}`);
+    })().catch((e) => {
+        console.log(e);
+    });
+}
