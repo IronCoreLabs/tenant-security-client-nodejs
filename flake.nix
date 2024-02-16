@@ -7,7 +7,8 @@
       let
         lib = import <nixpkgs/lib>;
         pkgs = nixpkgs.legacyPackages.${system};
-      in rec {
+      in
+      rec {
         packages = {
           tenant-security-client-nodejs = {
             name = "tenant-security-client-nodejs";
@@ -29,6 +30,7 @@
             pkgs.nodejs-18_x
             pkgs.protobuf
             (pkgs.yarn.override { nodejs = pkgs.nodejs-18_x; })
+            (pkgs.google-cloud-sdk.withExtraComponents [ pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin ])
           ];
         };
       });
