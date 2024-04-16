@@ -18,4 +18,11 @@ describe("UNIT KmsException", () => {
         expect(error.httpResponseCode).toEqual(429);
         expect(error.message).toEqual("totally real error message.");
     });
+
+    test("Understands error 210", () => {
+        const error = new KmsException(210, "totally real error message.", 429);
+        expect(error.errorCode).toEqual(TenantSecurityErrorCode.KMS_ACCOUNT_ISSUE);
+        expect(error.httpResponseCode).toEqual(429);
+        expect(error.message).toEqual("totally real error message.");
+    });
 });
