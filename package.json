@@ -6,7 +6,7 @@
   "main": "src/index.js",
   "repository": "git@github.com:IronCoreLabs/tenant-security-client-nodejs.git",
   "author": "IronCore Labs",
-  "license": "AGPL-3.0-only",
+  "license": "AGPL-3.0-only OR LicenseRef-ironcore-labs-commercial-license",
   "types": "src/index.d.ts",
   "engines": {
     "node": ">=14.0.0"
