@@ -20,4 +20,9 @@ See our documentation on the [IronCore website](http://ironcorelabs.com/docs/saa
 
 Check in the `examples` subdirectory - there are subdirectories for some example Node programs that demonstrate a few of the ways you can use the TSC in your code to secure data.
 
+## License
+
+`tenant-security-client-nodejs` is licensed under the [GNU Affero General Public License](LICENSE). We also offer commercial licenses - [email](mailto:info@ironcorelabs.com) for more information or check pricing on our [website](https://ironcorelabs.com/)
+
+
 Copyright (c) 2023 IronCore Labs, Inc. All rights reserved.
