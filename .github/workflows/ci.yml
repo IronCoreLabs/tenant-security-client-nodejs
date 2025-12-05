@@ -8,8 +8,8 @@ on:
 
 jobs:
   build_and_test:
-    runs-on: ubuntu-22.04
-    needs: get_refs
+    runs-on: ubuntu-latest
+    needs: get_ref
     strategy:
       fail-fast: false
       matrix:
@@ -18,21 +18,21 @@ jobs:
         # to major version bump the library
         version: [14, 16, 18, 20]
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.version }}
       - name: build and unit test
         run: yarn && yarn build
       - name: clone the tsp
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           repository: IronCoreLabs/tenant-security-proxy
-          ref: ${{ needs.get_refs.outputs.tenant-security-proxy }}
+          ref: ${{ needs.get_ref.outputs.tsp_ref }}
           path: tenant-security-proxy
           token: ${{ secrets.WORKFLOW_PAT }}
       - name: cache cargo
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
           path: |
@@ -53,89 +53,27 @@ jobs:
           timeout 700 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:9000/ready)" =~ ''[01346-9][0-9][0-9]'' ]]; do sleep 5; done' || false
           env $(cat .env.integration) yarn integration
 
-  # Look for a comment telling us what refs to use from the other repos we depend on.
-  # To add additional repositories, add them to "outputs" and to the "Setup list of required repos" step.
-  get_refs:
-    # Only run if it's on a PR.
-    if: github.base_ref != ''
-    runs-on: ubuntu-22.04
-    outputs:
-      tenant-security-proxy: ${{ steps.get_refs.outputs.tenant-security-proxy }}
-    steps:
-      - name: Setup list of required repos
-        run: |
-          echo tenant-security-proxy >> repos
-      - name: Get PR number
-        id: get_pr
-        run: |
-          PR=$(jq -r .pull_request.number "${GITHUB_EVENT_PATH}")
-          echo "PR is ${PR}"
-          # Sanity check that ${PR} is a number.
-          test "${PR}" -ge 0
-          echo "pr=${PR}" >> "$GITHUB_OUTPUT"
-      - name: Find Comment
-        uses: peter-evans/find-comment@v2
-        id: find_comment
-        with:
-          issue-number: ${{ steps.get_pr.outputs.pr }}
-          body-includes: CI_branches
-          direction: last
-      - name: Parse refs
-        if: steps.find_comment.outputs.comment-id != 0
-        id: get_refs
-        env:
-          COMMENT_BODY: ${{ steps.find_comment.outputs.comment-body }}
-        run: |
-          # Extract the JSON part of the comment into a file.
-          echo "${COMMENT_BODY}" | tr '\n' ' ' | sed -e 's,^[^{]*,,' -e 's,[^}]*$,,' > refs.json
-          echo "Got JSON:"
-          cat refs.json && echo ""
-
-          # Sanity check that all repos in the JSON comment are ones that we know about.
-          jq -r 'keys[]' < refs.json > extra_repos
-          for REPO in $(cat repos) ; do
-            grep -v "^${REPO}\$" < extra_repos > temp || true
-            mv temp extra_repos
-          done
-          if [ -s extra_repos ] ; then
-            echo "Unrecognized repositories:"
-            cat extra_repos
-            exit 1
-          fi
-
-          # Emit an output variable for each repo.
-          for REPO in $(cat repos) ; do
-            REF=$(jq -r '.["'"${REPO}"'"]' < refs.json)
-            if [ "${REF}" = "null" ] ; then
-              REF="main"
-            fi
-            echo "${REPO}: ${REF}"
-            echo "${REPO}=${REF}" >> "$GITHUB_OUTPUT"
-          done
-      - name: Post a reaction (parsed your comment)
-        if: steps.get_refs.outcome == 'success'
-        uses: peter-evans/create-or-update-comment@v3
-        with:
-          issue-number: ${{ steps.get_pr.outputs.pr }}
-          comment-id: ${{ steps.find_comment.outputs.comment-id }}
-          reactions: eyes
-      - name: Post a reaction (unparsed comment)
-        if: steps.get_refs.outcome == 'failure'
-        uses: peter-evans/create-or-update-comment@v3
-        with:
-          issue-number: ${{ steps.get_pr.outputs.pr }}
-          comment-id: ${{ steps.find_comment.outputs.comment-id }}
-          reactions: confused
+  # Look for a comment telling us what TSP ref to use.
+  get_ref:
+    uses: IronCoreLabs/workflows/.github/workflows/get-tsp-ref.yaml@get-tsp-ref-v1
+    secrets: inherit
 
   build_examples:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        example-dir: [large-documents, logging-example, rekey-example, simple-roundtrip, deterministic-roundtrip]
+        example-dir:
+          [
+            large-documents,
+            logging-example,
+            rekey-example,
+            simple-roundtrip,
+            deterministic-roundtrip,
+          ]
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: 14
       - name: compilation check
