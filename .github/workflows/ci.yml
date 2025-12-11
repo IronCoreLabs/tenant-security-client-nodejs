@@ -9,7 +9,6 @@ on:
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
-    needs: get_ref
     strategy:
       fail-fast: false
       matrix:
@@ -18,45 +17,24 @@ jobs:
         # to major version bump the library
         version: [14, 16, 18, 20]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.version }}
       - name: build and unit test
         run: yarn && yarn build
-      - name: clone the tsp
-        uses: actions/checkout@v5
-        with:
-          repository: IronCoreLabs/tenant-security-proxy
-          ref: ${{ needs.get_ref.outputs.tsp_ref }}
-          path: tenant-security-proxy
-          token: ${{ secrets.WORKFLOW_PAT }}
-      - name: cache cargo
-        uses: actions/cache@v4
-        with:
-          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
-          path: |
-            ~/.cargo/git
-            tenant-security-proxy/target
-      - name: Decrypt TSP integration keys
-        uses: IronCoreLabs/ironhide-actions/decrypt@v3
-        with:
-          keys: ${{ secrets.IRONHIDE_KEYS }}
-          input: tenant-security-proxy/.env.integration.iron
-      - name: install zmq
-        run: sudo apt update && sudo apt install -y --no-install-recommends libzmq3-dev
-      - name: integration test
+      - name: Save TSP env.integration to a file
         run: |
-          cd tenant-security-proxy
-          cargo build --release
-          env $(cat .env.integration) cargo run --release &
-          timeout 700 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:9000/ready)" =~ ''[01346-9][0-9][0-9]'' ]]; do sleep 5; done' || false
-          env $(cat .env.integration) yarn integration
-
-  # Look for a comment telling us what TSP ref to use.
-  get_ref:
-    uses: IronCoreLabs/workflows/.github/workflows/get-tsp-ref.yaml@get-tsp-ref-v1
-    secrets: inherit
+          cat > .env.integration <<EOF
+          ${{ secrets.TSP_ENV_INTEGRATION }}
+          EOF
+      - name: Start the TSP
+        uses: IronCoreLabs/workflows/.github/actions/start-tsp@start-tsp-v1
+        with:
+          gcloud-auth: ${{ secrets.GCLOUD_AUTH }}
+          env-file-path: .env.integration
+      - name: integration test
+        run: env $(cat .env.integration) yarn integration
 
   build_examples:
     runs-on: ubuntu-latest
