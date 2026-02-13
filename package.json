@@ -9,7 +9,7 @@
   "license": "AGPL-3.0-only OR LicenseRef-ironcore-labs-commercial-license",
   "types": "src/index.d.ts",
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=20.0.0"
   },
   "scripts": {
     "build": "./build.js",
