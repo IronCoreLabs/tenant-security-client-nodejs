@@ -2,39 +2,79 @@ import Future from "futurejs";
 import {TenantSecurityException} from "../TenantSecurityException";
 import {Base64String, makeJsonRequest} from "../Util";
 import {DocumentMetadata} from "./Metadata";
+import Joi = require("joi");
 
 export interface ApiErrorResponse {
     code: number;
     message: string;
 }
+export const ApiErrorResponseSchema = Joi.object({
+    code: Joi.number().required(),
+    message: Joi.string().required(),
+}).unknown(true);
 
 interface BatchResponse<T> {
     keys: Record<string, T>;
     failures: Record<string, ApiErrorResponse>;
 }
 
-interface WrapKeyResponse {
+export interface WrapKeyResponse {
     dek: Base64String;
     edek: Base64String;
 }
+export const WrapKeyResponseSchema = Joi.object({
+    dek: Joi.string().required(),
+    edek: Joi.string().required(),
+}).unknown(true);
 
 export type RekeyResponse = WrapKeyResponse;
+export const RekeyResponseSchema = WrapKeyResponseSchema;
 
 export type BatchWrapKeyResponse = BatchResponse<WrapKeyResponse>;
+export const BatchWrapKeyResponseSchema = Joi.object({
+    keys: Joi.object().pattern(Joi.string(), WrapKeyResponseSchema).required(),
+    failures: Joi.object().pattern(Joi.string(), ApiErrorResponseSchema).required(),
+}).unknown(true);
 
-interface UnwrapKeyResponse {
+export interface UnwrapKeyResponse {
     dek: Base64String;
 }
+export const UnwrapKeyResponseSchema = Joi.object({
+    dek: Joi.string().required(),
+}).unknown(true);
 
 export type BatchUnwrapKeyResponse = BatchResponse<UnwrapKeyResponse>;
+export const BatchUnwrapKeyResponseSchema = Joi.object({
+    keys: Joi.object().pattern(Joi.string(), UnwrapKeyResponseSchema).required(),
+    failures: Joi.object().pattern(Joi.string(), ApiErrorResponseSchema).required(),
+}).unknown(true);
 
 export type DerivationPath = string;
 export type SecretPath = string;
+
+export interface DerivedKey {
+    derivedKey: Base64String;
+    tenantSecretId: number;
+    current: boolean;
+}
+export const DerivedKeySchema = Joi.object({
+    derivedKey: Joi.string().required(),
+    tenantSecretId: Joi.number().required(),
+    current: Joi.boolean().required(),
+}).unknown(true);
+
+export type DerivedKeys = Record<DerivationPath, DerivedKey[]>;
+
+export const DerivedKeysSchema = Joi.object().pattern(Joi.string(), Joi.array().items(DerivedKeySchema));
 
 export interface DeriveKeyResponse {
     hasPrimaryConfig: boolean;
     derivedKeys: Record<SecretPath, DerivedKeys>;
 }
+export const DeriveKeyResponseSchema = Joi.object({
+    hasPrimaryConfig: Joi.boolean().required(),
+    derivedKeys: Joi.object().pattern(Joi.string(), DerivedKeysSchema).required(),
+}).unknown(true);
 
 export const getDerivedKeys = (deriveKeyResponse: DeriveKeyResponse, secretPath: SecretPath, derivationPath: DerivationPath): DerivedKey[] | undefined =>
     deriveKeyResponse.derivedKeys[secretPath] === undefined ? undefined : deriveKeyResponse.derivedKeys[secretPath][derivationPath];
@@ -42,23 +82,18 @@ export const getDerivedKeys = (deriveKeyResponse: DeriveKeyResponse, secretPath:
 export const deterministicCollectionToPathMap = (
     fields: Record<string, {secretPath: SecretPath; derivationPath: DerivationPath}>
 ): Record<SecretPath, DerivationPath[]> => {
-    return Object.values(fields).reduce((currentMap, {derivationPath, secretPath}) => {
-        if (currentMap[secretPath] === undefined) {
-            currentMap[secretPath] = [derivationPath];
-        } else {
-            currentMap[secretPath].push(derivationPath);
-        }
-        return currentMap;
-    }, {} as Record<SecretPath, DerivationPath[]>);
+    return Object.values(fields).reduce(
+        (currentMap, {derivationPath, secretPath}) => {
+            if (currentMap[secretPath] === undefined) {
+                currentMap[secretPath] = [derivationPath];
+            } else {
+                currentMap[secretPath].push(derivationPath);
+            }
+            return currentMap;
+        },
+        {} as Record<SecretPath, DerivationPath[]>
+    );
 };
-
-export type DerivedKeys = Record<DerivationPath, DerivedKey[]>;
-
-export interface DerivedKey {
-    derivedKey: Base64String;
-    tenantSecretId: number;
-    current: boolean;
-}
 
 enum DerivationType {
     Argon2 = "argon2",
@@ -82,7 +117,7 @@ const DERIVE_ENDPOINT = "key/derive-with-secret-path";
  * Generate and wrap a new key via the tenant's KMS.
  */
 export const wrapKey = (tspDomain: string, apiKey: string, metadata: DocumentMetadata): Future<TenantSecurityException, WrapKeyResponse> =>
-    makeJsonRequest(tspDomain, apiKey, WRAP_ENDPOINT, JSON.stringify(metadata.toJsonStructure()));
+    makeJsonRequest(tspDomain, apiKey, WRAP_ENDPOINT, JSON.stringify(metadata.toJsonStructure()), WrapKeyResponseSchema);
 
 /**
  * Generate and wrap a collection of new KMS keys.
@@ -100,7 +135,8 @@ export const batchWrapKeys = (
         JSON.stringify({
             ...metadata.toJsonStructure(),
             documentIds,
-        })
+        }),
+        BatchWrapKeyResponseSchema
     );
 
 /**
@@ -119,7 +155,8 @@ export const unwrapKey = (
         JSON.stringify({
             ...metadata.toJsonStructure(),
             encryptedDocumentKey: edek,
-        })
+        }),
+        UnwrapKeyResponseSchema
     );
 
 /**
@@ -138,7 +175,8 @@ export const batchUnwrapKey = (
         JSON.stringify({
             ...metadata.toJsonStructure(),
             edeks,
-        })
+        }),
+        BatchUnwrapKeyResponseSchema
     );
 
 /**
@@ -160,7 +198,8 @@ export const rekeyKey = (
             ...metadata.toJsonStructure(),
             encryptedDocumentKey: edek,
             newTenantId,
-        })
+        }),
+        RekeyResponseSchema
     );
 
 /**
@@ -182,6 +221,7 @@ export const deriveKey = (
             paths,
             derivationType: DerivationType.Sha512,
             secretType: SecretType.Deterministic,
-        })
+        }),
+        DeriveKeyResponseSchema
     );
 };

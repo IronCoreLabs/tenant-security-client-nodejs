@@ -3,6 +3,7 @@ import {TenantSecurityException} from "../TenantSecurityException";
 import {makeJsonRequest} from "../Util";
 import {EventMetadata} from "./EventMetadata";
 import {SecurityEvent} from "./SecurityEvent";
+import Joi = require("joi");
 
 const SECURITY_EVENT_ENDPOINT = "event/security-event";
 
@@ -14,7 +15,7 @@ const SECURITY_EVENT_ENDPOINT = "event/security-event";
  * @return         Void on success. Failures come back as exceptions.
  */
 export const logSecurityEvent = (tspDomain: string, apiKey: string, event: SecurityEvent, metadata: EventMetadata): Future<TenantSecurityException, void> =>
-    makeJsonRequest(tspDomain, apiKey, SECURITY_EVENT_ENDPOINT, JSON.stringify(combinePostableEventAndMetadata(event, metadata)));
+    makeJsonRequest(tspDomain, apiKey, SECURITY_EVENT_ENDPOINT, JSON.stringify(combinePostableEventAndMetadata(event, metadata)), Joi.any());
 
 const combinePostableEventAndMetadata = (event: SecurityEvent, metadata: EventMetadata) => {
     const postData = metadata.toJsonStructure();
