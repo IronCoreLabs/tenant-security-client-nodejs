@@ -4,12 +4,15 @@
   "description": "NodeJS client library for the IronCore Labs Tenant Security Proxy.",
   "homepage": "https://ironcorelabs.com/docs",
   "main": "src/index.js",
-  "repository": "git@github.com:IronCoreLabs/tenant-security-client-nodejs.git",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/IronCoreLabs/tenant-security-client-nodejs.git"
+  },
   "author": "IronCore Labs",
   "license": "AGPL-3.0-only OR LicenseRef-ironcore-labs-commercial-license",
   "types": "src/index.d.ts",
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=20.0.0"
   },
   "scripts": {
     "build": "./build.js",
@@ -23,6 +26,7 @@
   },
   "dependencies": {
     "futurejs": "2.2.0",
+    "joi": "^18.0.2",
     "miscreant": "^0.3.2",
     "node-fetch": "2.6.12",
     "protobufjs": "^7.2.5"
