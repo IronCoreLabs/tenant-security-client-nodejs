@@ -4,12 +4,16 @@ import {ApiErrorResponseSchema} from "./kms/KmsApi";
 import {TenantSecurityErrorCode, TenantSecurityException} from "./TenantSecurityException";
 import {TenantSecurityExceptionUtils} from "./TenantSecurityExceptionUtils";
 import {TspServiceException} from "./TspServiceException";
-import {version} from "../package.json";
 import * as Crypto from "./kms/Crypto";
 import * as DetCrypto from "./kms/DeterministicCrypto";
 import * as http from "http";
 import * as https from "https";
 import * as Joi from "joi";
+
+// Loaded via require so tsc doesn't include package.json in the program and
+// elevate the inferred rootDir above ./src (which would nest the build output).
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const {version} = require("../package.json") as {version: string};
 
 /**
  * Try to JSON parse error responses from the TSP to extract error codes and messages.

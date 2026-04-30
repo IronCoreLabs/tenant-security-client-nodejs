@@ -8,6 +8,7 @@
         "noUnusedLocals": true,
         "declaration": false,
         "target": "ES6",
+        "rootDir": "./src",
         "module": "commonjs",
         "moduleResolution": "node",
         "resolveJsonModule": true,
