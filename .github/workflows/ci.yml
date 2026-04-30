@@ -52,6 +52,8 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+      - if: matrix.example-dir == 'disaster-recovery-example'
+        run: yarn && yarn proto
       - name: compilation check
         run: |
           yarn
