@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [20, 22]
+        version: [ 20, 22, 24 ]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -47,10 +47,10 @@ jobs:
             deterministic-roundtrip,
           ]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
       - name: compilation check
         run: |
           yarn

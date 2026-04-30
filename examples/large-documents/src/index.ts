@@ -63,7 +63,10 @@ performance.mark("encryptAllSubdocsS");
 const writeP = client.encryptDocument(docToEncrypt, metadata).then((encryptResult) => {
     performance.mark("encryptAllSubdocsE");
     // write the encrypted subdocs and the encrypted key to the filesystem
-    fs.rmdirSync(subfolder, {recursive: true});
+    try {
+        fs.rmSync(subfolder, {recursive: true});
+        // eslint-disable-next-line no-empty
+    } catch (_) {}
     fs.mkdirSync(subfolder);
     Object.entries(encryptResult.encryptedDocument).forEach(([subDocId, encDocBuffer]) => fs.writeFileSync(`${subfolder}/${subDocId}.enc`, encDocBuffer));
     fs.writeFileSync(`${subfolder}/${filename}.edek`, encryptResult.edek);
@@ -181,7 +184,10 @@ finishAllP
 
 // Helper to map over an object, types are whack here, don't use in prod
 const objectMap = <T1, T2>(obj: Record<string, T1>, f: (v: T1) => T2): Record<string, T2> =>
-    Object.keys(obj).reduce((result, key) => {
-        result[key] = f(obj[key]);
-        return result;
-    }, {} as Record<string, T2>);
+    Object.keys(obj).reduce(
+        (result, key) => {
+            result[key] = f(obj[key]);
+            return result;
+        },
+        {} as Record<string, T2>
+    );
