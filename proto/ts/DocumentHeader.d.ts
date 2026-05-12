@@ -14,6 +14,9 @@ export namespace ironcorelabs {
 
             /** DataControlPlatformHeader segmentId */
             segmentId?: (number|Long|null);
+
+            /** Unknown fields preserved while decoding */
+            $unknowns?: Uint8Array[];
         }
 
         /** Represents a DataControlPlatformHeader. */
@@ -24,6 +27,9 @@ export namespace ironcorelabs {
              * @param [properties] Properties to set
              */
             constructor(properties?: ironcorelabs.proto.IDataControlPlatformHeader);
+
+            /** Unknown fields preserved while decoding */
+            public $unknowns?: Uint8Array[];
 
             /** DataControlPlatformHeader documentId. */
             public documentId: string;
@@ -102,11 +108,11 @@ export namespace ironcorelabs {
             public toJSON(): { [k: string]: any };
 
             /**
-             * Gets the default type url for DataControlPlatformHeader
-             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-             * @returns The default type url
+             * Gets the type url for DataControlPlatformHeader
+             * @param [prefix] Custom type url prefix, defaults to `"type.googleapis.com"`
+             * @returns The type url
              */
-            public static getTypeUrl(typeUrlPrefix?: string): string;
+            public static getTypeUrl(prefix?: string): string;
         }
 
         /** Properties of a SaaSShieldHeader. */
@@ -114,6 +120,9 @@ export namespace ironcorelabs {
 
             /** SaaSShieldHeader tenantId */
             tenantId?: (string|null);
+
+            /** Unknown fields preserved while decoding */
+            $unknowns?: Uint8Array[];
         }
 
         /** Represents a SaaSShieldHeader. */
@@ -124,6 +133,9 @@ export namespace ironcorelabs {
              * @param [properties] Properties to set
              */
             constructor(properties?: ironcorelabs.proto.ISaaSShieldHeader);
+
+            /** Unknown fields preserved while decoding */
+            public $unknowns?: Uint8Array[];
 
             /** SaaSShieldHeader tenantId. */
             public tenantId: string;
@@ -199,11 +211,11 @@ export namespace ironcorelabs {
             public toJSON(): { [k: string]: any };
 
             /**
-             * Gets the default type url for SaaSShieldHeader
-             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-             * @returns The default type url
+             * Gets the type url for SaaSShieldHeader
+             * @param [prefix] Custom type url prefix, defaults to `"type.googleapis.com"`
+             * @returns The type url
              */
-            public static getTypeUrl(typeUrlPrefix?: string): string;
+            public static getTypeUrl(prefix?: string): string;
         }
 
         /** Properties of a v3DocumentHeader. */
@@ -217,6 +229,9 @@ export namespace ironcorelabs {
 
             /** v3DocumentHeader saasShield */
             saasShield?: (ironcorelabs.proto.ISaaSShieldHeader|null);
+
+            /** Unknown fields preserved while decoding */
+            $unknowns?: Uint8Array[];
         }
 
         /** Represents a v3DocumentHeader. */
@@ -227,6 +242,9 @@ export namespace ironcorelabs {
              * @param [properties] Properties to set
              */
             constructor(properties?: ironcorelabs.proto.Iv3DocumentHeader);
+
+            /** Unknown fields preserved while decoding */
+            public $unknowns?: Uint8Array[];
 
             /** v3DocumentHeader sig. */
             public sig: Uint8Array;
@@ -311,11 +329,11 @@ export namespace ironcorelabs {
             public toJSON(): { [k: string]: any };
 
             /**
-             * Gets the default type url for v3DocumentHeader
-             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-             * @returns The default type url
+             * Gets the type url for v3DocumentHeader
+             * @param [prefix] Custom type url prefix, defaults to `"type.googleapis.com"`
+             * @returns The type url
              */
-            public static getTypeUrl(typeUrlPrefix?: string): string;
+            public static getTypeUrl(prefix?: string): string;
         }
     }
 }
