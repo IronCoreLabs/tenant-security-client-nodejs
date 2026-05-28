@@ -3851,10 +3851,10 @@ prompts@^2.0.1:
     kleur "^3.0.3"
     sisteransi "^1.0.4"
 
-protobufjs-cli@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/protobufjs-cli/-/protobufjs-cli-2.2.0.tgz#7b0fe72ca26dd9e454674871097a09377df2156a"
-  integrity sha512-vpGt6STprj8FFm5x5w0mOrIISgtmoMKZt0X74N7Lyd0VWNHX6pDPp0iF0MEegSnwkeErh0wdFfIQfbhcgUaBdw==
+protobufjs-cli@^2.4.2:
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/protobufjs-cli/-/protobufjs-cli-2.4.2.tgz#32ad31d601a2426597fd0e3c1e1a2c3117185f51"
+  integrity sha512-dz7TvVs+tf0CQqS7wU+MsUH/5mNZAXmRD6PxxbjBk7DaL0AbjAJzVnV+B1w4qslCnL5TwlwCfPchd/us8AmfBQ==
   dependencies:
     chalk "^4.0.0"
     escodegen "^1.13.0"
