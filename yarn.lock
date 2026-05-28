@@ -823,7 +823,7 @@
     "@types/node" "*"
     form-data "^3.0.0"
 
-"@types/node@*", "@types/node@>=13.7.0":
+"@types/node@*":
   version "17.0.39"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.39.tgz#3652d82e2a16b4ea679d5ea3143b816c91b7e113"
   integrity sha512-JDU3YLlnPK3WDao6/DlXLOgSNpG13ct+CwIO17V8q0/9fWJyeMJJ/VyZ1lv8kDprihvZMydzVwf0tQOqGiY2Nw==
@@ -3310,10 +3310,10 @@ lodash@^4.17.13, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.21, lodash@^4.7.
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.18.1.tgz#ff2b66c1f6326d59513de2407bf881439812771c"
   integrity sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==
 
-long@^5.0.0:
-  version "5.2.3"
-  resolved "https://registry.yarnpkg.com/long/-/long-5.2.3.tgz#a3ba97f3877cf1d778eccbcb048525ebb77499e1"
-  integrity sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==
+long@^5.3.2:
+  version "5.3.2"
+  resolved "https://registry.yarnpkg.com/long/-/long-5.3.2.tgz#1d84463095999262d7d7b7f8bfd4a8cc55167f83"
+  integrity sha512-mNAgZ1GmyNhD7AuqnTG3/VQ26o760+ZYBPKjPvugO8+nLbYfX6TVpJPseBvopbdY+qpZ/lKUnmEc1LeZYS3QAA==
 
 lru-cache@^6.0.0:
   version "6.0.0"
@@ -3851,10 +3851,10 @@ prompts@^2.0.1:
     kleur "^3.0.3"
     sisteransi "^1.0.4"
 
-protobufjs-cli@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/protobufjs-cli/-/protobufjs-cli-2.2.0.tgz#7b0fe72ca26dd9e454674871097a09377df2156a"
-  integrity sha512-vpGt6STprj8FFm5x5w0mOrIISgtmoMKZt0X74N7Lyd0VWNHX6pDPp0iF0MEegSnwkeErh0wdFfIQfbhcgUaBdw==
+protobufjs-cli@^2.4.2:
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/protobufjs-cli/-/protobufjs-cli-2.4.2.tgz#32ad31d601a2426597fd0e3c1e1a2c3117185f51"
+  integrity sha512-dz7TvVs+tf0CQqS7wU+MsUH/5mNZAXmRD6PxxbjBk7DaL0AbjAJzVnV+B1w4qslCnL5TwlwCfPchd/us8AmfBQ==
   dependencies:
     chalk "^4.0.0"
     escodegen "^1.13.0"
@@ -3868,12 +3868,11 @@ protobufjs-cli@^2.2.0:
     uglify-js "^3.7.7"
 
 protobufjs@^8.1.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-8.2.0.tgz#b062ced7379d1363180473093aeac9a8048e30e7"
-  integrity sha512-oI+GC9iPxrQEr6wragljFKH46/r3rNsm6eg7F2fp6kBUMnf6/mesDRdBuF4gK+OyaKJ8N4C1B9s9cCeYdqFikg==
+  version "8.4.2"
+  resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-8.4.2.tgz#758b5ed274b8d859f95174cbdb569f359a804e29"
+  integrity sha512-64rfNzkWOZAIazXzpBFPWq6F9up6gMvTzjE2oWIzApx2N/dqVUEE7+bCn2+40780dFVtKOUab8QfxJ6KJDWbqA==
   dependencies:
-    "@types/node" ">=13.7.0"
-    long "^5.0.0"
+    long "^5.3.2"
 
 psl@^1.1.33:
   version "1.8.0"

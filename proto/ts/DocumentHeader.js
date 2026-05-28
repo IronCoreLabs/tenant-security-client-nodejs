@@ -1,4 +1,4 @@
-/*eslint-disable block-scoped-var, id-length, no-control-regex, no-magic-numbers, no-prototype-builtins, no-redeclare, no-shadow, no-var, sort-vars, default-case, jsdoc/require-param*/
+/*eslint-disable block-scoped-var, id-length, no-control-regex, no-magic-numbers, no-mixed-operators, no-prototype-builtins, no-redeclare, no-shadow, no-var, sort-vars, default-case, jsdoc/require-param*/
 "use strict";
 
 var $protobuf = require("protobufjs/minimal");
@@ -31,20 +31,31 @@ $root.ironcorelabs = (function() {
 
             /**
              * Properties of a DataControlPlatformHeader.
-             * @memberof ironcorelabs.proto
-             * @interface IDataControlPlatformHeader
+             * @typedef {Object} ironcorelabs.proto.DataControlPlatformHeader.$Properties
              * @property {string|null} [documentId] DataControlPlatformHeader documentId
              * @property {number|Long|null} [segmentId] DataControlPlatformHeader segmentId
              * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding
              */
 
             /**
+             * Properties of a DataControlPlatformHeader.
+             * @memberof ironcorelabs.proto
+             * @interface IDataControlPlatformHeader
+             * @augments ironcorelabs.proto.DataControlPlatformHeader.$Properties
+             * @deprecated Use ironcorelabs.proto.DataControlPlatformHeader.$Properties instead.
+             */
+
+            /**
+             * Shape of a DataControlPlatformHeader.
+             * @typedef {ironcorelabs.proto.DataControlPlatformHeader.$Properties} ironcorelabs.proto.DataControlPlatformHeader.$Shape
+             */
+
+            /**
              * Constructs a new DataControlPlatformHeader.
              * @memberof ironcorelabs.proto
              * @classdesc Represents a DataControlPlatformHeader.
-             * @implements IDataControlPlatformHeader
              * @constructor
-             * @param {ironcorelabs.proto.IDataControlPlatformHeader=} [properties] Properties to set
+             * @param {ironcorelabs.proto.DataControlPlatformHeader.$Properties=} [properties] Properties to set
              * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding
              */
             function DataControlPlatformHeader(properties) {
@@ -75,8 +86,12 @@ $root.ironcorelabs = (function() {
              * @function create
              * @memberof ironcorelabs.proto.DataControlPlatformHeader
              * @static
-             * @param {ironcorelabs.proto.IDataControlPlatformHeader=} [properties] Properties to set
+             * @param {ironcorelabs.proto.DataControlPlatformHeader.$Properties=} [properties] Properties to set
              * @returns {ironcorelabs.proto.DataControlPlatformHeader} DataControlPlatformHeader instance
+             * @type {{
+             *   (properties: ironcorelabs.proto.DataControlPlatformHeader.$Shape): ironcorelabs.proto.DataControlPlatformHeader & ironcorelabs.proto.DataControlPlatformHeader.$Shape;
+             *   (properties?: ironcorelabs.proto.DataControlPlatformHeader.$Properties): ironcorelabs.proto.DataControlPlatformHeader;
+             * }}
              */
             DataControlPlatformHeader.create = function create(properties) {
                 return new DataControlPlatformHeader(properties);
@@ -87,13 +102,17 @@ $root.ironcorelabs = (function() {
              * @function encode
              * @memberof ironcorelabs.proto.DataControlPlatformHeader
              * @static
-             * @param {ironcorelabs.proto.IDataControlPlatformHeader} message DataControlPlatformHeader message or plain object to encode
+             * @param {ironcorelabs.proto.DataControlPlatformHeader.$Properties} message DataControlPlatformHeader message or plain object to encode
              * @param {$protobuf.Writer} [writer] Writer to encode to
              * @returns {$protobuf.Writer} Writer
              */
-            DataControlPlatformHeader.encode = function encode(message, writer) {
+            DataControlPlatformHeader.encode = function encode(message, writer, _depth) {
                 if (!writer)
                     writer = $Writer.create();
+                if (_depth === undefined)
+                    _depth = 0;
+                if (_depth > $util.recursionLimit)
+                    throw Error("max depth exceeded");
                 if (message.documentId != null && Object.hasOwnProperty.call(message, "documentId"))
                     writer.uint32(/* id 1, wireType 2 =*/10).string(message.documentId);
                 if (message.segmentId != null && Object.hasOwnProperty.call(message, "segmentId"))
@@ -109,12 +128,12 @@ $root.ironcorelabs = (function() {
              * @function encodeDelimited
              * @memberof ironcorelabs.proto.DataControlPlatformHeader
              * @static
-             * @param {ironcorelabs.proto.IDataControlPlatformHeader} message DataControlPlatformHeader message or plain object to encode
+             * @param {ironcorelabs.proto.DataControlPlatformHeader.$Properties} message DataControlPlatformHeader message or plain object to encode
              * @param {$protobuf.Writer} [writer] Writer to encode to
              * @returns {$protobuf.Writer} Writer
              */
             DataControlPlatformHeader.encodeDelimited = function encodeDelimited(message, writer) {
-                return this.encode(message, writer).ldelim();
+                return this.encode(message, writer && writer.len ? writer.fork() : writer).ldelim();
             };
 
             /**
@@ -124,7 +143,7 @@ $root.ironcorelabs = (function() {
              * @static
              * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
              * @param {number} [length] Message length if known beforehand
-             * @returns {ironcorelabs.proto.DataControlPlatformHeader} DataControlPlatformHeader
+             * @returns {ironcorelabs.proto.DataControlPlatformHeader & ironcorelabs.proto.DataControlPlatformHeader.$Shape} DataControlPlatformHeader
              * @throws {Error} If the payload is not a reader or valid buffer
              * @throws {$protobuf.util.ProtocolError} If required fields are missing
              */
@@ -179,7 +198,7 @@ $root.ironcorelabs = (function() {
              * @memberof ironcorelabs.proto.DataControlPlatformHeader
              * @static
              * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @returns {ironcorelabs.proto.DataControlPlatformHeader} DataControlPlatformHeader
+             * @returns {ironcorelabs.proto.DataControlPlatformHeader & ironcorelabs.proto.DataControlPlatformHeader.$Shape} DataControlPlatformHeader
              * @throws {Error} If the payload is not a reader or valid buffer
              * @throws {$protobuf.util.ProtocolError} If required fields are missing
              */
@@ -235,7 +254,7 @@ $root.ironcorelabs = (function() {
                 if (object.segmentId != null)
                     if (typeof object.segmentId === "object" ? object.segmentId.low || object.segmentId.high : Number(object.segmentId) !== 0)
                         if ($util.Long)
-                            (message.segmentId = $util.Long.fromValue(object.segmentId)).unsigned = true;
+                            message.segmentId = $util.Long.fromValue(object.segmentId, true);
                         else if (typeof object.segmentId === "string")
                             message.segmentId = parseInt(object.segmentId, 10);
                         else if (typeof object.segmentId === "number")
@@ -254,22 +273,28 @@ $root.ironcorelabs = (function() {
              * @param {$protobuf.IConversionOptions} [options] Conversion options
              * @returns {Object.<string,*>} Plain object
              */
-            DataControlPlatformHeader.toObject = function toObject(message, options) {
+            DataControlPlatformHeader.toObject = function toObject(message, options, _depth) {
                 if (!options)
                     options = {};
+                if (_depth === undefined)
+                    _depth = 0;
+                if (_depth > $util.recursionLimit)
+                    throw Error("max depth exceeded");
                 var object = {};
                 if (options.defaults) {
                     object.documentId = "";
                     if ($util.Long) {
                         var long = new $util.Long(0, 0, true);
-                        object.segmentId = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                        object.segmentId = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : typeof BigInt !== "undefined" && options.longs === BigInt ? long.toBigInt() : long;
                     } else
-                        object.segmentId = options.longs === String ? "0" : 0;
+                        object.segmentId = options.longs === String ? "0" : typeof BigInt !== "undefined" && options.longs === BigInt ? BigInt("0") : 0;
                 }
                 if (message.documentId != null && message.hasOwnProperty("documentId"))
                     object.documentId = message.documentId;
                 if (message.segmentId != null && message.hasOwnProperty("segmentId"))
-                    if (typeof message.segmentId === "number")
+                    if (typeof BigInt !== "undefined" && options.longs === BigInt)
+                        object.segmentId = typeof message.segmentId === "number" ? BigInt(message.segmentId) : $util.Long.fromBits(message.segmentId.low >>> 0, message.segmentId.high >>> 0, true).toBigInt();
+                    else if (typeof message.segmentId === "number")
                         object.segmentId = options.longs === String ? String(message.segmentId) : message.segmentId;
                     else
                         object.segmentId = options.longs === String ? $util.Long.prototype.toString.call(message.segmentId) : options.longs === Number ? new $util.LongBits(message.segmentId.low >>> 0, message.segmentId.high >>> 0).toNumber(true) : message.segmentId;
@@ -308,19 +333,30 @@ $root.ironcorelabs = (function() {
 
             /**
              * Properties of a SaaSShieldHeader.
-             * @memberof ironcorelabs.proto
-             * @interface ISaaSShieldHeader
+             * @typedef {Object} ironcorelabs.proto.SaaSShieldHeader.$Properties
              * @property {string|null} [tenantId] SaaSShieldHeader tenantId
              * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding
+             */
+
+            /**
+             * Properties of a SaaSShieldHeader.
+             * @memberof ironcorelabs.proto
+             * @interface ISaaSShieldHeader
+             * @augments ironcorelabs.proto.SaaSShieldHeader.$Properties
+             * @deprecated Use ironcorelabs.proto.SaaSShieldHeader.$Properties instead.
+             */
+
+            /**
+             * Shape of a SaaSShieldHeader.
+             * @typedef {ironcorelabs.proto.SaaSShieldHeader.$Properties} ironcorelabs.proto.SaaSShieldHeader.$Shape
              */
 
             /**
              * Constructs a new SaaSShieldHeader.
              * @memberof ironcorelabs.proto
              * @classdesc Represents a SaaSShieldHeader.
-             * @implements ISaaSShieldHeader
              * @constructor
-             * @param {ironcorelabs.proto.ISaaSShieldHeader=} [properties] Properties to set
+             * @param {ironcorelabs.proto.SaaSShieldHeader.$Properties=} [properties] Properties to set
              * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding
              */
             function SaaSShieldHeader(properties) {
@@ -343,8 +379,12 @@ $root.ironcorelabs = (function() {
              * @function create
              * @memberof ironcorelabs.proto.SaaSShieldHeader
              * @static
-             * @param {ironcorelabs.proto.ISaaSShieldHeader=} [properties] Properties to set
+             * @param {ironcorelabs.proto.SaaSShieldHeader.$Properties=} [properties] Properties to set
              * @returns {ironcorelabs.proto.SaaSShieldHeader} SaaSShieldHeader instance
+             * @type {{
+             *   (properties: ironcorelabs.proto.SaaSShieldHeader.$Shape): ironcorelabs.proto.SaaSShieldHeader & ironcorelabs.proto.SaaSShieldHeader.$Shape;
+             *   (properties?: ironcorelabs.proto.SaaSShieldHeader.$Properties): ironcorelabs.proto.SaaSShieldHeader;
+             * }}
              */
             SaaSShieldHeader.create = function create(properties) {
                 return new SaaSShieldHeader(properties);
@@ -355,13 +395,17 @@ $root.ironcorelabs = (function() {
              * @function encode
              * @memberof ironcorelabs.proto.SaaSShieldHeader
              * @static
-             * @param {ironcorelabs.proto.ISaaSShieldHeader} message SaaSShieldHeader message or plain object to encode
+             * @param {ironcorelabs.proto.SaaSShieldHeader.$Properties} message SaaSShieldHeader message or plain object to encode
              * @param {$protobuf.Writer} [writer] Writer to encode to
              * @returns {$protobuf.Writer} Writer
              */
-            SaaSShieldHeader.encode = function encode(message, writer) {
+            SaaSShieldHeader.encode = function encode(message, writer, _depth) {
                 if (!writer)
                     writer = $Writer.create();
+                if (_depth === undefined)
+                    _depth = 0;
+                if (_depth > $util.recursionLimit)
+                    throw Error("max depth exceeded");
                 if (message.tenantId != null && Object.hasOwnProperty.call(message, "tenantId"))
                     writer.uint32(/* id 1, wireType 2 =*/10).string(message.tenantId);
                 if (message.$unknowns != null && Object.hasOwnProperty.call(message, "$unknowns"))
@@ -375,12 +419,12 @@ $root.ironcorelabs = (function() {
              * @function encodeDelimited
              * @memberof ironcorelabs.proto.SaaSShieldHeader
              * @static
-             * @param {ironcorelabs.proto.ISaaSShieldHeader} message SaaSShieldHeader message or plain object to encode
+             * @param {ironcorelabs.proto.SaaSShieldHeader.$Properties} message SaaSShieldHeader message or plain object to encode
              * @param {$protobuf.Writer} [writer] Writer to encode to
              * @returns {$protobuf.Writer} Writer
              */
             SaaSShieldHeader.encodeDelimited = function encodeDelimited(message, writer) {
-                return this.encode(message, writer).ldelim();
+                return this.encode(message, writer && writer.len ? writer.fork() : writer).ldelim();
             };
 
             /**
@@ -390,7 +434,7 @@ $root.ironcorelabs = (function() {
              * @static
              * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
              * @param {number} [length] Message length if known beforehand
-             * @returns {ironcorelabs.proto.SaaSShieldHeader} SaaSShieldHeader
+             * @returns {ironcorelabs.proto.SaaSShieldHeader & ironcorelabs.proto.SaaSShieldHeader.$Shape} SaaSShieldHeader
              * @throws {Error} If the payload is not a reader or valid buffer
              * @throws {$protobuf.util.ProtocolError} If required fields are missing
              */
@@ -436,7 +480,7 @@ $root.ironcorelabs = (function() {
              * @memberof ironcorelabs.proto.SaaSShieldHeader
              * @static
              * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @returns {ironcorelabs.proto.SaaSShieldHeader} SaaSShieldHeader
+             * @returns {ironcorelabs.proto.SaaSShieldHeader & ironcorelabs.proto.SaaSShieldHeader.$Shape} SaaSShieldHeader
              * @throws {Error} If the payload is not a reader or valid buffer
              * @throws {$protobuf.util.ProtocolError} If required fields are missing
              */
@@ -498,9 +542,13 @@ $root.ironcorelabs = (function() {
              * @param {$protobuf.IConversionOptions} [options] Conversion options
              * @returns {Object.<string,*>} Plain object
              */
-            SaaSShieldHeader.toObject = function toObject(message, options) {
+            SaaSShieldHeader.toObject = function toObject(message, options, _depth) {
                 if (!options)
                     options = {};
+                if (_depth === undefined)
+                    _depth = 0;
+                if (_depth > $util.recursionLimit)
+                    throw Error("max depth exceeded");
                 var object = {};
                 if (options.defaults)
                     object.tenantId = "";
@@ -541,21 +589,40 @@ $root.ironcorelabs = (function() {
 
             /**
              * Properties of a v3DocumentHeader.
+             * @typedef {Object} ironcorelabs.proto.v3DocumentHeader.$Properties
+             * @property {Uint8Array|null} [sig] v3DocumentHeader sig
+             * @property {ironcorelabs.proto.DataControlPlatformHeader.$Properties|null} [dataControl] v3DocumentHeader dataControl
+             * @property {ironcorelabs.proto.SaaSShieldHeader.$Properties|null} [saasShield] v3DocumentHeader saasShield
+             * @property {"dataControl"|"saasShield"} [header] v3DocumentHeader header
+             * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding
+             */
+
+            /**
+             * Properties of a v3DocumentHeader.
              * @memberof ironcorelabs.proto
              * @interface Iv3DocumentHeader
-             * @property {Uint8Array|null} [sig] v3DocumentHeader sig
-             * @property {ironcorelabs.proto.IDataControlPlatformHeader|null} [dataControl] v3DocumentHeader dataControl
-             * @property {ironcorelabs.proto.ISaaSShieldHeader|null} [saasShield] v3DocumentHeader saasShield
-             * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding
+             * @augments ironcorelabs.proto.v3DocumentHeader.$Properties
+             * @deprecated Use ironcorelabs.proto.v3DocumentHeader.$Properties instead.
+             */
+
+            /**
+             * Narrowed shape of a v3DocumentHeader.
+             * @typedef {{
+             *   sig?: Uint8Array|null;
+             *   dataControl?: ironcorelabs.proto.DataControlPlatformHeader.$Shape|null;
+             *   saasShield?: ironcorelabs.proto.SaaSShieldHeader.$Shape|null;
+             *   $unknowns?: Array.<Uint8Array>;
+             * } & (
+             *   ({ header?: undefined; dataControl?: null; saasShield?: null }|{ header?: "dataControl"; dataControl: ironcorelabs.proto.DataControlPlatformHeader.$Shape; saasShield?: null }|{ header?: "saasShield"; dataControl?: null; saasShield: ironcorelabs.proto.SaaSShieldHeader.$Shape })
+             * )} ironcorelabs.proto.v3DocumentHeader.$Shape
              */
 
             /**
              * Constructs a new v3DocumentHeader.
              * @memberof ironcorelabs.proto
              * @classdesc Represents a v3DocumentHeader.
-             * @implements Iv3DocumentHeader
              * @constructor
-             * @param {ironcorelabs.proto.Iv3DocumentHeader=} [properties] Properties to set
+             * @param {ironcorelabs.proto.v3DocumentHeader.$Properties=} [properties] Properties to set
              * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding
              */
             function v3DocumentHeader(properties) {
@@ -575,7 +642,7 @@ $root.ironcorelabs = (function() {
 
             /**
              * v3DocumentHeader dataControl.
-             * @member {ironcorelabs.proto.IDataControlPlatformHeader|null|undefined} dataControl
+             * @member {ironcorelabs.proto.DataControlPlatformHeader.$Properties|null|undefined} dataControl
              * @memberof ironcorelabs.proto.v3DocumentHeader
              * @instance
              */
@@ -583,7 +650,7 @@ $root.ironcorelabs = (function() {
 
             /**
              * v3DocumentHeader saasShield.
-             * @member {ironcorelabs.proto.ISaaSShieldHeader|null|undefined} saasShield
+             * @member {ironcorelabs.proto.SaaSShieldHeader.$Properties|null|undefined} saasShield
              * @memberof ironcorelabs.proto.v3DocumentHeader
              * @instance
              */
@@ -608,8 +675,12 @@ $root.ironcorelabs = (function() {
              * @function create
              * @memberof ironcorelabs.proto.v3DocumentHeader
              * @static
-             * @param {ironcorelabs.proto.Iv3DocumentHeader=} [properties] Properties to set
+             * @param {ironcorelabs.proto.v3DocumentHeader.$Properties=} [properties] Properties to set
              * @returns {ironcorelabs.proto.v3DocumentHeader} v3DocumentHeader instance
+             * @type {{
+             *   (properties: ironcorelabs.proto.v3DocumentHeader.$Shape): ironcorelabs.proto.v3DocumentHeader & ironcorelabs.proto.v3DocumentHeader.$Shape;
+             *   (properties?: ironcorelabs.proto.v3DocumentHeader.$Properties): ironcorelabs.proto.v3DocumentHeader;
+             * }}
              */
             v3DocumentHeader.create = function create(properties) {
                 return new v3DocumentHeader(properties);
@@ -620,19 +691,23 @@ $root.ironcorelabs = (function() {
              * @function encode
              * @memberof ironcorelabs.proto.v3DocumentHeader
              * @static
-             * @param {ironcorelabs.proto.Iv3DocumentHeader} message v3DocumentHeader message or plain object to encode
+             * @param {ironcorelabs.proto.v3DocumentHeader.$Properties} message v3DocumentHeader message or plain object to encode
              * @param {$protobuf.Writer} [writer] Writer to encode to
              * @returns {$protobuf.Writer} Writer
              */
-            v3DocumentHeader.encode = function encode(message, writer) {
+            v3DocumentHeader.encode = function encode(message, writer, _depth) {
                 if (!writer)
                     writer = $Writer.create();
+                if (_depth === undefined)
+                    _depth = 0;
+                if (_depth > $util.recursionLimit)
+                    throw Error("max depth exceeded");
                 if (message.sig != null && Object.hasOwnProperty.call(message, "sig"))
                     writer.uint32(/* id 1, wireType 2 =*/10).bytes(message.sig);
                 if (message.dataControl != null && Object.hasOwnProperty.call(message, "dataControl"))
-                    $root.ironcorelabs.proto.DataControlPlatformHeader.encode(message.dataControl, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+                    $root.ironcorelabs.proto.DataControlPlatformHeader.encode(message.dataControl, writer.uint32(/* id 2, wireType 2 =*/18).fork(), _depth + 1).ldelim();
                 if (message.saasShield != null && Object.hasOwnProperty.call(message, "saasShield"))
-                    $root.ironcorelabs.proto.SaaSShieldHeader.encode(message.saasShield, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+                    $root.ironcorelabs.proto.SaaSShieldHeader.encode(message.saasShield, writer.uint32(/* id 3, wireType 2 =*/26).fork(), _depth + 1).ldelim();
                 if (message.$unknowns != null && Object.hasOwnProperty.call(message, "$unknowns"))
                     for (var i = 0; i < message.$unknowns.length; ++i)
                         writer.raw(message.$unknowns[i]);
@@ -644,12 +719,12 @@ $root.ironcorelabs = (function() {
              * @function encodeDelimited
              * @memberof ironcorelabs.proto.v3DocumentHeader
              * @static
-             * @param {ironcorelabs.proto.Iv3DocumentHeader} message v3DocumentHeader message or plain object to encode
+             * @param {ironcorelabs.proto.v3DocumentHeader.$Properties} message v3DocumentHeader message or plain object to encode
              * @param {$protobuf.Writer} [writer] Writer to encode to
              * @returns {$protobuf.Writer} Writer
              */
             v3DocumentHeader.encodeDelimited = function encodeDelimited(message, writer) {
-                return this.encode(message, writer).ldelim();
+                return this.encode(message, writer && writer.len ? writer.fork() : writer).ldelim();
             };
 
             /**
@@ -659,7 +734,7 @@ $root.ironcorelabs = (function() {
              * @static
              * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
              * @param {number} [length] Message length if known beforehand
-             * @returns {ironcorelabs.proto.v3DocumentHeader} v3DocumentHeader
+             * @returns {ironcorelabs.proto.v3DocumentHeader & ironcorelabs.proto.v3DocumentHeader.$Shape} v3DocumentHeader
              * @throws {Error} If the payload is not a reader or valid buffer
              * @throws {$protobuf.util.ProtocolError} If required fields are missing
              */
@@ -719,7 +794,7 @@ $root.ironcorelabs = (function() {
              * @memberof ironcorelabs.proto.v3DocumentHeader
              * @static
              * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @returns {ironcorelabs.proto.v3DocumentHeader} v3DocumentHeader
+             * @returns {ironcorelabs.proto.v3DocumentHeader & ironcorelabs.proto.v3DocumentHeader.$Shape} v3DocumentHeader
              * @throws {Error} If the payload is not a reader or valid buffer
              * @throws {$protobuf.util.ProtocolError} If required fields are missing
              */
@@ -813,9 +888,13 @@ $root.ironcorelabs = (function() {
              * @param {$protobuf.IConversionOptions} [options] Conversion options
              * @returns {Object.<string,*>} Plain object
              */
-            v3DocumentHeader.toObject = function toObject(message, options) {
+            v3DocumentHeader.toObject = function toObject(message, options, _depth) {
                 if (!options)
                     options = {};
+                if (_depth === undefined)
+                    _depth = 0;
+                if (_depth > $util.recursionLimit)
+                    throw Error("max depth exceeded");
                 var object = {};
                 if (options.defaults)
                     if (options.bytes === String)
@@ -828,12 +907,12 @@ $root.ironcorelabs = (function() {
                 if (message.sig != null && message.hasOwnProperty("sig"))
                     object.sig = options.bytes === String ? $util.base64.encode(message.sig, 0, message.sig.length) : options.bytes === Array ? Array.prototype.slice.call(message.sig) : message.sig;
                 if (message.dataControl != null && message.hasOwnProperty("dataControl")) {
-                    object.dataControl = $root.ironcorelabs.proto.DataControlPlatformHeader.toObject(message.dataControl, options);
+                    object.dataControl = $root.ironcorelabs.proto.DataControlPlatformHeader.toObject(message.dataControl, options, _depth + 1);
                     if (options.oneofs)
                         object.header = "dataControl";
                 }
                 if (message.saasShield != null && message.hasOwnProperty("saasShield")) {
-                    object.saasShield = $root.ironcorelabs.proto.SaaSShieldHeader.toObject(message.saasShield, options);
+                    object.saasShield = $root.ironcorelabs.proto.SaaSShieldHeader.toObject(message.saasShield, options, _depth + 1);
                     if (options.oneofs)
                         object.header = "saasShield";
                 }
