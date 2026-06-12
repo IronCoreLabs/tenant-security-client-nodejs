@@ -120,9 +120,9 @@ futurejs@2.2.0:
   integrity sha512-JgWDGfaDquVmSNvWAKulJXb/cMvxTAcPw2kW9UI2GsVw8iXuvaGh6hZHp08BkzPh2xFMYgvcwF4lK7qpbDP2HQ==
 
 joi@^18.0.2:
-  version "18.1.2"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-18.1.2.tgz#4735a384d7721fcda7a551d128862cf816541924"
-  integrity sha512-rF5MAmps5esSlhCA+N1b6IYHDw9j/btzGaqfgie522jS02Ju/HXBxamlXVlKEHAxoMKQL77HWI8jlqWsFuekZA==
+  version "18.2.1"
+  resolved "https://registry.yarnpkg.com/joi/-/joi-18.2.1.tgz#a022e39496e25b010a6d4649975c160a4315bd79"
+  integrity sha512-2/OKlogiESf2Nh3TFCrRjrr9z1DRHeW0I+KReF67+4J0Ns+8hBtHRmoWAZ2OFU6I5+TWLEe6sVlSdXPjHm5UbQ==
   dependencies:
     "@hapi/address" "^5.1.1"
     "@hapi/formula" "^3.0.2"
@@ -150,9 +150,9 @@ node-fetch@2.6.12:
     whatwg-url "^5.0.0"
 
 protobufjs@^7.2.5:
-  version "7.6.1"
-  resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-7.6.1.tgz#6320bb08c3be7dcfc6f9193ee03d3a4643f1eb37"
-  integrity sha512-4K0myLaWL5EteuSAro91EGFgcfVgxb64Jx+7oDAY6GOkXD4M69yuSEljNcInGVCA5sOPxmZ/EqDLj2x0Q0+Ygg==
+  version "7.6.3"
+  resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-7.6.3.tgz#92cc8806db61393e68f6a2eb742c1d9c0cafd672"
+  integrity sha512-+k0vdJKNdW+Vu+dYe8tZA/VvQb6XKNWexC6URwBFXxNnjLJz9nQJCemGyNgRAWD+B7+nGNc9qMPGwcD7s4nzUw==
   dependencies:
     "@protobufjs/aspromise" "^1.1.2"
     "@protobufjs/base64" "^1.1.2"
