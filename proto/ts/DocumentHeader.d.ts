@@ -23,7 +23,7 @@ export namespace ironcorelabs {
              */
             constructor(properties?: ironcorelabs.proto.DataControlPlatformHeader.$Properties);
 
-            /** Unknown fields preserved while decoding */
+            /** Unknown fields preserved while decoding when enabled */
             $unknowns?: Uint8Array[];
 
             /** DataControlPlatformHeader documentId. */
@@ -122,7 +122,7 @@ export namespace ironcorelabs {
                 /** DataControlPlatformHeader segmentId */
                 segmentId?: (number|Long|null);
 
-                /** Unknown fields preserved while decoding */
+                /** Unknown fields preserved while decoding when enabled */
                 $unknowns?: Uint8Array[];
             }
 
@@ -146,7 +146,7 @@ export namespace ironcorelabs {
              */
             constructor(properties?: ironcorelabs.proto.SaaSShieldHeader.$Properties);
 
-            /** Unknown fields preserved while decoding */
+            /** Unknown fields preserved while decoding when enabled */
             $unknowns?: Uint8Array[];
 
             /** SaaSShieldHeader tenantId. */
@@ -239,7 +239,7 @@ export namespace ironcorelabs {
                 /** SaaSShieldHeader tenantId */
                 tenantId?: (string|null);
 
-                /** Unknown fields preserved while decoding */
+                /** Unknown fields preserved while decoding when enabled */
                 $unknowns?: Uint8Array[];
             }
 
@@ -263,7 +263,7 @@ export namespace ironcorelabs {
              */
             constructor(properties?: ironcorelabs.proto.v3DocumentHeader.$Properties);
 
-            /** Unknown fields preserved while decoding */
+            /** Unknown fields preserved while decoding when enabled */
             $unknowns?: Uint8Array[];
 
             /** v3DocumentHeader sig. */
@@ -374,19 +374,19 @@ export namespace ironcorelabs {
                 /** v3DocumentHeader header */
                 header?: ("dataControl"|"saasShield");
 
-                /** Unknown fields preserved while decoding */
+                /** Unknown fields preserved while decoding when enabled */
                 $unknowns?: Uint8Array[];
             }
 
             /** Narrowed shape of a v3DocumentHeader. */
             type $Shape = {
-  sig?: Uint8Array|null;
-  dataControl?: ironcorelabs.proto.DataControlPlatformHeader.$Shape|null;
-  saasShield?: ironcorelabs.proto.SaaSShieldHeader.$Shape|null;
-  $unknowns?: Uint8Array[];
-} & (
-  ({ header?: undefined; dataControl?: null; saasShield?: null }|{ header?: "dataControl"; dataControl: ironcorelabs.proto.DataControlPlatformHeader.$Shape; saasShield?: null }|{ header?: "saasShield"; dataControl?: null; saasShield: ironcorelabs.proto.SaaSShieldHeader.$Shape })
-);
+              sig?: Uint8Array|null;
+              dataControl?: ironcorelabs.proto.DataControlPlatformHeader.$Shape|null;
+              saasShield?: ironcorelabs.proto.SaaSShieldHeader.$Shape|null;
+              $unknowns?: Uint8Array[];
+            } & (
+              ({ header?: undefined; dataControl?: null; saasShield?: null }|{ header?: "dataControl"; dataControl: ironcorelabs.proto.DataControlPlatformHeader.$Shape; saasShield?: null }|{ header?: "saasShield"; dataControl?: null; saasShield: ironcorelabs.proto.SaaSShieldHeader.$Shape })
+            );
         }
     }
 }

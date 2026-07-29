@@ -4,17 +4,17 @@
   "main": "src/index.js",
   "license": "MIT",
   "devDependencies": {
-    "typescript": "^4.3.5"
+    "typescript": "~5.6.0"
   },
   "dependencies": {
-    "@google-cloud/kms": "^2.6.0",
+    "@google-cloud/kms": "^5.7.0",
     "@types/node": "^16.6.0",
     "miscreant": "^0.3.2",
-    "ts-proto": "^1.82.5"
+    "ts-proto": "^2.12.0"
   },
   "scripts": {
-    "start": "yarn proto && yarn tsc --target ES6 --sourceMap false --module CommonJS --outDir ./dist/src src/index.ts && node dist/src/index.js",
-    "deterministic": "yarn proto && yarn tsc --target ES6 --sourceMap false --module CommonJS --outDir ./dist/src src/deterministic.ts && node dist/src/deterministic.js",
+    "start": "yarn proto && yarn tsc --target ES6 --sourceMap false --module CommonJS --skipLibCheck --outDir ./dist/src src/index.ts && node dist/src/index.js",
+    "deterministic": "yarn proto && yarn tsc --target ES6 --sourceMap false --module CommonJS --skipLibCheck --outDir ./dist/src src/deterministic.ts && node dist/src/deterministic.js",
     "proto": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./src ./transform.proto"
   }
 }
