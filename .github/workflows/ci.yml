@@ -9,6 +9,10 @@ on:
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     strategy:
       fail-fast: false
       matrix:
@@ -26,9 +30,8 @@ jobs:
           ${{ secrets.TSP_ENV_INTEGRATION }}
           EOF
       - name: Start the TSP
-        uses: IronCoreLabs/workflows/.github/actions/start-tsp@start-tsp-v1.0.0
+        uses: IronCoreLabs/workflows/.github/actions/start-tsp@start-tsp-v2.0.0
         with:
-          gcloud-auth: ${{ secrets.GCLOUD_AUTH }}
           env-file-path: .env.integration
       - name: integration test
         run: env $(cat .env.integration) yarn integration
