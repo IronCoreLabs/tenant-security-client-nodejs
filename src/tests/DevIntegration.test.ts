@@ -46,7 +46,7 @@ describe("INTEGRATION dev environment tests", () => {
             try {
                 await client.decryptDocument({edek: existingEdekForEnabledConfig, encryptedDocument: {bs: randomBytes}}, meta);
                 fail("Should not be able to decrypt BS data");
-            } catch (e) {
+            } catch (e: any) {
                 expect(e.errorCode).toEqual(TenantSecurityErrorCode.INVALID_ENCRYPTED_DOCUMENT);
                 expect(e).toBeInstanceOf(TscException);
             }
@@ -59,7 +59,7 @@ describe("INTEGRATION dev environment tests", () => {
             try {
                 await client.decryptDocument({edek: randomBytes.toString("base64"), encryptedDocument: {bs: existingEncryptedDataForEnabledConfig}}, meta);
                 fail("Should not be able to decrypt BS data");
-            } catch (e) {
+            } catch (e: any) {
                 expect(e).toBeInstanceOf(TenantSecurityException);
                 expect(e.errorCode).toEqual(TenantSecurityErrorCode.INVALID_PROVIDED_EDEK);
             }
@@ -90,7 +90,7 @@ describe("INTEGRATION dev environment tests", () => {
             try {
                 await client.encryptDocument(encrypted.encryptedDocument, meta);
                 fail("Should fail because documents are double encrypted");
-            } catch (e) {
+            } catch (e: any) {
                 expect(e).toBeInstanceOf(TenantSecurityException);
                 expect(e.errorCode).toEqual(TenantSecurityErrorCode.DOCUMENT_ENCRYPT_FAILED);
                 expect(e.message).toContain("`field1`, `field2`, `field3`");
@@ -162,7 +162,7 @@ describe("INTEGRATION dev environment tests", () => {
             try {
                 await client.decryptStream(otherEdek, cipherTextInputStream, roundtripFileStream, TestUtils.getMetadata(GCP_TENANT_ID));
                 fail("Should fail when provided EDEK is invalid");
-            } catch (e) {
+            } catch (e: any) {
                 expect(e.errorCode).toEqual(TenantSecurityErrorCode.DOCUMENT_DECRYPT_FAILED);
                 //When using the wrong EDEK, we shouldn't write any file content
                 expect(fs.readFileSync(roundtripFilePath, "utf-8")).toEqual("");
@@ -180,7 +180,7 @@ describe("INTEGRATION dev environment tests", () => {
             try {
                 await client.decryptStream(streamEncryptRes.edek, cipherTextInputStream, roundtripFileStream, TestUtils.getMetadata(GCP_TENANT_ID));
                 fail("Should fail when encrypted data is invalid");
-            } catch (e) {
+            } catch (e: any) {
                 expect(e.errorCode).toEqual(TenantSecurityErrorCode.DOCUMENT_DECRYPT_FAILED);
                 //Some amount of bytes should have been written
                 expect(fs.readFileSync(roundtripFilePath, "utf-8")).not.toEqual("");
@@ -239,7 +239,7 @@ describe("INTEGRATION dev environment tests", () => {
             try {
                 await client.encryptDocument(data, meta);
                 fail("Should fail because tenant has no primary KMS config");
-            } catch (e) {
+            } catch (e: any) {
                 expect(e).toBeInstanceOf(TenantSecurityException);
                 expect(e.errorCode).toEqual(TenantSecurityErrorCode.NO_PRIMARY_KMS_CONFIGURATION);
             }
@@ -252,7 +252,7 @@ describe("INTEGRATION dev environment tests", () => {
             try {
                 await client.encryptDocumentBatch({fail: data}, meta);
                 fail("Should fail because tenant has no primary KMS config");
-            } catch (e) {
+            } catch (e: any) {
                 expect(e).toBeInstanceOf(TenantSecurityException);
                 expect(e.errorCode).toEqual(TenantSecurityErrorCode.NO_PRIMARY_KMS_CONFIGURATION);
             }
@@ -265,7 +265,7 @@ describe("INTEGRATION dev environment tests", () => {
             try {
                 await client.decryptDocument(data, meta);
                 fail("Decrypt should fail because KMS config was disabled");
-            } catch (e) {
+            } catch (e: any) {
                 expect(e).toBeInstanceOf(TenantSecurityException);
                 expect(e.errorCode).toEqual(TenantSecurityErrorCode.KMS_CONFIGURATION_DISABLED);
             }
@@ -322,7 +322,7 @@ describe("INTEGRATION dev environment tests", () => {
             try {
                 await client.encryptDocument(data, meta);
                 fail("Should fail because tenant has no primary KMS config");
-            } catch (e) {
+            } catch (e: any) {
                 expect(e).toBeInstanceOf(TenantSecurityException);
                 expect(e.errorCode).toEqual(TenantSecurityErrorCode.UNKNOWN_TENANT_OR_NO_ACTIVE_KMS_CONFIGURATIONS);
             }
@@ -386,7 +386,7 @@ describe("INTEGRATION dev environment tests", () => {
 
             try {
                 await client.decryptDocument({encryptedDocument: {foo: azureEncryptedDataForEdekWithoutVersion}, edek: hackedAzureEdek}, meta);
-            } catch (e) {
+            } catch (e: any) {
                 expect(e.message).toContain("Code: BadParameter");
                 expect(e.message).toContain("The parameter is incorrect");
                 expect(e.message).not.toContain("Property 'value' is required");

@@ -21,7 +21,7 @@ describe("UNIT TenantSecurityClient", () => {
             try {
                 await client.encryptDocument(data, meta);
                 fail("Should fail when request to TSP fails");
-            } catch (e) {
+            } catch (e: any) {
                 expect(e).toBeInstanceOf(TenantSecurityException);
                 expect(e.errorCode).toEqual(TenantSecurityErrorCode.UNABLE_TO_MAKE_REQUEST);
             }

@@ -1,5 +1,5 @@
 import * as crypto from "crypto";
-import * as miscreant from "miscreant";
+import {aessiv} from "@noble/ciphers/aes.js";
 import {retrieveDek} from "./index";
 
 // Only run through the example if this module was executed (vs imported).
@@ -77,10 +77,8 @@ if (require.main == module) {
         There is no AES-SIV associated data attached to IronCore deterministic values.
         */
         console.log("AES-SIV Decrypting Deterministic Data...");
-        const cryptoProvider = new miscreant.PolyfillCryptoProvider();
-        const siv = await miscreant.SIV.importKey(deterministicKey, "AES-SIV", cryptoProvider);
         // slice past the secretId and padding to the ciphertext
-        const recoveredData = Buffer.from(await siv.open(deterministicEncryptedValue.slice(6), []));
+        const recoveredData = Buffer.from(aessiv(deterministicKey).decrypt(deterministicEncryptedValue.slice(6)));
         console.log(`Recovered Data:
           ${recoveredData.toString("base64")}`);
         const recoveredString = recoveredData.toString("utf8");
