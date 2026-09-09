@@ -1,3 +1,8 @@
+## 4.1.3
+
+- Minimum supported Node version is now 20.19 (or 22.12 on the 22 line).
+- Dependency updates
+
 ## 4.1.2
 
 - Fixed issue preventing use of v4.1.0 and v4.1.1.
