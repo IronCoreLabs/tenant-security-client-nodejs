@@ -2,7 +2,7 @@ import Future from "futurejs";
 import {TenantSecurityErrorCode, TenantSecurityException} from "../TenantSecurityException";
 import {TenantSecurityExceptionUtils} from "../TenantSecurityExceptionUtils";
 import {TscException} from "../TscException";
-import * as miscreant from "miscreant";
+import {aessiv} from "@noble/ciphers/aes.js";
 import {
     BatchResult,
     DeterministicEncryptedField,
@@ -13,8 +13,6 @@ import {
 } from "../Util";
 import {DETERMINISTIC_HEADER_PADDING, MAX_TENANT_SECRET_ID} from "./Constants";
 import {DerivedKey, DeriveKeyResponse, getDerivedKeys} from "./KmsApi";
-
-const cryptoProvider = new miscreant.PolyfillCryptoProvider();
 
 interface DeterministicEncryptedFieldParts {
     tenantSecretId: number;
@@ -61,19 +59,12 @@ export const generateEncryptedFieldHeader = (tenantSecretId: number): Future<Ten
 };
 
 /**
- * Encrypt the provided bytes with the provided key using AES-256-SIV.
- * associatedData is not used by our deterministic encryption, but is used in our unit tests of miscreant encryption.
+ * AES-256-SIV (RFC 5297). associatedData is only used by the RFC 5297 vector tests; deterministic fields carry none.
  */
-export const encryptBytes = (bytes: Buffer, key: Buffer, associatedData: Uint8Array[] = []): Future<TenantSecurityException, Buffer> => {
-    return Future.tryP(() => miscreant.SIV.importKey(key, "AES-SIV", cryptoProvider))
-        .flatMap((siv) =>
-            Future.tryP(async () => {
-                const encrypted = await siv.seal(bytes, associatedData);
-                return Buffer.from(encrypted);
-            })
-        )
-        .errorMap((e) => new TscException(TenantSecurityErrorCode.DETERMINISTIC_FIELD_ENCRYPT_FAILED, e.message));
-};
+export const encryptBytes = (bytes: Buffer, key: Buffer, associatedData: Uint8Array[] = []): Future<TenantSecurityException, Buffer> =>
+    Future.tryF(() => Buffer.from(aessiv(key, ...associatedData).encrypt(bytes))).errorMap(
+        (e) => new TscException(TenantSecurityErrorCode.DETERMINISTIC_FIELD_ENCRYPT_FAILED, e.message)
+    );
 
 /**
  * Check if the encrypted field was deterministically encrypted with the current primary. If it is,
@@ -130,14 +121,12 @@ export const decomposeField = (encryptedBytesWithHeader: Buffer): Future<TenantS
 };
 
 /**
- * Attempt to AES-SIV decrypt the provided bytes using the provided key.
- * associatedData is not used by our deterministic encryption, but is used in our unit tests of miscreant encryption.
+ * AES-256-SIV (RFC 5297). associatedData is only used by the RFC 5297 vector tests; deterministic fields carry none.
  */
-export const decryptBytes = (encryptedBytes: Buffer, key: Buffer, associatedData: Uint8Array[] = []): Future<TenantSecurityException, Buffer> => {
-    return Future.tryP(() => miscreant.SIV.importKey(key, "AES-SIV", cryptoProvider))
-        .flatMap((siv) => Future.tryP(() => siv.open(encryptedBytes, associatedData)).map((decrypted) => Buffer.from(decrypted)))
-        .errorMap((e) => new TscException(TenantSecurityErrorCode.DETERMINISTIC_FIELD_DECRYPT_FAILED, e.message));
-};
+export const decryptBytes = (encryptedBytes: Buffer, key: Buffer, associatedData: Uint8Array[] = []): Future<TenantSecurityException, Buffer> =>
+    Future.tryF(() => Buffer.from(aessiv(key, ...associatedData).decrypt(encryptedBytes))).errorMap(
+        (e) => new TscException(TenantSecurityErrorCode.DETERMINISTIC_FIELD_DECRYPT_FAILED, e.message)
+    );
 
 /**
  * Decrypt the provided deterministically encrypted field and re-encrypt it with the current tenant secret.

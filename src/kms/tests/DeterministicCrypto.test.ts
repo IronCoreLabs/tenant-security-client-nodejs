@@ -1,5 +1,6 @@
 import * as DetCrypto from "../DeterministicCrypto";
 import {DeterministicEncryptedField} from "../../Util";
+import {TenantSecurityErrorCode} from "../../TenantSecurityException";
 
 const plaintextField = {plaintextField: Buffer.from("aaaaaa"), secretPath: "path2", derivationPath: "path1"};
 
@@ -48,7 +49,7 @@ describe("UNIT encryptField", () => {
                 current: true,
             },
         ];
-        await expect(DetCrypto.encryptField(plaintextField, derivedKeys)).rejects.toThrow("got 0");
+        await expect(DetCrypto.encryptField(plaintextField, derivedKeys)).rejects.toMatchObject({errorCode: TenantSecurityErrorCode.DETERMINISTIC_FIELD_ENCRYPT_FAILED});
     });
 });
 

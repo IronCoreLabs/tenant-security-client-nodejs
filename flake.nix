@@ -27,9 +27,9 @@
 
         devShell = pkgs.mkShell {
           buildInputs = with pkgs.nodePackages; [
-            pkgs.nodejs_22
+            pkgs.nodejs_24
             pkgs.protobuf
-            (pkgs.yarn.override { nodejs = pkgs.nodejs_22; })
+            (pkgs.yarn.override { nodejs = pkgs.nodejs_24; })
             (pkgs.google-cloud-sdk.withExtraComponents [ pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin ])
           ];
         };
