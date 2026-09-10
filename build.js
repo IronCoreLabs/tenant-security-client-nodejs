@@ -38,28 +38,22 @@ if (args.indexOf("-h") !== -1 || args.indexOf("--help") !== -1) {
  */
 function publishModule() {
     shell.pushd("./dist");
+    let publish;
     if (SHOULD_PUBLISH) {
         if (OTP_REQUIRED) {
             prompt.start();
-            prompt.get([{
-                    name: 'otp_code',
-                    pattern: /^\d{6}$/,
-                    message: 'Code must be a six-digit number',
-                    required: true
-                }], function (err, result) {
-                if (err) {
-                    console.log(err);
-                    return 1;
-                }
-                shell.exec("npm publish --access public --otp=" + result.otp_code);
-            });
+            publish = new Promise((resolve, reject) =>
+                prompt.get([{name: "otp_code", pattern: /^\d{6}$/, message: "Code must be a six-digit number", required: true}], (err, result) =>
+                    err ? reject(err) : resolve(result)
+                )
+            ).then((result) => shell.exec("npm publish --access public --otp=" + result.otp_code));
         } else {
-            shell.exec("npm publish --access public");
+            publish = Promise.resolve(shell.exec("npm publish --access public"));
         }
     } else {
-        shell.exec("npm publish --dry-run");
+        publish = Promise.resolve(shell.exec("npm publish --dry-run"));
     }
-    shell.popd();
+    return publish.finally(() => shell.popd());
 }
 
 /**
@@ -133,7 +127,12 @@ shell.cp("./README.md", "./dist");
 shell.cp("./LICENSE", "./dist");
 shell.cp("-R", "./proto", "./dist");
 
-publishModule();
-tagRepo(package.version);
-
-console.log("\n\nBuild Complete!");
+publishModule()
+    .then(() => {
+        tagRepo(package.version);
+        console.log("\n\nBuild Complete!");
+    })
+    .catch((err) => {
+        console.error(err);
+        process.exit(1);
+    });
