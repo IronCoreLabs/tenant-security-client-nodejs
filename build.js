@@ -13,6 +13,7 @@
  */
 
 const path = require("path");
+const {promisify} = require("util");
 const shell = require("shelljs");
 const prompt = require("prompt");
 const package = require("./package.json");
@@ -36,24 +37,21 @@ if (args.indexOf("-h") !== -1 || args.indexOf("--help") !== -1) {
 /**
  * Publish the TSC. Will do a dry-run unless argument is provided to perform actual publish
  */
-function publishModule() {
+async function publishModule() {
     shell.pushd("./dist");
-    let publish;
-    if (SHOULD_PUBLISH) {
-        if (OTP_REQUIRED) {
+    try {
+        if (!SHOULD_PUBLISH) {
+            shell.exec("npm publish --dry-run");
+        } else if (OTP_REQUIRED) {
             prompt.start();
-            publish = new Promise((resolve, reject) =>
-                prompt.get([{name: "otp_code", pattern: /^\d{6}$/, message: "Code must be a six-digit number", required: true}], (err, result) =>
-                    err ? reject(err) : resolve(result)
-                )
-            ).then((result) => shell.exec("npm publish --access public --otp=" + result.otp_code));
+            const {otp_code} = await promisify(prompt.get)([{name: "otp_code", pattern: /^\d{6}$/, message: "Code must be a six-digit number", required: true}]);
+            shell.exec(`npm publish --access public --otp=${otp_code}`);
         } else {
-            publish = Promise.resolve(shell.exec("npm publish --access public"));
+            shell.exec("npm publish --access public");
         }
-    } else {
-        publish = Promise.resolve(shell.exec("npm publish --dry-run"));
+    } finally {
+        shell.popd();
     }
-    return publish.finally(() => shell.popd());
 }
 
 /**
@@ -99,40 +97,41 @@ function ensureNoChangesOnMainBeforePublish() {
     }
 }
 
-//Ensure that we're at the root directory of the repo to start
-const buildScriptDirectory = path.dirname(process.argv[1]);
-shell.cd(path.join(buildScriptDirectory));
+async function main() {
+    //Ensure that we're at the root directory of the repo to start
+    shell.cd(path.dirname(process.argv[1]));
 
-ensureNoChangesOnMainBeforePublish();
+    ensureNoChangesOnMainBeforePublish();
 
-//Clean up any existing dist directory
-shell.rm("-rf", "./dist");
+    //Clean up any existing dist directory
+    shell.rm("-rf", "./dist");
 
-shell.echo("Running yarn to make sure deps are up to date");
-shell.exec("yarn");
+    shell.echo("Running yarn to make sure deps are up to date");
+    shell.exec("yarn");
 
-shell.echo("\n\nRunning unit tests...");
-shell.exec("yarn test");
+    shell.echo("\n\nRunning unit tests...");
+    shell.exec("yarn test");
 
-shell.echo("\n\nCompiling protobuf source");
-shell.exec("yarn protobuild");
+    shell.echo("\n\nCompiling protobuf source");
+    shell.exec("yarn protobuild");
 
-shell.echo("\n\nCompiling all source from TypeScript to ES6 JS and removing unit test files");
-shell.exec("./node_modules/typescript/bin/tsc --declaration --target ES6 --sourceMap false --module CommonJS --outDir ./dist/src");
-shell.exec("find dist -type d -name tests -prune -exec rm -rf {} \\;");
+    shell.echo("\n\nCompiling all source from TypeScript to ES6 JS and removing unit test files");
+    shell.exec("./node_modules/typescript/bin/tsc --declaration --target ES6 --sourceMap false --module CommonJS --outDir ./dist/src");
+    shell.exec("find dist -type d -name tests -prune -exec rm -rf {} \\;");
 
-//Copy in various files that we need to deploy as part of our NPM package
-shell.cp("./package.json", "./dist");
-shell.cp("./README.md", "./dist");
-shell.cp("./LICENSE", "./dist");
-shell.cp("-R", "./proto", "./dist");
+    //Copy in various files that we need to deploy as part of our NPM package
+    shell.cp("./package.json", "./dist");
+    shell.cp("./README.md", "./dist");
+    shell.cp("./LICENSE", "./dist");
+    shell.cp("-R", "./proto", "./dist");
 
-publishModule()
-    .then(() => {
-        tagRepo(package.version);
-        console.log("\n\nBuild Complete!");
-    })
-    .catch((err) => {
-        console.error(err);
-        process.exit(1);
-    });
+    await publishModule();
+    tagRepo(package.version);
+
+    console.log("\n\nBuild Complete!");
+}
+
+main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+});
