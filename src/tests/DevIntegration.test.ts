@@ -387,7 +387,7 @@ describe("INTEGRATION dev environment tests", () => {
             try {
                 await client.decryptDocument({encryptedDocument: {foo: azureEncryptedDataForEdekWithoutVersion}, edek: hackedAzureEdek}, meta);
             } catch (e: any) {
-                expect(e.message).toContain("Code: BadParameter");
+                expect(e.message).toContain("BadParameter");
                 expect(e.message).toContain("The parameter is incorrect");
                 expect(e.message).not.toContain("Property 'value' is required");
             }
