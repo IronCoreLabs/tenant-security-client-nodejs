@@ -15,7 +15,8 @@ if (require.main == module) {
         console.log(`Deterministic Encrypted Value:
           ${deterministicEncryptedValue.toString("base64")}`);
         /*
-        The first 6 bytes of the deterministic value are the secret ID. In this case it's 5111.
+        The first 4 bytes of the deterministic value are the secret ID, as a big-endian Uint32, followed by 2 bytes of
+        padding. In this case it's 5111.
         */
         const secretId = deterministicEncryptedValue.readUInt32BE(0);
         console.log(`Recovered Secret ID:
@@ -23,11 +24,12 @@ if (require.main == module) {
 
         /*
         We took that secretId and pulled out its secret from our manual backup with
-        `cat secret-recovery.json | jq '.result | map(select(.tenantSecretId == secretId))'`.
-        The same thing could be programatically done if you have the secret backup up in a DB or file,
-        or still have access to the Config Broker by way of the Vendor API or UI.
+        `cat secret-recovery.json | jq '.result | map(select(.numericId == secretId))'`.
+        The secret ID is the backup's `numericId`, not its `tenantSecretId`, though the two happen to match here.
+        The same thing could be programmatically done if you have the secret backed up in a DB or file,
+        or still have access to the Config Broker by way of the Vendor Bridge or UI.
 
-        WARNING: You must back up encrypted secrets periodically to avoid data loss! See current [IronCore documentation](https://docs.ironcorelabs.com)
+        WARNING: You must back up encrypted secrets periodically to avoid data loss! See the [data continuity documentation](https://ironcorelabs.com/docs/saas-shield/data-continuity/)
                  for information on obtaining backups of encrypted secrets.
         */
         const backedUpSecret = {
@@ -60,7 +62,8 @@ if (require.main == module) {
         /*
         Use the decrypted secret as a key in a HMAC-SHA512 hash to get the deterministic key. You can see that you need
         to know what derivation path you called the TSC with for any given data in your system (which you already do or it's
-        not decryptable).
+        not decryptable). The tenant ID is the one your application passes to the TSC, and the secret path isn't part of
+        the string.
         */
         const derivationString = `${backedUpSecret.tenantProvidedId}-derivPath`;
         console.log(`Hashing Over Tenant String:
@@ -74,7 +77,8 @@ if (require.main == module) {
         /*
         We can now use the recovered `deterministicKey` to AES-SIV decrypt the deterministic data. This part of the
         process will vary the most language to language as AES-SIV libraries all have slight differences in interface.
-        There is no AES-SIV associated data attached to IronCore deterministic values.
+        There is no AES-SIV associated data attached to IronCore deterministic values, so pass none rather than a single
+        empty piece, which some libraries treat differently.
         */
         console.log("AES-SIV Decrypting Deterministic Data...");
         // slice past the secretId and padding to the ciphertext
